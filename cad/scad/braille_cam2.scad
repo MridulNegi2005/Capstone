@@ -31,6 +31,9 @@ magnet_radius = 17.35; // Radius from centre (centre of outermost track, just in
 magnet_angle  = 90;    // Changed from 0° → 90° to match hall sensor repositioned at
                        // base_plate y=+20mm (+Y axis). Was x=+19mm (+X axis, now outside plate).
 
+// Hub geometry (promoted to top-level so braille_cam2() module can reference it)
+hub_h = 4;             // Hub depth below disc underside (grips 28BYJ-48 D-shaft)
+
 // Calculated Variables
 slice_angle = 360 / states;
 ramp_angle = slice_angle * angular_ramp_fraction;
@@ -137,9 +140,8 @@ union() {
         cylinder(h=disk_base_thickness, r=outermost_r, $fn=100);
 
     // 1. Central Hub — INVERTED (drops BELOW disc, clears top surface for linkage feet)
-    //    Hub extends 4mm below disc bottom (z=0 → z=−4)
+    //    Hub extends hub_h=4mm below disc bottom (z=0 → z=−4)
     //    28BYJ-48 D-Shaft: 5mm dia flattened to 3mm across flats
-    hub_h = 4;
     color("gray")
     translate([0, 0, -hub_h])
     difference() {
@@ -177,3 +179,33 @@ translate([magnet_radius * cos(magnet_angle),
     cylinder(d=magnet_dia + 0.2, h=magnet_depth + 1, $fn=30);
 
 } // end difference
+
+// --- MODULE WRAPPER (used by print_small_parts.scad) ---
+// Print orientation: hub DOWN on build plate, cam tracks face UP — no supports needed.
+// Entire assembly shifted up by hub_h=4mm so hub bottom sits at z=0.
+module braille_cam2() {
+    translate([0, 0, hub_h])
+    difference() {
+        union() {
+            // Disc floor
+            cylinder(h=disk_base_thickness,
+                     r=inner_radius + (dots*(track_width+track_gap)), $fn=100);
+            // Hub — hangs below disc, now resting on build plate
+            translate([0, 0, -hub_h])
+            difference() {
+                cylinder(h=hub_h, r=4.5, $fn=50);
+                translate([0, 0, -1])
+                intersection() {
+                    cylinder(h=hub_h+2, r=2.6, $fn=50);
+                    cube([3.2, 10, hub_h+2], center=true);
+                }
+            }
+            // All 6 cam tracks
+            for(t=[0:dots-1]) build_track_polyhedron(t);
+        }
+        // Homing magnet pocket
+        translate([magnet_radius*cos(magnet_angle),
+                   magnet_radius*sin(magnet_angle), -1])
+            cylinder(d=magnet_dia+0.2, h=magnet_depth+1, $fn=30);
+    }
+}

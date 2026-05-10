@@ -71,6 +71,21 @@ tie_post_dia     = 4;
 tie_post_h       = 10;
 tie_post_hole    = 2;
 
+// --- NAVIGATION BUTTONS (audit §2) ---
+// 3× PS-style flanged caps: Previous (<), Select (O), Next (>)
+// Tactile switch: 6x6x5mm DIP, actuator at PCB+5mm height
+// Cap shaft: 4.5mm long, through pod_wall(4mm), 0.5mm protrudes inside to press switch
+nav_shaft_dia    = 4.0;    // cap shaft OD
+nav_hole_dia     = 4.2;    // wall hole — 0.2mm sliding clearance
+nav_flange_dia   = 8.0;    // flange OD — larger than hole, retains cap on outer face
+nav_flange_h     = 1.5;    // flange thickness (sits flush on pod outer wall)
+nav_cap_body_dia = 7.5;    // PS-style dome body OD
+nav_cap_body_h   = 3.5;    // dome height above flange
+nav_shaft_len    = 4.5;    // total shaft length (4mm through wall + 0.5mm inside)
+// Positions on FRONT face (-Y wall), centred vertically at z=pod_height*0.42
+nav_z            = pod_height * 0.42;  // ≈24.4mm — comfortable thumb height
+nav_x_positions  = [-20, 0, 20];       // Previous, Select, Next (20mm pitch)
+
 $fn = 60;
 
 // --- SHARED BASE MODULE ---

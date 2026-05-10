@@ -44,6 +44,16 @@ module usb_cutout() {
         cube([pod_wall + 2, usb_w, usb_h]);
 }
 
+module nav_button_holes() {
+    // 3× Ø4.2mm through-holes on front face (-Y wall) for PS-style cap shafts
+    // Previous (<) at x=-20, Select (O) at x=0, Next (>) at x=+20
+    for(nx = nav_x_positions) {
+        translate([nx, -pod_width/2 - 1, nav_z])
+            rotate([-90, 0, 0])
+            cylinder(d=nav_hole_dia, h=pod_wall + 2, $fn=30);
+    }
+}
+
 module pogo_pad_recess_cutout() {
     // 1mm-deep recess on right face for pogo pad targets (audit 6.2)
     translate([pod_length/2 - pogo_pad_recess, -pogo_pad_w/2,
@@ -140,13 +150,14 @@ module esp32_pod_shell() {
             // Left face: USB port
             usb_cutout();
 
+            // Front face: 3× nav button shaft holes
+            nav_button_holes();
+
             // Right face: pogo recess
             pogo_pad_recess_cutout();
 
-            // Right face: tongue docking slot
-            docking_slot();
-
             // Right face: 3× magnet pockets
+            // (Docking slot removed — audit 3: over-constraint. Flush face + magnets only.)
             magnet_pockets();
 
             // Right end wall: antenna grille slots

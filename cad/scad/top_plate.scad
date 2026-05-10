@@ -112,11 +112,12 @@ difference() {
 
 // --- 4. TACTILE FEATURES ---
 
-// Thumb ridge — left edge, guides blind user to cell orientation by touch
-translate([-plate_length/2 + 1.5, 0, plate_thickness])
+// Thumb ridge — bottom edge (closest to user's body, audit 5)
+// Relocated from left edge: ergonomic resting position for standard orientation
+translate([0, -plate_width/2 + 1.5, plate_thickness])
     hull() {
-        translate([0, -3, 0]) sphere(r=0.6);
-        translate([0,  3, 0]) sphere(r=0.6);
+        translate([-4, 0, 0]) sphere(r=0.6, $fn=20);
+        translate([ 4, 0, 0]) sphere(r=0.6, $fn=20);
     }
 
 // --- 5. SPRING SPEC (for BOM / sourcing) ---
@@ -125,3 +126,20 @@ translate([-plate_length/2 + 1.5, 0, plate_thickness])
 // Free length: 6-8mm
 // Spring constant: <= 0.1 N/mm (lowest available — avoid motor stall)
 // Source: 3mm x 6mm or 3.5mm x 8mm micro compression spring
+
+// --- 6. MODULE WRAPPER (used by print_small_parts.scad) ---
+module top_plate() {
+    difference() {
+        rounded_rect(plate_length, plate_width, corner_radius, plate_thickness);
+        translate([0, 0, plate_thickness - finger_pad_depth])
+            rounded_rect(plate_length - 6, plate_width - 6, corner_radius, finger_pad_depth + 1);
+        braille_holes();
+        mounting_holes();
+    }
+    // Thumb ridge — bottom edge
+    translate([0, -plate_width/2 + 1.5, plate_thickness])
+        hull() {
+            translate([-4, 0, 0]) sphere(r=0.6, $fn=20);
+            translate([ 4, 0, 0]) sphere(r=0.6, $fn=20);
+        }
+}
