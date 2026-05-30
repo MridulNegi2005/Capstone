@@ -19,23 +19,37 @@ union() {
     difference() {
         // Base plate body
         rounded_rect(plate_l, plate_w, plate_h, 1.0);
-        
+
         // Holes to allow the 4 corner bosses to pass through
         for(sx = [-1, 1]) for(sy = [-1, 1]) {
-            translate([sx * 15, sy * 15, -1]) 
-                cylinder(d=8.5, h=plate_h + 2); // 8.5mm to clear 8mm boss
+            translate([sx * 26, sy * 21, -1])
+                cylinder(d=8.5, h=plate_h + 2);
         }
-        
+
         // Central hole for motor shaft to pass up to the cam
         translate([0, 0, -1]) cylinder(d=10, h=plate_h + 2);
-        
+
         // Slot for motor wires to drop down into the electronics bay
         translate([-8, 20, -1]) cube([15, 8, plate_h + 2], center=true);
+
+        // Wire pass-through notches: pogo wires drop from z31 into pocket
+        // -X edge notch (pogo spring side)
+        translate([-plate_l/2, -3, -1]) cube([6, 6, plate_h + 2]);
+        // +X edge notch (pogo pad side)
+        translate([plate_l/2 - 6, -3, -1]) cube([6, 6, plate_h + 2]);
+        // +Y edge notch (hall sensor wires from base plate)
+        translate([-3, plate_w/2 - 6, -1]) cube([6, 6, plate_h + 2]);
     }
     
     // Motor Retaining Collar (Centered at X=-8)
+    // Audit 2 fix (2026-05-15): added boss relief notches — collar at x=-8 with r=17.25mm
+    // was crashing into corner bosses at (-15, +-15), distance=16.55mm < 17.25mm
     translate([motor_x_offset, 0, plate_h]) difference() {
         cylinder(d=34.5, h=8); // 8mm tall collar
         translate([0,0,-1]) cylinder(d=29.5, h=10); // 29.5mm ID for motor body
+        // Boss relief notches for the two -X corner bosses
+        for(sy = [-1, 1])
+            translate([-26 - motor_x_offset, sy * 21, -1])
+                cylinder(d=9, h=10, $fn=40);  // 9mm clears 8mm boss + 0.5mm/side
     }
 }
