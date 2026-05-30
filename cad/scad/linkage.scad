@@ -40,9 +40,12 @@ thickness     = 1.0;    // Sheet metal thickness (extrusion depth for DXF)
 foot_w        = 2.0;    // Foot width — straddles cam track (1.6mm wide), 0.2mm overhang each side
 foot_len      = 2.5;    // Foot contact patch length
 foot_radius   = 0.8;    // Rounded foot tip (reduces cam surface wear)
-nub_w         = 1.2;    // Nub width — matches top_plate hole_dia clearance
+nub_w         = 2.2;    // Nub width — widened for 2mm bearing ball cup (was 1.2mm)
 nub_len       = 2.0;    // Nub length (radial extent)
 nub_h         = 1.5;    // Nub protrusion above arm/upper-riser top
+// BEARING BALL: Glue 2mm stainless steel bearing ball into laser-cut cup on nub top.
+// Cup: 2.2mm wide x 0.8mm deep hemispherical recess on nub tip (post-process with
+// ball-nose endmill or laser etch). Ball protrudes ~1mm above plate top when dot is UP.
 arm_h         = 1.0;    // Horizontal arm thickness
 total_h       = 12.0;   // Total height: foot bottom to nub top (matches corrected stack)
 
@@ -74,11 +77,16 @@ function arm_span(d) = sqrt(pow(track_r(d) - dot_x(d), 2) + pow(dot_y(d), 2));
 function asm_ang(d) = atan2(-dot_y(d), track_r(d) - dot_x(d));
 
 // Arm Y position from foot bottom — per-dot stagger for collision safety
+// Each dot gets its own arm_y to avoid collision between overlapping arms.
 // Critical pair: dots 1 and 4 (both at world Y=0, arms overlap in X)
-//   dot 1: arm_y=4.0, dot 4: arm_y=7.8 -> gap=2.8mm static, 2.0mm with bump
-function arm_y(d) = (d == 0 || d == 3) ? 2.0 :
-                    (d == 1 || d == 4) ? 5.5 :
-                                         9.0;
+//   dot 1: arm_y=4.0, dot 4: arm_y=7.8 -> gap=7.8-4.0-1.0=2.8mm static, 2.0mm with bump
+// FIX (Audit 2, 2026-05-15): was grouped as pairs — dots 1&4 both got 5.5 = collision!
+function arm_y(d) = (d == 0) ? 3.5 :
+                    (d == 1) ? 4.0 :
+                    (d == 2) ? 9.5 :
+                    (d == 3) ? 3.5 :
+                    (d == 4) ? 7.8 :
+                               9.5;
 
 // Derived heights
 function lower_riser_h(d) = arm_y(d) - foot_len;
@@ -129,12 +137,11 @@ module linkage_2d_v3(dot) {
 
         // D. Upper riser — from arm top up to nub bottom (at X=0, nub end)
         if(ur > 0.01)
-            translate([-thickness/2 + nub_w/2, ay + arm_h])
+            translate([-thickness/2, ay + arm_h])
                 square([thickness, ur]);
 
-        // E. Nub — rectangular tab at top, centred at X=0
-        //    This passes through top_plate hole and connects to braille_cap
-        translate([0, total_h - nub_h])
+        // E. Nub — rectangular tab at top, centred on dot origin (X=0)
+        translate([-nub_w/2, total_h - nub_h])
             square([nub_w, nub_h]);
     }
 }

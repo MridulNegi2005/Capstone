@@ -1,5 +1,13 @@
 // =========================================================
-// COMPONENT: BRAILLE DOT CAPS — Bearing Ball Cup Design
+// *** DEPRECATED — 2026-05-15 ***
+// Replaced by ball-on-nub approach: 2mm bearing ball glued directly
+// into a laser-cut cup on the metal linkage nub tip. This eliminates
+// the braille cap entirely — fewer parts, more reliable, no socket
+// alignment issues. See linkage.scad nub_w=2.2mm.
+// =========================================================
+//
+// =========================================================
+// COMPONENT: BRAILLE DOT CAPS — Bearing Ball Cup Design (DEPRECATED)
 // Revision 1.0
 // Created 2026-05-06
 //

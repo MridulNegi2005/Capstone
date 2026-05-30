@@ -31,8 +31,9 @@ magnet_radius = 17.35; // Radius from centre (centre of outermost track, just in
 magnet_angle  = 90;    // Changed from 0° → 90° to match hall sensor repositioned at
                        // base_plate y=+20mm (+Y axis). Was x=+19mm (+X axis, now outside plate).
 
-// Hub geometry (promoted to top-level so braille_cam2() module can reference it)
-hub_h = 4;             // Hub depth below disc underside (grips 28BYJ-48 D-shaft)
+// Hub extends 2mm below disc; D-bore continues 2mm into disc floor = 4mm total engagement
+hub_h = 2;
+shaft_bore_depth = 4;  // total D-bore depth from hub bottom through disc floor
 
 // Calculated Variables
 slice_angle = 360 / states;
@@ -172,6 +173,13 @@ union() {
     }
 } // end union
 
+// D-shaft bore through hub AND disc floor (4mm total from hub bottom)
+translate([0, 0, -hub_h - 1])
+intersection() {
+    cylinder(h=shaft_bore_depth + 1, r=2.6, $fn=50);
+    cube([3.2, 10, shaft_bore_depth + 1], center=true);
+}
+
 // Homing magnet pocket (subtracted from disc underside)
 translate([magnet_radius * cos(magnet_angle),
            magnet_radius * sin(magnet_angle),
@@ -202,6 +210,12 @@ module braille_cam2() {
             }
             // All 6 cam tracks
             for(t=[0:dots-1]) build_track_polyhedron(t);
+        }
+        // D-shaft bore through hub + disc floor (4mm total engagement)
+        translate([0, 0, -hub_h - 1])
+        intersection() {
+            cylinder(h=shaft_bore_depth + 1, r=2.6, $fn=50);
+            cube([3.2, 10, shaft_bore_depth + 1], center=true);
         }
         // Homing magnet pocket
         translate([magnet_radius*cos(magnet_angle),

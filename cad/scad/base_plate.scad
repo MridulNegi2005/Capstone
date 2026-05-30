@@ -23,7 +23,7 @@ base_thickness  = 5;       // Z
 
 // Motor Interface — CORRECTED for actual 28BYJ-48 measurements
 // Previous values were wrong (body 28.3→29, mount hole 3.4→4.3, spacing 31→35)
-shaft_clearance      = 7;      // 5mm shaft + 1mm clearance each side
+shaft_clearance      = 10;     // Ø9mm cam hub + 0.5mm clearance each side
 motor_body_diameter  = 29;     // 28mm + 1mm tolerance (was 28.3mm — wrong)
 motor_seat_depth     = 1.5;    // Shallow pocket to locate motor body centrally
 motor_mount_spacing  = 35;     // Hole-to-hole distance (was 31mm — wrong)
@@ -38,7 +38,8 @@ cam_pocket_depth    = 3;    // Disc base (2mm) sits in pocket; bumps 0.2mm below
 // Linkage total height = 12mm, foot on cam bump (0.2mm below plate top) → nub at +0.8mm
 standoff_diameter = 6;
 standoff_height   = 8;     // Was 3.5mm — FAR too short for cam + linkage + top plate stack
-standoff_offset   = 15;    // ±15mm from plate centre (must match outer_box boss_x/y_off)
+standoff_x = 26;
+standoff_y = 21;
 
 // Spring Cavity — through-hole window for service access (unchanged)
 spring_cavity_width  = 22;
@@ -123,13 +124,14 @@ module spring_cavity() {
 
 module standoffs() {
     // 4 corner posts — support top plate 8mm above base plate top
-    // M2.5 tap holes for top plate mounting screws
+    // M2.5 clearance thru-bore (Ø2.9) through standoff AND plate body
+    // Bolt goes: top-plate counterbore → standoff → plate → into box boss tap
     for(sx = [-1, 1]) for(sy = [-1, 1]) {
-        translate([sx * standoff_offset, sy * standoff_offset, base_thickness]) {
+        translate([sx * standoff_x, sy * standoff_y, base_thickness]) {
             difference() {
                 cylinder(d=standoff_diameter, h=standoff_height);
-                translate([0, 0, -1])
-                    cylinder(d=2.6, h=standoff_height + 2); // M2.5 clearance
+                translate([0, 0, -base_thickness - 1])
+                    cylinder(d=2.9, h=standoff_height + base_thickness + 2);
             }
         }
     }

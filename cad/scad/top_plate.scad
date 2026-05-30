@@ -24,21 +24,23 @@ col_spacing     = 4.8;    // Left col at x=-2.4, right at x=+2.4
 row_spacing     = 2.6;    // Rows at y=+2.6, 0, -2.6
 
 // Braille holes — round (replaces 1.2x3mm rectangular slots)
-hole_dia        = 2.0;    // Fits braille_cap pin shaft (1.9mm + 0.1mm clearance)
+hole_dia        = 2.5;    // Fits 2.2mm linkage nub + 0.15mm/side clearance (was 2.0 for cap pin)
 
 // Spring pockets — on underside, concentric around each braille hole
-spring_pocket_dia   = 3.5;   // Compression spring OD
-spring_pocket_depth = 3.0;   // Pocket depth from underside upward
+// Audit 2 fix: wider pocket, shallower depth for stronger annular wall
+spring_pocket_dia   = 4.5;   // was 3.5 — wider for 2.5mm hole clearance (wall=1.0mm)
+spring_pocket_depth = 2.0;   // was 3.0 — shallower: 4mm plate - 2mm pocket = 2mm floor
 
 // Plate body — rectangular, matches outer_box internal cavity
-plate_length    = 60.0;   // X — matches internal_length (flush fit, was 34mm square)
-plate_width     = 60.0;   // Y — matches internal_width (flush fit)
+plate_length    = 59.0;   // X — 0.5mm clearance/side in 60mm internal cavity
+plate_width     = 59.0;   // Y — 0.5mm clearance/side in 60mm internal cavity
 plate_thickness = 4.0;    // Z — increased from 3mm: 3mm pocket + 1mm floor
 corner_radius   = 2.0;
 finger_pad_depth = 0.8;   // Shallow recess on top face
 
 // Mounting — 4 corner holes at +/-15mm matching base_plate standoffs
-standoff_offset  = 15.0;
+standoff_x       = 26.0;
+standoff_y       = 21.0;
 screw_dia        = 2.8;   // M2.5 clearance
 counterbore_dia  = 5.0;   // M2.5 button-head
 counterbore_depth = 1.5;
@@ -58,12 +60,11 @@ module rounded_rect(lx, ly, r, h) {
 
 // One braille hole with spring pocket underneath
 module braille_hole_with_spring(cx, cy) {
-    // Through hole — round, allows braille_cap pin to travel vertically
+    // Round through hole — fits 2.2mm linkage nub with 0.15mm/side clearance
     translate([cx, cy, -1])
         cylinder(d=hole_dia, h=plate_thickness + 2);
 
     // Spring retaining pocket — from underside (z=0) upward
-    // Spring sits in this pocket, pushes cap/linkage downward
     translate([cx, cy, -0.01])
         cylinder(d=spring_pocket_dia, h=spring_pocket_depth + 0.01);
 }
@@ -82,7 +83,7 @@ module braille_holes() {
 
 module mounting_holes() {
     for(sx = [-1,1]) for(sy = [-1,1]) {
-        translate([sx * standoff_offset, sy * standoff_offset, 0]) {
+        translate([sx * standoff_x, sy * standoff_y, 0]) {
             // Through hole
             translate([0, 0, -1])
                 cylinder(d=screw_dia, h=plate_thickness + 5);
@@ -121,11 +122,12 @@ translate([0, -plate_width/2 + 1.5, plate_thickness])
     }
 
 // --- 5. SPRING SPEC (for BOM / sourcing) ---
-// OD:  3.0-3.5mm (fits 3.5mm pocket)
-// ID:  >= 2.0mm (clears 1.9mm cap pin)
-// Free length: 6-8mm
+// OD:  4.0-4.5mm (fits 4.5mm pocket)
+// ID:  >= 2.5mm (clears 2.2mm linkage nub — was 2.0mm for cap pin)
+// Free length: 5-6mm
 // Spring constant: <= 0.1 N/mm (lowest available — avoid motor stall)
-// Source: 3mm x 6mm or 3.5mm x 8mm micro compression spring
+// Source: 4mm x 5mm or 4.5mm x 6mm micro compression spring
+// NOTE: Spring now pushes directly on metal linkage nub (braille_cap deprecated)
 
 // --- 6. MODULE WRAPPER (used by print_small_parts.scad) ---
 module top_plate() {
