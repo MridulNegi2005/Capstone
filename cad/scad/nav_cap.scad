@@ -24,7 +24,7 @@
 
 include <esp32_pod_params.scad>
 
-raise_h = 0.8;   // symbol height raised above dome top — enough for blind tactile detection
+raise_h = 1.2;   // symbol height raised above dome top (was 0.8 — increased for easier tactile ID)
 $fn = 60;
 
 // --- MODULES ---
