@@ -1,0 +1,475 @@
+(kicad_sch
+  (version 20231120)
+  (generator "claude_pcb_gen")
+  (generator_version "1.0")
+  (uuid "e63e39d7-6ac0-4ffd-8aa3-1841a4541b55")
+  (paper "A3")
+
+  (title_block
+    (title "Braillix Muscle Board v1.0")
+    (date "2026-05-15")
+    (rev "1.0")
+    (company "Braillix / TIET Capstone CPG-126")
+    (comment 1 "Per-cell ATmega328P + ULN2003A motor driver")
+    (comment 2 "I2C slave, Hall sensor, stepper motor interface")
+    (comment 3 "Board: 34x44mm, 2-layer, 1oz copper")
+  )
+
+  ;; =====================================================================
+  ;; POWER SYMBOLS
+  ;; =====================================================================
+
+  (symbol
+    (lib_id "power:+5V")
+    (at 50.8 25.4 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom no)
+    (on_board no)
+    (dnp no)
+    (uuid "a0000001-0001-0001-0001-000000000001")
+    (property "Reference" "#PWR01" (at 50.8 29.21 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Value" "+5V" (at 50.8 22.86 0) (effects (font (size 1.27 1.27))))
+    (instances (project "braillix_muscle_board" (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55" (reference "#PWR01") (unit 1))))
+  )
+
+  (symbol
+    (lib_id "power:GND")
+    (at 50.8 165.1 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom no)
+    (on_board no)
+    (dnp no)
+    (uuid "a0000001-0001-0001-0001-000000000002")
+    (property "Reference" "#PWR02" (at 50.8 171.45 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Value" "GND" (at 50.8 168.91 0) (effects (font (size 1.27 1.27))))
+    (instances (project "braillix_muscle_board" (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55" (reference "#PWR02") (unit 1))))
+  )
+
+  ;; =====================================================================
+  ;; U1: ATmega328P-AU (TQFP-32) — Main MCU
+  ;; =====================================================================
+
+  (symbol
+    (lib_id "MCU_Microchip_ATmega:ATmega328P-A")
+    (at 127 95.25 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (uuid "b0000001-0001-0001-0001-000000000001")
+    (property "Reference" "U1" (at 127 55.88 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "ATmega328P-AU" (at 127 58.42 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Package_QFP:TQFP-32_7x7mm_P0.8mm" (at 127 95.25 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega328_P%20AVR%20MCU%20with%20picoPower%20Technology%20Data%20Sheet%2040001984A.pdf" (at 127 95.25 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "ATmega328P MCU — I2C slave, stepper control, hall sensor input" (at 127 95.25 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "braillix_muscle_board" (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55" (reference "U1") (unit 1))))
+  )
+
+  ;; =====================================================================
+  ;; U2: ULN2003A (SOIC-16) — Darlington Motor Driver
+  ;; =====================================================================
+
+  (symbol
+    (lib_id "Transistor_Array:ULN2003")
+    (at 228.6 88.9 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (uuid "b0000001-0001-0001-0001-000000000002")
+    (property "Reference" "U2" (at 228.6 68.58 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "ULN2003A" (at 228.6 71.12 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Package_SO:SOIC-16_3.9x9.9mm_P1.27mm" (at 228.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "http://www.ti.com/lit/ds/symlink/uln2003a.pdf" (at 228.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "Darlington transistor array — drives 28BYJ-48 stepper coils" (at 228.6 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "braillix_muscle_board" (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55" (reference "U2") (unit 1))))
+  )
+
+  ;; =====================================================================
+  ;; Y1: 16MHz Crystal
+  ;; =====================================================================
+
+  (symbol
+    (lib_id "Device:Crystal")
+    (at 88.9 88.9 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (uuid "c0000001-0001-0001-0001-000000000001")
+    (property "Reference" "Y1" (at 88.9 82.55 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "16MHz" (at 88.9 85.09 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Crystal:Crystal_HC49-4H_Vertical" (at 88.9 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "braillix_muscle_board" (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55" (reference "Y1") (unit 1))))
+  )
+
+  ;; =====================================================================
+  ;; C1, C2: 22pF Crystal Load Capacitors
+  ;; =====================================================================
+
+  (symbol
+    (lib_id "Device:C")
+    (at 82.55 99.06 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (uuid "c0000001-0001-0001-0001-000000000002")
+    (property "Reference" "C1" (at 85.09 96.52 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "22pF" (at 85.09 101.6 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Capacitor_SMD:C_0402_1005Metric" (at 82.55 99.06 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "braillix_muscle_board" (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55" (reference "C1") (unit 1))))
+  )
+
+  (symbol
+    (lib_id "Device:C")
+    (at 95.25 99.06 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (uuid "c0000001-0001-0001-0001-000000000003")
+    (property "Reference" "C2" (at 97.79 96.52 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "22pF" (at 97.79 101.6 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Capacitor_SMD:C_0402_1005Metric" (at 95.25 99.06 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "braillix_muscle_board" (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55" (reference "C2") (unit 1))))
+  )
+
+  ;; =====================================================================
+  ;; C3: 100nF VCC Decoupling
+  ;; =====================================================================
+
+  (symbol
+    (lib_id "Device:C")
+    (at 101.6 63.5 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (uuid "c0000001-0001-0001-0001-000000000004")
+    (property "Reference" "C3" (at 104.14 60.96 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "100nF" (at 104.14 66.04 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Capacitor_SMD:C_0402_1005Metric" (at 101.6 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "braillix_muscle_board" (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55" (reference "C3") (unit 1))))
+  )
+
+  ;; =====================================================================
+  ;; C4: 100nF AVCC Decoupling
+  ;; =====================================================================
+
+  (symbol
+    (lib_id "Device:C")
+    (at 109.22 63.5 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (uuid "c0000001-0001-0001-0001-000000000005")
+    (property "Reference" "C4" (at 111.76 60.96 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "100nF" (at 111.76 66.04 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Capacitor_SMD:C_0402_1005Metric" (at 109.22 63.5 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "braillix_muscle_board" (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55" (reference "C4") (unit 1))))
+  )
+
+  ;; =====================================================================
+  ;; C5: 100uF Bulk Electrolytic (motor current spikes)
+  ;; =====================================================================
+
+  (symbol
+    (lib_id "Device:CP1")
+    (at 259.08 101.6 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (uuid "c0000001-0001-0001-0001-000000000006")
+    (property "Reference" "C5" (at 262.89 99.06 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "100uF/10V" (at 262.89 104.14 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Capacitor_SMD:CP_Elec_5x5.3" (at 259.08 101.6 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "braillix_muscle_board" (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55" (reference "C5") (unit 1))))
+  )
+
+  ;; =====================================================================
+  ;; R1: 10K RESET Pull-up
+  ;; =====================================================================
+
+  (symbol
+    (lib_id "Device:R")
+    (at 101.6 44.45 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (uuid "d0000001-0001-0001-0001-000000000001")
+    (property "Reference" "R1" (at 104.14 43.18 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "10K" (at 104.14 46.99 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Resistor_SMD:R_0402_1005Metric" (at 101.6 44.45 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "braillix_muscle_board" (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55" (reference "R1") (unit 1))))
+  )
+
+  ;; =====================================================================
+  ;; R2: 10K Hall Sensor Pull-up
+  ;; =====================================================================
+
+  (symbol
+    (lib_id "Device:R")
+    (at 177.8 44.45 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (uuid "d0000001-0001-0001-0001-000000000002")
+    (property "Reference" "R2" (at 180.34 43.18 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "10K" (at 180.34 46.99 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Resistor_SMD:R_0402_1005Metric" (at 177.8 44.45 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "braillix_muscle_board" (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55" (reference "R2") (unit 1))))
+  )
+
+  ;; =====================================================================
+  ;; R3, R4: 4.7K I2C Pull-ups (optional via solder jumper)
+  ;; =====================================================================
+
+  (symbol
+    (lib_id "Device:R")
+    (at 44.45 44.45 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (uuid "d0000001-0001-0001-0001-000000000003")
+    (property "Reference" "R3" (at 46.99 43.18 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "4K7" (at 46.99 46.99 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Resistor_SMD:R_0402_1005Metric" (at 44.45 44.45 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "SDA pull-up (enable via SJ1)" (at 44.45 44.45 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "braillix_muscle_board" (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55" (reference "R3") (unit 1))))
+  )
+
+  (symbol
+    (lib_id "Device:R")
+    (at 53.34 44.45 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (uuid "d0000001-0001-0001-0001-000000000004")
+    (property "Reference" "R4" (at 55.88 43.18 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "4K7" (at 55.88 46.99 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Resistor_SMD:R_0402_1005Metric" (at 53.34 44.45 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "SCL pull-up (enable via SJ2)" (at 53.34 44.45 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "braillix_muscle_board" (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55" (reference "R4") (unit 1))))
+  )
+
+  ;; =====================================================================
+  ;; D1: Schottky Diode — Reverse Polarity Protection
+  ;; =====================================================================
+
+  (symbol
+    (lib_id "Device:D_Schottky")
+    (at 38.1 25.4 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (uuid "e0000001-0001-0001-0001-000000000001")
+    (property "Reference" "D1" (at 38.1 21.59 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "SS14" (at 38.1 29.21 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Diode_SMD:D_SMA" (at 38.1 25.4 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "braillix_muscle_board" (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55" (reference "D1") (unit 1))))
+  )
+
+  ;; =====================================================================
+  ;; J1: Pogo Connector (4-pin: 5V, GND, SDA, SCL) — Left edge
+  ;; =====================================================================
+
+  (symbol
+    (lib_id "Connector_Generic:Conn_01x04")
+    (at 20.32 88.9 180)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (uuid "f0000001-0001-0001-0001-000000000001")
+    (property "Reference" "J1" (at 20.32 78.74 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "POGO_I2C" (at 20.32 81.28 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical" (at 20.32 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "Pogo pad interface: 5V, GND, SDA, SCL" (at 20.32 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "braillix_muscle_board" (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55" (reference "J1") (unit 1))))
+  )
+
+  ;; =====================================================================
+  ;; J2: Motor Connector (5-pin JST XH) — Top edge
+  ;; =====================================================================
+
+  (symbol
+    (lib_id "Connector_Generic:Conn_01x05")
+    (at 271.78 88.9 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (uuid "f0000001-0001-0001-0001-000000000002")
+    (property "Reference" "J2" (at 271.78 78.74 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "MOTOR_JST" (at 271.78 81.28 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Connector_JST:JST_XH_B5B-XH-A_1x05_P2.50mm_Vertical" (at 271.78 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "28BYJ-48 stepper motor connector" (at 271.78 88.9 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "braillix_muscle_board" (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55" (reference "J2") (unit 1))))
+  )
+
+  ;; =====================================================================
+  ;; J3: Hall Sensor Connector (3-pin: VCC, GND, SIGNAL)
+  ;; =====================================================================
+
+  (symbol
+    (lib_id "Connector_Generic:Conn_01x03")
+    (at 177.8 69.85 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (uuid "f0000001-0001-0001-0001-000000000003")
+    (property "Reference" "J3" (at 177.8 59.69 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "HALL_SENSOR" (at 177.8 62.23 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" (at 177.8 69.85 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "Hall effect sensor: SS49E / A3144 (VCC, GND, OUT)" (at 177.8 69.85 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "braillix_muscle_board" (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55" (reference "J3") (unit 1))))
+  )
+
+  ;; =====================================================================
+  ;; J4: ICSP Header (2x3 pin) — Programming interface
+  ;; =====================================================================
+
+  (symbol
+    (lib_id "Connector_Generic:Conn_02x03_Odd_Even")
+    (at 127 152.4 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (uuid "f0000001-0001-0001-0001-000000000004")
+    (property "Reference" "J4" (at 127 142.24 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "ICSP" (at 127 144.78 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_2x03_P2.54mm_Vertical" (at 127 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "AVR ISP programming header (MOSI, MISO, SCK, RESET, VCC, GND)" (at 127 152.4 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "braillix_muscle_board" (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55" (reference "J4") (unit 1))))
+  )
+
+  ;; =====================================================================
+  ;; MOUNTING HOLES
+  ;; =====================================================================
+
+  (symbol
+    (lib_id "Connector_Generic:Conn_01x01")
+    (at 295.91 25.4 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom no)
+    (on_board yes)
+    (dnp no)
+    (uuid "f0000001-0001-0001-0001-000000000010")
+    (property "Reference" "H1" (at 295.91 20.32 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "MountingHole" (at 295.91 22.86 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "MountingHole:MountingHole_2.7mm_M2.5" (at 295.91 25.4 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "braillix_muscle_board" (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55" (reference "H1") (unit 1))))
+  )
+
+  (symbol
+    (lib_id "Connector_Generic:Conn_01x01")
+    (at 304.8 25.4 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom no)
+    (on_board yes)
+    (dnp no)
+    (uuid "f0000001-0001-0001-0001-000000000011")
+    (property "Reference" "H2" (at 304.8 20.32 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "MountingHole" (at 304.8 22.86 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "MountingHole:MountingHole_2.7mm_M2.5" (at 304.8 25.4 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "braillix_muscle_board" (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55" (reference "H2") (unit 1))))
+  )
+
+  (symbol
+    (lib_id "Connector_Generic:Conn_01x01")
+    (at 313.69 25.4 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom no)
+    (on_board yes)
+    (dnp no)
+    (uuid "f0000001-0001-0001-0001-000000000012")
+    (property "Reference" "H3" (at 313.69 20.32 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "MountingHole" (at 313.69 22.86 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "MountingHole:MountingHole_2.7mm_M2.5" (at 313.69 25.4 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "braillix_muscle_board" (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55" (reference "H3") (unit 1))))
+  )
+
+  (symbol
+    (lib_id "Connector_Generic:Conn_01x01")
+    (at 322.58 25.4 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom no)
+    (on_board yes)
+    (dnp no)
+    (uuid "f0000001-0001-0001-0001-000000000013")
+    (property "Reference" "H4" (at 322.58 20.32 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "MountingHole" (at 322.58 22.86 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "MountingHole:MountingHole_2.7mm_M2.5" (at 322.58 25.4 0) (effects (font (size 1.27 1.27)) hide))
+    (instances (project "braillix_muscle_board" (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55" (reference "H4") (unit 1))))
+  )
+
+  ;; =====================================================================
+  ;; TEXT ANNOTATIONS — Circuit Description
+  ;; =====================================================================
+
+  (text "BRAILLIX MUSCLE BOARD v1.0\nPer-cell controller: ATmega328P-AU + ULN2003A\n\nPIN ASSIGNMENTS:\n  PD4-PD7 (pins 4-7) -> ULN2003 IN1-IN4 (motor coils)\n  PC0/A0 -> Hall sensor signal (active LOW, 10K pull-up)\n  PC4/A4 -> SDA (I2C slave)\n  PC5/A5 -> SCL (I2C slave)\n  PB0-PB2 (pins 8-10) -> Address jumpers A0-A2 (internal pull-up)\n  PB3/MOSI, PB4/MISO, PB5/SCK -> ICSP programming\n\nI2C ADDRESS: 0x20-0x27 via solder jumpers\nI2C PULL-UPS: 4.7K on SDA/SCL via solder jumpers (enable on last cell only)\nMOTOR: 28BYJ-48 via 5-pin JST XH\nPOWER: 5V from pogo chain, 100uF bulk cap for motor spikes\nPROTECTION: SS14 Schottky for reverse polarity"
+    (exclude_from_sim no)
+    (at 20.32 180.34 0)
+    (effects (font (size 1.5 1.5)) (justify left))
+    (uuid "99000001-0001-0001-0001-000000000001")
+  )
+
+  ;; =====================================================================
+  ;; NOTE: This schematic defines all components and their footprints.
+  ;; Wiring (nets) should be completed in KiCad's schematic editor by
+  ;; connecting pins according to the pin assignments above.
+  ;;
+  ;; Key connections to make:
+  ;;   J1.1 -> D1 anode -> +5V rail (cathode side)
+  ;;   J1.2 -> GND
+  ;;   J1.3 -> SDA net (to U1 PC4, R3, J4)
+  ;;   J1.4 -> SCL net (to U1 PC5, R4, J4)
+  ;;   U1 VCC, AVCC -> +5V (via C3, C4 decoupling)
+  ;;   U1 GND -> GND
+  ;;   U1 XTAL1, XTAL2 -> Y1 (with C1, C2 to GND)
+  ;;   U1 RESET -> R1 to +5V, J4 pin 5
+  ;;   U1 PD4 -> U2 IN1
+  ;;   U1 PD5 -> U2 IN2
+  ;;   U1 PD6 -> U2 IN3
+  ;;   U1 PD7 -> U2 IN4
+  ;;   U1 PC0 -> J3 SIGNAL (Hall sensor)
+  ;;   U2 OUT1-OUT4 -> J2 pins 1-4 (motor coils)
+  ;;   U2 COM -> +5V
+  ;;   J2 pin 5 -> +5V (motor common)
+  ;;   U2 GND -> GND
+  ;;   C5 -> +5V / GND (bulk decoupling near U2)
+  ;; =====================================================================
+)

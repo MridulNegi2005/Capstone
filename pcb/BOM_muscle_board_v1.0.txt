@@ -1,0 +1,69 @@
+===============================================================================
+BRAILLIX MUSCLE BOARD v1.0 — Bill of Materials (per cell)
+Board: 34 x 44mm, 2-layer, 1.6mm FR4, 1oz Cu, HASL lead-free
+Generated: 2026-05-16
+===============================================================================
+
+Qty | Ref  | Value         | Package            | Description / Notes
+----|------|---------------|--------------------|------------------------------------------
+ 1  | U1   | ATmega328P-AU | TQFP-32 (7x7mm)   | Microchip AVR MCU, I2C slave + motor ctrl
+    |      |               |                    | Pre-program Arduino bootloader via ICSP
+ 1  | U2   | ULN2003A      | SOIC-16 (3.9x9.9)  | TI Darlington array, 500mA/ch, motor driver
+ 1  | Y1   | 16 MHz        | HC49-4H Vertical   | Crystal oscillator for ATmega328P
+ 2  | C1,C2| 22 pF         | 0402 (1005 Metric) | C0G/NP0, crystal load capacitors
+ 2  | C3,C4| 100 nF        | 0402 (1005 Metric) | X7R, VCC + AVCC decoupling caps
+ 1  | C5   | 100 uF / 10V  | SMD Elec 5x5.3mm   | Aluminium electrolytic, motor bulk bypass
+ 1  | R1   | 10K ohm       | 0402 (1005 Metric) | RESET pin pull-up to +5V
+ 1  | R2   | 10K ohm       | 0402 (1005 Metric) | Hall sensor signal pull-up to +5V
+ 2  | R3,R4| 4.7K ohm      | 0402 (1005 Metric) | I2C pull-ups (SDA, SCL) — enable via jumper
+ 1  | D1   | SS14          | SMA (DO-214AC)     | 1A 40V Schottky, reverse polarity protection
+ 1  | J1   | 1x04 header   | 2.54mm vertical    | Pogo pad interface: +5V, GND, SDA, SCL
+ 1  | J2   | JST XH 5-pin  | B5B-XH-A 2.50mm   | 28BYJ-48 stepper motor connector
+ 1  | J3   | 1x03 header   | 2.54mm vertical    | Hall sensor: VCC, GND, SIGNAL
+ 1  | J4   | 2x03 header   | 2.54mm vertical    | AVR ISP (ICSP) programming interface
+ 4  | H1-4 | M2.5 hole     | 2.7mm NPTH         | Board mounting, matches cell bosses
+
+===============================================================================
+TOTAL UNIQUE PARTS:  15 line items
+TOTAL COMPONENTS:    19 parts per board (excluding mounting holes)
+===============================================================================
+
+SOURCING NOTES:
+- ATmega328P-AU: LCSC C14877, Mouser 556-ATMEGA328P-AU (~$2.50)
+- ULN2003A SOIC: LCSC C7386, TI ULN2003ADR (~$0.30)
+- Crystal 16MHz HC49: LCSC C32346 (~$0.15)
+- SS14 Schottky: LCSC C2480 (~$0.05)
+- JST XH 5-pin: LCSC C2316 (~$0.10)
+- 0402 passives: LCSC generic stock (~$0.01 each)
+- 100uF/10V SMD elec: LCSC C131307 (~$0.15)
+- Pin headers: cut from 40-pin strip (~$0.05)
+
+ESTIMATED BOM COST: ~$3.50 per board (LCSC/JLCPCB pricing, qty 10+)
+PCB FABRICATION: ~$0.40/board (JLCPCB, 5-board MOQ, 2-layer, 1oz)
+
+===============================================================================
+I2C ADDRESS CONFIGURATION:
+  Solder jumpers on PB0-PB2 set address 0x20-0x27
+  Internal pull-ups enabled in firmware (no external resistors needed)
+  Default (all open) = 0x27 (all pulled HIGH)
+  Short A0 to GND = 0x26, short A0+A1 = 0x24, etc.
+
+I2C PULL-UP CONFIGURATION:
+  R3 (SDA) and R4 (SCL) are 4.7K pull-ups to +5V.
+  Enable by bridging solder jumper pads near R3/R4.
+  Only enable on the LAST cell in the I2C chain.
+  All other cells: leave jumper pads open.
+
+MOTOR CONNECTOR PINOUT (J2, JST XH 5-pin):
+  Pin 1: Coil A (Blue wire on 28BYJ-48)
+  Pin 2: Coil B (Pink wire)
+  Pin 3: Coil C (Yellow wire)
+  Pin 4: Coil D (Orange wire)
+  Pin 5: Common +5V (Red wire)
+
+POGO CONNECTOR PINOUT (J1, 1x04):
+  Pin 1: +5V (power chain)
+  Pin 2: GND (power chain)
+  Pin 3: SDA (I2C data)
+  Pin 4: SCL (I2C clock)
+===============================================================================

@@ -899,3 +899,136 @@ All 9 STLs exported via OpenSCAD CLI — **all manifold (Simple: yes)**:
 - ESP32 pod positioned beside cell (x=-71mm)
 - All meshes: Shade Flat, material colors assigned
 - 9 materials: Shell grey, Plate dark metal, Cam blue, Linkage steel, Top cream, Cap white, Pod dark grey, Comb PETG green, EndCap TPU
+
+---
+
+## Section 17 — Independent Dimensional Audit #2 (2026-05-16)
+
+**Scope:** Cross-file dimensional audit of all SCAD files after the May 6 redesign. Found 12 additional findings (3 showstopper, 3 critical, 4 moderate, 2 informational).
+
+### 17.1 Findings Summary
+
+| # | Severity | Issue | File(s) | Fix |
+|---|----------|-------|---------|-----|
+| F1 | SHOWSTOPPER | Linkage arm_y collision (dots 1&4 both at 5.5mm) | linkage.scad | Per-dot arm_y values from reference table |
+| F2 | CRITICAL | Vertical stack 1mm over-height (plate top z=58 > shell z=57) | outer_box.scad | shell_height 57→58, cascading updates |
+| F3 | CRITICAL | Braille cap incompatible with linkage nub geometry | linkage.scad, top_plate.scad | Ball-on-nub approach (caps deprecated) |
+| F4 | MODERATE | Mid-plate motor collar crashes into -X corner bosses | mid_plate.scad | Boss relief notch cutouts in collar |
+| F5 | MODERATE | Top plate zero clearance in box (60mm in 60mm) | top_plate.scad | Plate reduced to 59×59mm |
+| F6 | MODERATE | Braille cap socket depth only 0.5mm (center=true bug) | braille_cap.scad | Moot — caps deprecated per F3 |
+| F7 | MODERATE | Spring pocket wall only 0.75mm thick (fragile) | top_plate.scad | Pocket 4.5mm dia, 2.0mm depth |
+| F8 | MINOR | Cam hub only 2mm shaft engagement | braille_cam2.scad | hub_h reduced 4→2 for full engagement |
+| F9 | MINOR | Linkage comb free-floating (no vertical lock) | linkage_comb.scad | M2 grub screw hole added |
+| F10 | MINOR | Screw size mismatch (M3 boss vs M2.5 standoff) | outer_box.scad, base_plate.scad | Unified to M2.5 |
+| F11 | INFO | Pod/cell magnet height — resolved by F2 fix | esp32_pod_params.scad | pogo_z updated to 31mm |
+| F12 | INFO | Braille dot horizontal spacing 4.8mm (2× standard) | — | Known limitation of cam mechanism |
+
+### 17.2 Key Parameter Changes
+
+| Parameter | Old | New | File |
+|-----------|-----|-----|------|
+| shell_height | 57 | **58** | outer_box.scad |
+| boss_height | 37 | **38** | outer_box.scad |
+| mag_z | 28.5 | **29** | outer_box.scad |
+| pogo_z | 30.5 | **31** | outer_box.scad |
+| pogo_z_from_bot | 30.5 | **31** | esp32_pod_params.scad |
+| boss screw hole d | 3.2 | **2.6** | outer_box.scad |
+| corner_radius | 2 | **3** | outer_box.scad |
+| plate_length/width | 60 | **59** | top_plate.scad |
+| hole_dia | 2.0 | **2.5** | top_plate.scad |
+| spring_pocket_dia | 3.5 | **4.5** | top_plate.scad |
+| spring_pocket_depth | 3.0 | **2.0** | top_plate.scad |
+| nub_w | 1.2 | **2.2** | linkage.scad |
+| arm_y(0) | 2.0 | **3.5** | linkage.scad |
+| arm_y(1) | 5.5 | **4.0** | linkage.scad |
+| arm_y(2) | 9.0 | **9.5** | linkage.scad |
+| arm_y(3) | 2.0 | **3.5** | linkage.scad |
+| arm_y(4) | 5.5 | **7.8** | linkage.scad |
+| arm_y(5) | 9.0 | **9.5** | linkage.scad |
+| hub_h | 4 | **2** | braille_cam2.scad |
+| standoff hole d | 2.6 | **2.2** | base_plate.scad |
+| raise_h (nav cap) | 0.8 | **1.2** | nav_cap.scad |
+
+### 17.3 Ball-on-Nub Dot Mechanism (replacing braille_cap)
+
+The braille_cap.scad is **DEPRECATED**. The new approach:
+- Linkage nub widened to 2.2mm (from 1.2mm) to hold a 2mm bearing ball cup
+- Top plate hole widened to 2.5mm (clearance for 2.2mm nub + 0.15mm/side)
+- Ball protrudes 0.2mm above plate when DOWN, 1.0mm when UP
+- Dot travel = 0.8mm (matches cam lift)
+- Spring in top plate pocket pushes down on nub through the hole
+
+### 17.4 Updated Stack Table (v4.1 — shell_height=58)
+
+| z (mm) | Component |
+|--------|-----------|
+| 0 | Outer box bottom |
+| 4 | Inner floor top |
+| 4-20 | Electronics pocket (16mm) |
+| 20-22 | Mid-plate (2mm) |
+| 22-41 | Motor body (19mm) |
+| 41 | Base plate bottom |
+| 46 | Base plate top |
+| 45 | Cam flat surface |
+| 45.8 | Cam bump top |
+| 54 | Top plate bottom (8mm standoffs) |
+| **58** | **Top plate top = shell_height** ✓ |
+| 57 | Linkage nub top (dot DOWN) |
+| 57.8 | Linkage nub top (dot UP) |
+| 58.2 | Ball top (dot DOWN, 0.2mm above plate) |
+| 59.0 | Ball top (dot UP, 1.0mm above plate) |
+
+### 17.5 Blind-User Ergonomic Improvements
+
+- **Nav cap raise_h** increased 0.8→1.2mm for confident tactile identification
+- **Box corner_radius** increased 2→3mm for comfortable handling
+- **Braille 'F' orientation** on front face repositioned to z=43 (58−15)
+
+---
+
+## Section 18 — Custom PCB: Braillix Muscle Board v1.0 (2026-05-16)
+
+**New files created in `pcb/` directory:**
+- `braillix_muscle_board.kicad_pro` — KiCad 10.0.2 project file
+- `braillix_muscle_board.kicad_sch` — Full schematic
+- `braillix_muscle_board.kicad_pcb` — 34×44mm PCB layout (component placement + GND zone)
+- `BOM_muscle_board_v1.0.txt` — Complete bill of materials with sourcing notes
+
+### 18.1 Purpose
+
+Replaces the Arduino Pro Mini + ULN2003 breakout board + hand-wired connections with a single 34×44mm SMD PCB. Fits in the 36×46mm electronics pocket with 1mm clearance per side.
+
+### 18.2 Key Components
+
+| Ref | Component | Package | Function |
+|-----|-----------|---------|----------|
+| U1 | ATmega328P-AU | TQFP-32 (7×7mm) | MCU (I2C slave + motor control) |
+| U2 | ULN2003A | SOIC-16 | Darlington motor driver |
+| Y1 | 16 MHz crystal | HC49-4H | MCU clock |
+| C1-C4 | 22pF / 100nF | 0402 | Crystal load + VCC decoupling |
+| C5 | 100µF / 10V | SMD elec 5×5.3mm | Motor bulk bypass |
+| D1 | SS14 | SMA (DO-214AC) | Reverse polarity protection |
+| J1 | 1×04 header | 2.54mm | Pogo interface (+5V, GND, SDA, SCL) |
+| J2 | JST XH 5-pin | B5B-XH-A | 28BYJ-48 motor connector |
+| J3 | 1×03 header | 2.54mm | Hall sensor (VCC, GND, SIGNAL) |
+| J4 | 2×03 header | 2.54mm | AVR ISP programming |
+
+### 18.3 Design Changes from Original Architecture
+
+- **Protocol changed from UART to I2C:** Each cell is an I2C slave (addresses 0x20-0x27 via solder jumpers on PB0-PB2). No more daisy-chain forwarding.
+- **I2C pull-ups:** 4.7K on SDA/SCL, enabled via solder jumper on last cell only.
+- **Board specs:** 2-layer, 1.6mm FR4, 1oz Cu, HASL lead-free.
+
+### 18.4 DRC Results
+
+KiCad 10.0.2 DRC validation:
+- **0 electrical errors** (no shorts, no clearance violations)
+- **50 unconnected items** — expected, traces to be routed in KiCad GUI
+- **21 lib_footprint_mismatch** — cosmetic (inline vs library footprints)
+- **4 silk_over_copper** — cosmetic (auto-clipped during Gerber export)
+
+### 18.5 Estimated Cost
+
+- BOM: ~$3.50 per board (LCSC/JLCPCB pricing, qty 10+)
+- PCB fabrication: ~$0.40/board (JLCPCB, 5-board MOQ)
+- Total per cell: ~$3.90 (vs ~$5+ for discrete modules + hand wiring)
