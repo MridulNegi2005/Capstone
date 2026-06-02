@@ -49,10 +49,10 @@ nub_h         = 1.5;    // Nub protrusion above arm/upper-riser top
 arm_h         = 1.0;    // Horizontal arm thickness
 total_h       = 12.0;   // Total height: foot bottom to nub top (matches corrected stack)
 
-// Cam geometry (must match braille_cam2.scad exactly)
+// Cam geometry (must match braille_cam.scad exactly)
 track_width   = 1.6;
 track_gap     = 0.1;
-inner_radius  = 8.0;
+inner_radius  = 12.0;    // Was 8.0 — matches braille_cam.scad v5.1
 
 // Braille dot positions (must match top_plate.scad)
 col_spacing   = 4.8;    // Left column at x=-2.4, right at x=+2.4

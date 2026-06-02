@@ -19,7 +19,7 @@
 
 // --- 1. PARAMETERS ---
 
-// Braille dot positions (must match linkage.scad, braille_cam2.scad)
+// Braille dot positions (must match linkage.scad, braille_cam.scad)
 col_spacing     = 4.8;    // Left col at x=-2.4, right at x=+2.4
 row_spacing     = 2.6;    // Rows at y=+2.6, 0, -2.6
 

@@ -29,8 +29,8 @@ motor_seat_depth     = 1.5;    // Shallow pocket to locate motor body centrally
 motor_mount_spacing  = 35;     // Hole-to-hole distance (was 31mm — wrong)
 motor_mount_hole     = 4.3;    // 4mm hole + 0.3mm clearance (was 3.4mm — wrong)
 
-// Cam Interface (unchanged — matches braille_cam2.scad)
-cam_pocket_diameter = 37;   // 36.4mm cam OD + 0.3mm clearance each side
+// Cam Interface (unchanged — matches braille_cam.scad)
+cam_pocket_diameter = 46;   // 44.4mm cam OD + 0.8mm clearance/side (v5.1: inner_radius 8→12)
 cam_pocket_depth    = 3;    // Disc base (2mm) sits in pocket; bumps 0.2mm below plate top
 
 // Standoffs — CRITICAL FIX: was 3.5mm, now 8mm
@@ -48,7 +48,7 @@ spring_cavity_depth  = 16;
 // Hall Effect Sensor pocket — REPOSITIONED
 // Previous: x=19mm → pocket exceeded 42mm plate width (21.5mm > 21mm edge)
 // New: at x=0, y=+20mm (along +Y axis, well within 25mm plate edge)
-// Magnet angle in braille_cam2.scad changed from 0° to 90° to match
+// Magnet angle in braille_cam.scad changed from 0° to 90° to match
 hall_pocket_x   = 0;
 hall_pocket_y   = 20;      // +Y axis, outside cam OD (18.2mm) by 1.8mm
 hall_pocket_w   = 5;       // SS49E / A3144 body footprint

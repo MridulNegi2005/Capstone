@@ -28,7 +28,7 @@
 // =========================================================
 
 use <nav_cap.scad>       // nav_cap_prev(), nav_cap_select(), nav_cap_next()
-use <braille_cam2.scad>  // braille_cam2()
+use <braille_cam.scad>  // braille_cam()
 
 $fn = 60;
 
@@ -37,7 +37,7 @@ $fn = 60;
 // Ø≈37mm × 4.8mm tall (hub 2mm + disc+tracks 2.8mm)
 // -------------------------------------------------------
 translate([0, 0, 0])
-    braille_cam2();
+    braille_cam();
 
 // -------------------------------------------------------
 // ROW 2 — Nav caps  (y = -40, clear of cam disc edge at y≈-18.5)
