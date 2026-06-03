@@ -1,51 +1,43 @@
 # Active Handoff
 > Last updated by: Claude Code
-> Timestamp: 2026-05-31T01:30:00+05:30
+> Timestamp: 2026-06-03T12:00:00+05:30
 
 ## Current Task
-All pre-print CAD fixes implemented and verified. **Ready for printing.**
+Breadboard bring-up of ONE cell's electronics — solderless test before any build.
+ESP32 + ULN2003 + 28BYJ-48 + hall sensor. Mridul bought the parts (₹935 bill).
 
-## In Progress
-None — all CAD changes are complete and verified manifold.
+## In Progress — AWAITING CROSS-AGENT COMPONENT ID
+The wiring plan is written (`docs/BREADBOARD_TEST.md`) but two components are unidentified
+from the single wide photo, and they decide whether the ESP32 needs protection:
+- **Hall sensor module type** (3.3V analog SS49E-type vs 5V digital LM393+pot) — CRITICAL
+- **Resistor values** (color bands unreadable in the wide shot)
 
-## What Was Done (v5.0 CAD update)
-**Showstoppers fixed:**
-- F1: top_plate dot slots 1.4mm→2.5mm round holes (linkage nub is 2.2mm)
-- F2: top plate 60→59mm (fits in 60mm cavity)
-- F3: cam D-bore deepened to 4mm through disc floor (was only 2mm hub)
-- F4: through-bolt fastening — boss taps M2.5, base-plate/standoff clearance bores
+## Next Steps (CODEX + ANTIGRAVITY)
+1. Read the **"BREADBOARD BRING-UP REVIEW"** section at the bottom of
+   `.ai-sync/artifacts/assembly_audit_v4.1_2026-05-30.md`.
+2. **Ask Mridul for close-up photos**: (a) hall module both sides + pin labels,
+   (b) resistor color bands, (c) ESP32 pin silkscreen, (d) yellow barrel-jack polarity.
+3. ID the hall module + decode resistors from the photos.
+4. Audit `docs/BREADBOARD_TEST.md` wiring for faults — especially:
+   - ESP32 GPIO is NOT 5V-tolerant → hall needs 10k+20k divider IF it's a 5V module
+   - No back-feed: ESP32 on USB, motor on adapter, GND shared only
+   - GPIO 18/19/21/22 stepper pins + GPIO34 hall (strapping-pin safety)
+   - CheapStepper pin order for 28BYJ-48
+5. Write findings in the artifact's review section. **Do not let Mridul power on until verified.**
 
-**Pod redesigned (F5, F8, F14):**
-- Matching brick: 64×68×58mm (docking face matches cell)
-- Horizontal DevKit V1 on female header socket channels
-- 3× switch pockets in front wall (no extra PCB needed)
-- Lid screw bosses added
+## Key Files (this session)
+- `docs/BREADBOARD_TEST.md` (NEW — wiring + test sketch)
+- `docs/WIRING_AND_ASSEMBLY.md`, `docs/PRINT_CHECKLIST.md`, `docs/SHOPPING_LIST.md` (+PDF)
+- `print_batch/` (workshop USB folders)
+- CAD v5.1: `braille_cam.scad` (renamed, inner_radius=12), `base_plate.scad`, `linkage.scad`
+- `.ai-sync/artifacts/assembly_audit_v4.1_2026-05-30.md` (review request appended)
 
-**Wire management added (F6, F7):**
-- Pogo carrier pockets behind ±X windows
-- Floor wire gutters + wire hooks in electronics pocket
-- Vertical wire guides on ±X inner walls
-- 4× M2 muscle-board mounting bosses
-- Mid-plate wire pass-through notches (±X, +Y)
-
-**Other fixes:**
-- F11: linkage comb enlarged 38×38→56×46 (reaches standoffs)
-- F12: linkage nub centred on dot origin
-- F13: boss_height 38→37 (boss top = z41 = base plate bottom)
-
-**All 11 STLs verified: Simple: yes (manifold)**
-
-## Next Steps
-1. **Measure before print:** 28BYJ-48 shaft length + D-flat profile; DevKit pin-row pitch (22.9 vs 25.4mm); chosen pogo connector dimensions; muscle-board mounting-hole coords from KiCad
-2. **Print fit-test coupon:** top-plate corner + one linkage + cam disc → confirm dot rises 0.8mm
-3. **Full print run** per the plan's print table (PETG for structural, resin for top plate + cam)
-4. **Wire and assemble** per the plan's wiring tables (Part D of the execution plan)
-5. **Firmware** (separate session): ESP32 I2C master + ATmega slave
-
-## Key Files Modified
-All `cad/scad/*.scad` files + all `cad/stl/*.stl` files updated.
+## Confirmed decisions
+- ESP32 = 30-pin DevKit (USB-C, this unit). 28BYJ-48 + ULN2003 module (solderless via JST).
+- No buttons this round (none bought). No soldering — breadboard + dupont only.
+- Electronics protocol for final build = I2C; this breadboard test is standalone (one ESP32 direct-drives one motor).
 
 ## Project Context
-Braillix: affordable refreshable Braille display. 28BYJ-48 stepper per cell rotates cam disc
-(64 positions, 6 pins). Cells daisy-chain via 4-pin pogo (5V/GND/SDA/SCL). Custom ATmega328P
-muscle board per cell. Detachable ESP32 Brain Pod at head of chain. Budget: under 15,000 INR.
+Braillix: affordable refreshable Braille display. 28BYJ-48 rotates a cam disc (64 positions,
+6 dots). Final: N cells daisy-chained by pogo + an ESP32 brain pod. CAD in OpenSCAD (`cad/scad`).
+Budget under 15,000 INR (spent ~935 so far).

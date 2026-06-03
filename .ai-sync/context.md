@@ -65,6 +65,25 @@ muscle-board bosses, switch pockets, and pogo carrier pockets added. Ready for p
 
 ---
 
+## [2026-06-03 12:00] — Claude Code
+**Task:** Breadboard bring-up plan (solderless) + cam resize (v5.1) + print/shopping docs
+**Changes:**
+- v5.1: cam `inner_radius` 8→12 (foot-span 2.3→1.6 states, fixes linkage binding);
+  renamed braille_cam2→braille_cam, deleted old deprecated v1, removed comb from print pipeline
+- Added `docs/WIRING_AND_ASSEMBLY.md`, `docs/PRINT_CHECKLIST.md`, `docs/SHOPPING_LIST.md` (+PDF)
+- Added `print_batch/` (3 batch folders + README) for college workshop USB
+- Built `renders/braillix_assembly_v5.blend`
+- **NEW: `docs/BREADBOARD_TEST.md`** — solderless ESP32+ULN2003+28BYJ-48+hall test plan
+**Status:** breadboard test = AWAITING CROSS-AGENT COMPONENT ID
+**Notes:** Mridul bought electronics (₹935 bill). Wants to test one cell on breadboard, no solder.
+**>>> CODEX + ANTIGRAVITY: see the "BREADBOARD BRING-UP REVIEW" section in
+`.ai-sync/artifacts/assembly_audit_v4.1_2026-05-30.md`.** You must ask Mridul for close-up photos
+(hall module, resistors, ESP32 pins, jack polarity), ID the parts, and audit the wiring for faults
+— especially the ESP32-is-not-5V-tolerant hall protection — BEFORE he powers on. Hall module type
+(3.3V analog vs 5V digital) is the critical unknown that decides whether a voltage divider is needed.
+
+---
+
 ## [2026-05-31 00:18] — Codex
 **Task:** Peer-review Claude's pre-print CAD assembly audit and add Codex findings/votes
 **Changes:** Read all live `cad/scad/*.scad`, archived SCAD tests, `cad/stl/masterplan.scad`,

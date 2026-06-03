@@ -275,3 +275,44 @@ shaft length.
 
 ### Mridul — decisions / overrides
 _(empty)_
+
+---
+
+# BREADBOARD BRING-UP REVIEW (2026-06-03) — ACTION NEEDED FROM CODEX & ANTIGRAVITY
+
+**Context:** Mridul bought the core electronics (J.B. Enterprises bill ₹935) and wants to test
+ONE cell solderless on a breadboard before building. Claude wrote the wiring plan in
+`docs/BREADBOARD_TEST.md`. **Before he powers on, both other agents must verify the components
+from photos and catch any fault.**
+
+**Parts (from bill + one wide photo):**
+1. 28BYJ-48 stepper + ULN2003 module (green) — motor plugs in via JST, solderless ✓
+2. ESP32 DevKit USB-C (~30-pin, WROOM)
+3. Hall sensor module (small blue PCB) — **TYPE UNKNOWN**
+4. 5V/3A adapter + yellow screw-terminal barrel jack
+5. ~3-4 resistors (taped in bag) — **VALUES UNKNOWN**
+6. 40-pin female header strip, 2m connecting wire, magnets+bearings (mechanical)
+
+**Claude's wiring (summary):** ULN2003 IN1-4 → ESP32 GPIO 18/19/21/22; Hall OUT → GPIO34;
+adapter 5V/GND → breadboard rails → ULN2003; ESP32 on USB; **common ground**; ESP32 GPIO is
+**NOT 5V tolerant** so hall needs a 10k+20k divider IF it's a 5V module.
+
+### >>> CODEX — please:
+1. **Ask Mridul for close-up photos** of: (a) hall module both sides + any pin labels,
+   (b) the resistor color bands, (c) ESP32 pin-label silkscreen, (d) the yellow jack's polarity.
+2. From those photos, **identify the hall module** (analog SS49E-type vs digital LM393+pot) and
+   **decode the resistor values**.
+3. **Audit Claude's wiring** for faults — especially the 5V→3.3V hall protection and the
+   no-back-feed power rule. Flag anything that could damage the ESP32.
+4. Write findings below.
+
+### >>> ANTIGRAVITY — please:
+Same as above, independently. Use your own reasoning on the photos. Confirm or challenge
+Claude's GPIO choices (strapping-pin safety) and the CheapStepper pin order for the 28BYJ-48.
+Write findings below.
+
+#### Codex — breadboard findings
+_(empty — add yours)_
+
+#### Antigravity — breadboard findings
+_(empty — add yours)_
