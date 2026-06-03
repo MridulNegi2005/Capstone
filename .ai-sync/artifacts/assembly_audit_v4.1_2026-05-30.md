@@ -312,7 +312,49 @@ Claude's GPIO choices (strapping-pin safety) and the CheapStepper pin order for 
 Write findings below.
 
 #### Codex — breadboard findings
-_(empty — add yours)_
+**Reviewed photos 1-5 (2026-06-03 14:55). Verdict: safe to proceed only with the 3.3V hall
+wiring below, after barrel polarity is verified.**
+
+**Component IDs from photos:**
+- ESP32 is a 30-pin USB-C DevKit. Pin labels visible: right side includes `3V3`, `GND`, `D15`,
+  `D2`, `D4`, `D16`, `D17`, `D5`, `D18`, `D19`, `D21`, `RXD`, `TXD`, `D22`, `D23`; left side
+  includes `VIN`, `GND`, `D13`, `D12`, `D14`, `D27`, `D26`, `D25`, `D33`, `D32`, `D35`, `D34`,
+  `VN`, `VP`, `EN`.
+- Hall board is the common blue **MH-Sensor-Series magnetic Hall module** with `AO`, `DO`, `GND`,
+  `VCC`, an 8-pin comparator IC, trimpot, onboard sensor, and LEDs. Treat it as a KY-024-style
+  analog+digital Hall module.
+- Resistor values are **not safely readable** from the photo. Do not depend on them for a divider
+  unless measured with a multimeter or re-photographed closer.
+- Barrel jack polarity is **not proven by the photo**. Red/black leads are visible, but the screw
+  terminal markings/polarity still need a multimeter or visible `+/-` check.
+
+**Wiring corrections / approval conditions:**
+- Power the hall module from **ESP32 `3V3`, not 5V**. Then `AO` and `DO` should never exceed the
+  ESP32-safe logic rail, and no divider is needed for the first test.
+- Recommended first hall test: `VCC -> 3V3`, `GND -> common GND`, `AO -> GPIO34`; keep
+  `analogHall = true`. Leave `DO` disconnected initially. If using `DO` later, keep the module
+  on 3.3V and retune the blue potentiometer.
+- Keep Claude's motor power rule: adapter 5V/GND to ULN2003 and breadboard rails, ESP32 powered
+  by USB, **common GND only**, and **do not connect adapter +5V to ESP32 VIN while USB is plugged
+  in**.
+- GPIO choices look safe: 18/19/21/22 are normal output pins for ULN2003 inputs; GPIO34 is
+  input-only and suitable for hall analog input. Avoid strapping pins for this test.
+- CheapStepper pin order may need one practical check. Start with `CheapStepper(18,19,21,22)`.
+  If the motor only buzzes or moves weakly, try swapping the middle pair in code to
+  `CheapStepper(18,21,19,22)` before changing hardware.
+
+**Go / no-go:** Do **not** power the adapter into the breadboard until yellow jack polarity is
+confirmed. Once polarity is confirmed, the breadboard test is OK with hall powered from 3.3V and
+adapter +5V isolated from ESP32 VIN.
 
 #### Antigravity — breadboard findings
-_(empty — add yours)_
+**Reviewed photos 1-5 natively (2026-06-03). Verdict: Solderless test is safe, provided Hall is 3.3V powered and barrel jack polarity is explicitly verified.**
+
+**Component ID & Wiring Audit:**
+1. **Hall Sensor (MH-Sensor-Series):** This is an LM393-based comparator module (KY-024 equivalent). It has both Analog (`AO`) and Digital (`DO`) outputs and accepts 3.3V-5V power. **Crucial Rule:** Power this module from the ESP32's **`3V3` pin**, not the 5V rail. This guarantees the `AO` output never exceeds 3.3V, protecting the ESP32 (which is not officially 5V tolerant). No resistor divider is needed if you do this. Connect `AO` to `GPIO34`.
+2. **ESP32 (DOIT 30-pin DevKit V1):** The board features a CH340C and USB-C. Pins `18, 19, 21, 22` are standard GPIOs, safely avoiding strapping pins (0, 2, 5, 12, 15) which could prevent the board from booting if pulled high/low by the ULN2003. `GPIO34` is an input-only pin without an internal pull-up, which makes it perfect for the `AO` analog read.
+3. **Resistors:** I agree with Codex. The bands aren't clearly readable (light blue metal film, maybe 10k or 4.7k), but since we are powering the Hall module via 3.3V, **leave the resistors in the bag**. You don't need them.
+4. **Power Delivery:** The 5V/3A adapter is beefy enough for the motor. However, the yellow screw-terminal barrel jack has ambiguous polarity in the photo. **You MUST use a multimeter** to check which terminal is positive before connecting it to the ULN2003 power rail. Reversing this will fry the driver chip instantly. Also, only share common ground (`GND`); do not connect the adapter's 5V to the ESP32's `VIN` if you plan to use USB simultaneously.
+5. **Stepper (28BYJ-48):** The ULN2003 wiring is straightforward, but beware the phase order. If the motor just vibrates instead of turning, the library pin order is mismatched. Simply swap the middle two pins in your code: `CheapStepper(18, 21, 19, 22)`.
+
+**Summary:** Do not connect the 5V adapter until you verify the barrel jack's polarity. Wire the Hall sensor to 3.3V. Proceed with the breadboard test!

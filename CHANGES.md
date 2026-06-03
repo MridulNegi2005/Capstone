@@ -5,6 +5,21 @@
 
 ---
 
+## v6.0 — 2026-06-04 (pre-patent polish pass)
+
+See `.ai-sync/artifacts/cad_audit_v6_2026-06-04.md` for the full audit.
+
+- **DELETED `linkage_comb.scad` + `linkage_comb.stl` (SCRAPPED).** The 6 metal linkages are
+  constrained at **both ends** — the foot rides its cam track, and the nub is laterally guided by
+  the 2.5mm round hole in the top plate — so a separate comb guide is redundant. (It also carried
+  a stale `inner_radius=8` that no longer matched the cam/linkage `12.0`.)
+- Braille pitch decision: **kept at 4.8mm "jumbo"** (large-format / braille-learner positioning).
+- Material split locked: RESIN = cam, top_plate, nav_cap; PETG = box, plates, pod, end-cap.
+- Further v6 polish (keying, PETG bridges, wider gutters, pod ⠿ marker, nav braille, hall
+  comment, jack guard ring) tracked in the audit artifact.
+
+---
+
 ## Overview
 
 All five original OpenSCAD render files were audited before any physical prototyping. Four critical dimensional bugs were found that would have caused assembly failure on the first print. All were fixed. One new file was created (linkage set). A Blender presentation render was set up.

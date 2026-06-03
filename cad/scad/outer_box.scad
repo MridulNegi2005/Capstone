@@ -66,13 +66,23 @@ module cable_hook(px, py, pz) {
 }
 
 module floor_wire_gutters() {
-    // Channels along pocket floor edges — extend 0.1 below floor to avoid coplanar
-    gutter_w = 4;
-    gutter_d = 2;
+    // Channels along pocket floor edges (v6.0: widened 4→7mm for real Dupont/JST bundles)
+    // extend 0.1 below floor to avoid coplanar
+    gutter_w = 7;
+    gutter_d = 2.5;
     translate([-18, -20, floor_thickness - 0.1])
         cube([gutter_w, 40, gutter_d + 0.1]);
     translate([18 - gutter_w, -20, floor_thickness - 0.1])
         cube([gutter_w, 40, gutter_d + 0.1]);
+}
+
+module pogo_window_bridges() {
+    // Sacrificial single bridge layer across the TOP of each ±X pogo slot for clean PETG
+    // printing of the overhang. SNAP/CUT OUT after printing. (Not needed on resin.)
+    // Pogo slot = cube([6,10,8]) centered at (±34, 0, 31) → top face at z=35.
+    for(sx = [-1, 1])
+        translate([sx * shell_length/2, 0, 35 - 0.2])
+            cube([6, 10, 0.4], center=true);
 }
 
 module vertical_wire_guides() {
@@ -165,6 +175,9 @@ union() {
             translate([0, 0, 3]) cylinder(d=2.1, h=boss_height + 0.1);
         }
     }
+
+    // Sacrificial bridges over the pogo windows (PETG print aid)
+    pogo_window_bridges();
 
     // Muscle board mounting bosses
     muscle_board_bosses();

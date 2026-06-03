@@ -37,14 +37,47 @@ module lid_screw_holes() {
     }
 }
 
+// --- RAISED TACTILE FEATURES (v6.0) ---
+
+module pod_id_marker() {
+    // Raised braille ⠿ (all 6 dots) on the lid top so a blind user can tell the BRAIN POD apart
+    // from the identical-looking cells by touch. Standard 2.5mm braille pitch, dome-topped dots.
+    id_col = 2.5; id_row = 2.5;
+    for(cx = [-id_col/2, id_col/2])
+        for(cy = [id_row, 0, -id_row])
+            translate([cx, cy, lid_h - 0.01])
+                hull() {
+                    cylinder(d=1.6, h=0.2, $fn=20);
+                    translate([0, 0, 0.7]) sphere(d=1.4, $fn=20);
+                }
+}
+
+module jack_guard_ring() {
+    // Raised ring around the barrel jack so a finger finds the power inlet without probing the
+    // live contact. Auto-trimmed to the lid footprint (the jack is near the edge → partial arc).
+    intersection() {
+        translate([barrel_jack_x, 0, lid_h - 0.01])
+            difference() {
+                cylinder(d=barrel_jack_dia + 5, h=1.4, $fn=40);
+                translate([0, 0, -1]) cylinder(d=barrel_jack_dia + 0.6, h=3.4, $fn=40);
+            }
+        translate([0, 0, lid_h - 0.02])
+            pod_rounded_box(pod_length, pod_width, 2, pod_fillet);
+    }
+}
+
 // --- MAIN LID MODULE ---
 
 module esp32_pod_lid() {
-    difference() {
-        pod_rounded_box(pod_length, pod_width, lid_h, pod_fillet);
-        barrel_jack_cutout();
-        lid_inner_recess();
-        lid_screw_holes();
+    union() {
+        difference() {
+            pod_rounded_box(pod_length, pod_width, lid_h, pod_fillet);
+            barrel_jack_cutout();
+            lid_inner_recess();
+            lid_screw_holes();
+        }
+        pod_id_marker();
+        jack_guard_ring();
     }
 }
 

@@ -4,6 +4,25 @@
 
 ---
 
+## [2026-06-04 18:30] — Claude Code
+**Task:** Pre-patent CAD forensic audit (all SCAD files) + start polish pass (v6.0)
+**Changes:** Created `.ai-sync/artifacts/cad_audit_v6_2026-06-04.md` (single source of truth).
+Updated breadboard firmware earlier (AccelStepper + WiFi web monitor + OTA; STEPS_PER_REV→4096;
+cam Double-D bore + deeper hub re-rendered).
+**Status:** completed (v6.0 polish implemented — all changed PETG STLs Simple: yes, print_batch rebuilt)
+**Notes:** ⚠️ TWO FALSE ALARMS confirmed — do NOT re-fix: (1) magnet polarity is CORRECT
+(+X S/N/S docks to −X N/S/N = attract; agents wrongly assumed +X meets +X); (2) linkage.scad
+reference table is a stale COMMENT only, live geometry is correct. REAL fixes this pass:
+delete scrapped `linkage_comb.scad` (stale inner_radius=8); add anti-reversal dock keying;
+PETG bridges over side-wall holes; widen wire gutters; pod ⠿ tactile marker + nav-cap braille;
+fix stale hall-gap comment (real gap 2.65mm); power-jack guard ring. LOCKED DECISIONS: braille
+pitch stays **jumbo 4.8mm** (framed as large-format/learner); RESIN = cam/top_plate/nav_cap (do
+NOT make FDM-tolerance edits to these); PETG = box/plates/pod/end-cap; patent doc deferred to end.
+Architectural truth for patent: 28BYJ-48 (28mm) can't fit one-motor-per-char at 6.1mm pitch →
+Braillix is a modular teaching/single-char display, not a compact reader.
+
+---
+
 ## [2026-05-21 22:07] — System
 **Task:** Initialized cross-agent sync
 **Changes:** Created .ai-sync/ directory structure and bridge files
@@ -96,5 +115,52 @@ not centered at the dot, outer-box boss height conflicts with the stated z-stack
 holes have no matching shell bosses. Votes: horizontal ESP32 DevKit on female sockets in a matching
 brick pod; separate base↔box screw pattern; parametric pogo carrier only after real part dimensions;
 measure the actual 28BYJ-48 shaft and model the exact D profile.
+
+---
+
+## [2026-06-03 14:55] — Codex
+**Task:** Breadboard bring-up photo review and safety verdict
+**Changes:** Reviewed photos of ESP32 DevKit, MH-Sensor-Series hall module, resistors, and barrel
+adapter/jack. Updated `.ai-sync/artifacts/assembly_audit_v4.1_2026-05-30.md` under
+`Codex — breadboard findings`.
+**Status:** completed
+**Notes:** Hall board identified as KY-024-style analog+digital MH-Sensor-Series module with
+`AO/DO/GND/VCC`. Codex recommends powering hall from ESP32 `3V3`, using `AO -> GPIO34` first, and
+leaving `DO` disconnected initially. Resistor values are not readable enough to certify; not needed
+if hall is powered at 3.3V. Barrel jack polarity is still not proven by photo; verify with markings
+or multimeter before applying adapter power. Motor wiring/GPIO choices are otherwise acceptable,
+with possible CheapStepper middle-pin swap if motor only buzzes.
+
+---
+
+## [2026-06-03 15:00] — Antigravity
+**Task:** Breadboard bring-up photo review and safety verdict
+**Changes:** Reviewed hardware photos. Added Antigravity's independent findings to `.ai-sync/artifacts/assembly_audit_v4.1_2026-05-30.md`. Confirmed 3.3V power routing for Hall sensor and flagged the ambiguous barrel jack polarity.
+**Status:** completed
+**Notes:** The breadboard test is safe to proceed ONLY IF the Hall sensor is powered from the ESP32's 3V3 pin and the yellow barrel jack's polarity is verified with a multimeter first. No resistor divider is needed.
+
+---
+
+## [2026-06-03 17:28] — Codex
+**Task:** Live ESP32 + ULN2003 + 28BYJ-48 + Hall breadboard bring-up troubleshooting
+**Changes:** No repo code files changed during the live test. Guided Arduino IDE setup and replaced the
+`CheapStepper` sketch with a no-library half-step sketch because the installed CheapStepper library
+failed to compile on ESP32. Helped debug wiring and test behavior.
+**Status:** in-progress
+**Notes:** Difficulties/fixes so far:
+- Breadboard was too small for the ESP32 DevKit. Fix: do not fully mount ESP32 on breadboard; use
+  female-to-male Dupont jumpers directly from ESP32 pins and use breadboard mainly for power rails.
+- Arduino board selection confusion. Fix: select `esp32 by Espressif Systems` package and board
+  `ESP32 Dev Module`.
+- CheapStepper compile error. Fix: use a no-library stepper sketch with manual half-step sequence.
+- Hall sensor initially read constant `4095` because hall/ESP32 ground was not connected to common
+  ground. Fix: connect Hall GND, ESP32 GND, and adapter/ULN2003 GND together.
+- Hall now responds to magnet poles: one pole drives near zero, the other/max/no-magnet behavior
+  still needs calibration/interpretation. **Fixing/calibrating hall sensor is still left.**
+- Motor initially vibrated only. Tried pin-order/delay changes, but later found IN4 was accidentally
+  wired to ESP32 `RX0` instead of GPIO22. Fix: move IN4 to GPIO22.
+- After correct wiring (`IN1->18`, `IN2->19`, `IN3->21`, `IN4->22`) the motor rotates properly.
+  `STEP_DELAY_MS=3` feels better than 6ms; tradeoff is lower torque / higher skipped-step risk.
+  For final use, normal moves can be fast while homing should be slower.
 
 ---

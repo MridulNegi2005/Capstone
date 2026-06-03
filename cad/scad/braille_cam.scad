@@ -31,9 +31,12 @@ magnet_radius = 17.35; // Radius from centre (centre of outermost track, just in
 magnet_angle  = 90;    // Changed from 0° → 90° to match hall sensor repositioned at
                        // base_plate y=+20mm (+Y axis). Was x=+19mm (+X axis, now outside plate).
 
-// Hub extends 2mm below disc; D-bore continues 2mm into disc floor = 4mm total engagement
-hub_h = 2;
-shaft_bore_depth = 4;  // total D-bore depth from hub bottom through disc floor
+// Hub extends below disc; Double-D bore continues into disc floor
+// Shaft is 10mm long — hub + bore must accommodate most of it
+// Hub 4mm below disc + bore 4mm into disc floor = 8mm total engagement
+// Remaining 2mm of shaft sits below hub (in base_plate shaft clearance hole)
+hub_h = 4;
+shaft_bore_depth = 8;  // total Double-D bore depth from hub bottom through disc floor
 
 // Calculated Variables
 slice_angle = 360 / states;
@@ -142,18 +145,22 @@ union() {
 
     // 1. Central Hub — INVERTED (drops BELOW disc, clears top surface for linkage feet)
     //    Hub extends hub_h=4mm below disc bottom (z=0 → z=−4)
-    //    28BYJ-48 D-Shaft: 5mm dia flattened to 3mm across flats
+    //    28BYJ-48 Double-D Shaft: 5mm dia with two opposite flats
+    //    Shaft length: 10mm above motor body
+    //    Bore: Ø5.2 clearance cylinder intersected with 3.2mm-wide slab
+    //          on BOTH sides (double-D, not single-D)
     color("gray")
     translate([0, 0, -hub_h])
     difference() {
         // Hub body cylinder (below disc underside)
         cylinder(h=hub_h, r=4.5, $fn=50);
 
-        // D-shaft hole — through entire hub height
+        // Double-D shaft hole — through entire hub height
+        // Two opposite flats: cylinder clipped to 3.2mm across flats
         translate([0, 0, -1])
         intersection() {
-            cylinder(h=hub_h + 2, r=2.6, $fn=50); // 5.2mm clearance hole
-            cube([3.2, 10, hub_h + 2], center=true); // Flatten sides to 3.2mm
+            cylinder(h=hub_h + 2, r=2.6, $fn=50);     // 5.2mm clearance hole
+            cube([10, 3.2, hub_h + 2], center=true);   // Clip to 3.2mm across Y flats
         }
     }
 
@@ -173,11 +180,11 @@ union() {
     }
 } // end union
 
-// D-shaft bore through hub AND disc floor (4mm total from hub bottom)
+// Double-D shaft bore through hub AND disc floor (4mm total from hub bottom)
 translate([0, 0, -hub_h - 1])
 intersection() {
     cylinder(h=shaft_bore_depth + 1, r=2.6, $fn=50);
-    cube([3.2, 10, shaft_bore_depth + 1], center=true);
+    cube([10, 3.2, shaft_bore_depth + 1], center=true);  // Double-D: clip Y axis
 }
 
 // Homing magnet pocket (subtracted from disc underside)
@@ -205,17 +212,17 @@ module braille_cam() {
                 translate([0, 0, -1])
                 intersection() {
                     cylinder(h=hub_h+2, r=2.6, $fn=50);
-                    cube([3.2, 10, hub_h+2], center=true);
+                    cube([10, 3.2, hub_h+2], center=true);  // Double-D
                 }
             }
             // All 6 cam tracks
             for(t=[0:dots-1]) build_track_polyhedron(t);
         }
-        // D-shaft bore through hub + disc floor (4mm total engagement)
+        // Double-D shaft bore through hub + disc floor (4mm total engagement)
         translate([0, 0, -hub_h - 1])
         intersection() {
             cylinder(h=shaft_bore_depth + 1, r=2.6, $fn=50);
-            cube([3.2, 10, shaft_bore_depth + 1], center=true);
+            cube([10, 3.2, shaft_bore_depth + 1], center=true);  // Double-D
         }
         // Homing magnet pocket
         translate([magnet_radius*cos(magnet_angle),

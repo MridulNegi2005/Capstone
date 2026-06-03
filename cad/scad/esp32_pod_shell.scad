@@ -141,6 +141,39 @@ module lid_locating_lip() {
         }
 }
 
+// Raised braille label on the front (-Y) wall next to a nav button.
+// dots = list of braille dot-numbers (1..6). Cell numbering:
+//   1 4
+//   2 5
+//   3 6
+module braille_label(cx, cz, dots) {
+    p = 2.4;  // braille pitch
+    // (dotnum) -> [x_off, z_off]
+    offs = [[-p/2, p], [-p/2, 0], [-p/2, -p], [p/2, p], [p/2, 0], [p/2, -p]];
+    for(d = dots) {
+        o = offs[d - 1];
+        translate([cx + o[0], -pod_width/2 + 0.4, cz + o[1]])
+            rotate([90, 0, 0])
+                cylinder(d=1.4, h=0.9, $fn=16);
+    }
+}
+
+module nav_braille_labels() {
+    // P / S / N (Grade-1) below the Prev / Select / Next buttons. Redundant tactile label
+    // alongside the raised ◁ ○ ▷ cap symbols. Placed ~8mm below each cap hole, clear of flanges.
+    label_z = nav_z - 8;
+    braille_label(nav_x_positions[0], label_z, [1, 2, 3, 4]);     // P (prev)
+    braille_label(nav_x_positions[1], label_z, [2, 3, 4]);        // S (select)
+    braille_label(nav_x_positions[2], label_z, [1, 3, 4, 5]);     // N (next)
+}
+
+module usb_bridge() {
+    // Sacrificial single bridge layer across the TOP of the USB cutout so PETG prints the
+    // overhang cleanly (upright print). SNAP/CUT OUT after printing. (Not needed on resin.)
+    translate([-pod_length/2 - 1, -usb_w/2, usb_z + usb_h - 0.4])
+        cube([pod_wall + 2, usb_w, 0.4]);
+}
+
 module lid_screw_bosses() {
     // 2× bosses on shell top rim for M2 lid screws (F14 fix)
     for(sx = [-1, 1]) {
@@ -176,6 +209,8 @@ module esp32_pod_shell() {
         wire_tie_post();
         lid_locating_lip();
         lid_screw_bosses();
+        usb_bridge();         // PETG sacrificial bridge over USB cutout
+        nav_braille_labels(); // P/S/N braille beside the nav buttons
     }
 }
 

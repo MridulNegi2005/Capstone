@@ -17,7 +17,10 @@
 //   Pod shell   → esp32_pod_shell.scad  (separate PETG print)
 //   Pod lid     → esp32_pod_lid.scad    (separate PETG print)
 //   Outer box   → outer_box.scad        (separate PETG print)
-//   Linkage comb → linkage_comb.scad    (separate PETG print)
+//
+// REMOVED (v6.0, 2026-06-04): linkage_comb — SCRAPPED. Linkages are constrained at BOTH ends
+//   (foot rides the cam track, nub is guided by the 2.5mm top-plate hole), so a separate comb
+//   guide is unnecessary. File + STL deleted.
 //
 // Supports:     NONE required for any part
 // Bed footprint: ~50 mm × 70 mm

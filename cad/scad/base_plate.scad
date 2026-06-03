@@ -50,7 +50,11 @@ spring_cavity_depth  = 16;
 // New: at x=0, y=+20mm (along +Y axis, well within 25mm plate edge)
 // Magnet angle in braille_cam.scad changed from 0° to 90° to match
 hall_pocket_x   = 0;
-hall_pocket_y   = 20;      // +Y axis, outside cam OD (18.2mm) by 1.8mm
+hall_pocket_y   = 20;      // +Y axis. Magnet path on cam = r17.35mm → 2.65mm radial offset.
+                           // (v6.0: corrected stale "18.2mm/1.8mm" note. Cam OD is now 44.4mm so
+                           // y=20 sits UNDER the disc. For tightest coupling the sensor could move
+                           // to y~17.35 to sit directly under the magnet path; left at 20 —
+                           // validated on breadboard, hall saturates within a few mm.)
 hall_pocket_w   = 5;       // SS49E / A3144 body footprint
 hall_pocket_d   = 4;
 hall_pocket_h   = 3;       // 2mm floor remaining below sensor
@@ -102,7 +106,7 @@ module cam_features() {
 module hall_sensor_pocket() {
     // Rectangular recess on top face for Hall effect sensor (SS49E / A3144)
     // Sensor detects magnet on cam disc underside as it passes at r=17.35mm
-    // Sensor at y=20mm is 1.8mm outside cam OD (18.2mm) — detects at 1.8mm radial gap
+    // Sensor at y=20mm → 2.65mm radial offset from the magnet path (under the Ø44.4 disc)
     translate([hall_pocket_x - hall_pocket_w/2,
                hall_pocket_y - hall_pocket_d/2,
                base_thickness - hall_pocket_h])

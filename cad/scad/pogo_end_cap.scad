@@ -65,6 +65,15 @@ module snap_lips() {
     }
 }
 
+module end_marker() {
+    // Raised ridge on the EXPOSED (outward, -Z) face so a blind user feels "end of chain".
+    // The soft TPU + this bar together unambiguously mark the last cell's tail.
+    hull() {
+        translate([-3, 0, 0]) sphere(d=2.4, $fn=20);
+        translate([ 3, 0, 0]) sphere(d=2.4, $fn=20);
+    }
+}
+
 module pogo_end_cap() {
     union() {
         difference() {
@@ -72,6 +81,7 @@ module pogo_end_cap() {
             cap_inner();
         }
         snap_lips();
+        end_marker();
     }
 }
 
