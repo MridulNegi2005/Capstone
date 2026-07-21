@@ -1,3 +1,28 @@
-GEMINI.md
+# --- Agent / tool scratch (not part of the project) ---
 .claude
-__pycache__/*
+GEMINI.md
+.codex-remote-attachments/
+
+# NOTE: .ai-sync/ is NOT ignored — it's the real cross-agent context log
+# (Claude/Codex/Antigravity), meant to be committed and shared.
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# --- Blender auto-backup files ---
+*.blend1
+*.blend2
+
+# --- OS junk ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Editor junk ---
+*.swp
+*.swo
+*~
