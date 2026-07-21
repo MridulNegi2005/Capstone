@@ -1,7 +1,13 @@
-// outer_box v5.0 — Pre-print audit fixes + wire management
+// outer_box v6.1 — Physical-reality fixes after PETG fit-test (Kobra Neo, 0.4mm nozzle)
 shell_length      = 68;
 shell_width       = 68;
 shell_height      = 58;
+// v6.2: total height stays 58 = 54mm walls + 4mm over-cap (top_plate) sitting on top.
+// Only the OUTER shell extrusion is shortened to wall_top_h; every other feature
+// (mag_z, chevron at shell_height-22, ledge, bosses, cavity) still references
+// shell_height so nothing moves.
+cap_recess        = 4;
+wall_top_h        = shell_height - cap_recess;   // 54
 wall_thickness    = 4;
 floor_thickness   = 4;
 internal_length   = 60;
@@ -10,12 +16,16 @@ elec_pocket_h     = 16;
 base_plate_z      = 41;    // 4(floor) + 16(elec) + 2(midplate) + 19(motor)
 boss_height       = 37;    // boss top = z41 = base_plate bottom
 
-// Magnetic snap — NeFeB disc press-fit pockets
-// -X face: N/S/N polarity; +X face: S/N/S → attract when docked
-mag_dia           = 3.2;
-mag_depth         = 2.1;
+// Magnetic snap — NeFeB disc glue-in pockets
+// v6.1: real magnets measured 8mm dia × 1mm thick (CAD previously assumed 3×2).
+// 2 per face at y=±14 — the center magnet was dropped because an 8.4mm pocket at
+// y=0 would collide with the pogo window. Teardrop tops so the horizontal pockets
+// print without fusing closed (the 3.2mm round ones fused on the fit-test).
+// -X face: N/S polarity; +X face: S/N → attract when docked
+mag_dia           = 8.4;   // 8mm magnet + 0.4mm FDM clearance
+mag_depth         = 1.2;   // 1mm magnet + glue gap (4mm wall keeps 2.8mm behind)
 mag_z             = shell_height / 2;
-mag_y_pos         = [-12, 0, 12];
+mag_y_pos         = [-14, 14];
 
 // Pogo carrier pocket params (behind each ±X window)
 pogo_carrier_w    = 12;    // carrier board width (measure real part!)
@@ -77,12 +87,26 @@ module floor_wire_gutters() {
 }
 
 module pogo_window_bridges() {
-    // Sacrificial single bridge layer across the TOP of each ±X pogo slot for clean PETG
-    // printing of the overhang. SNAP/CUT OUT after printing. (Not needed on resin.)
+    // Sacrificial bridge across the TOP of each ±X pogo slot for clean PETG printing of
+    // the overhang. SNAP/CUT OUT after printing. (Not needed on resin.)
+    // v6.1: 0.4→0.6mm (3 layers @ 0.2) — a single layer adheres poorly on the Kobra Neo.
     // Pogo slot = cube([6,10,8]) centered at (±34, 0, 31) → top face at z=35.
     for(sx = [-1, 1])
-        translate([sx * shell_length/2, 0, 35 - 0.2])
-            cube([6, 10, 0.4], center=true);
+        translate([sx * shell_length/2, 0, 35 - 0.3])
+            cube([6, 10, 0.6], center=true);
+}
+
+module teardrop_magnet_pocket() {
+    // Horizontal-axis magnet pocket with a 45° "roof" — round side-wall holes fused
+    // closed on the fit-test print; the teardrop top is self-supporting on FDM.
+    // Drawn with axis along +Z, mouth at z=0; caller rotates it into the wall.
+    r = mag_dia / 2;
+    linear_extrude(mag_depth + 0.01) union() {
+        circle(r=r, $fn=40);
+        polygon([[-r * sin(45), r * cos(45)],
+                 [0, r * sqrt(2)],
+                 [ r * sin(45), r * cos(45)]]);
+    }
 }
 
 module vertical_wire_guides() {
@@ -93,6 +117,16 @@ module vertical_wire_guides() {
         translate([sx * (internal_length/2 - guide_depth/2), 0, floor_thickness - 0.1])
             cube([guide_depth, guide_w, 31 - floor_thickness + 0.1], center=false);
     }
+}
+
+module front_chevron_groove() {
+    // Bold ^ groove engraved into the front (-Y) wall, apex up = "this side front, this way up".
+    // Polygon is a chevron band: bottom edge (-8,0)→(0,8)→(8,0), offset 4.2 vertically.
+    // Extruded 1.3mm into the wall (1.2mm groove + 0.1mm past the outer surface).
+    translate([0, -shell_width/2 + 1.2, shell_height - 22])
+        rotate([90, 0, 0])
+        linear_extrude(1.3)
+        polygon([[-8, 0], [0, 8], [8, 0], [8, 4.2], [0, 12.2], [-8, 4.2]]);
 }
 
 module muscle_board_bosses() {
@@ -111,8 +145,9 @@ module muscle_board_bosses() {
 
 union() {
     difference() {
-        // Main Shell
-        rounded_box(shell_length, shell_width, shell_height, 3.0);
+        // Main Shell — outer extrusion shortened to wall_top_h (54) to seat the
+        // 4mm over-cap; cavity/pocket cuts below still use shell_height (harmless air above 54).
+        rounded_box(shell_length, shell_width, wall_top_h, 3.0);
 
         // Internal Cavity
         translate([0, 0, floor_thickness])
@@ -137,26 +172,22 @@ union() {
         pogo_carrier_pocket(-internal_length/2);
         pogo_carrier_pocket( internal_length/2);
 
-        // Magnet pockets — -X face N/S/N, +X face S/N/S
+        // Magnet pockets — -X face N/S, +X face S/N (teardrop tops, v6.1)
         for(my = mag_y_pos) {
             translate([-shell_length/2 - 0.01, my, mag_z])
                 rotate([0, 90, 0])
-                cylinder(d=mag_dia, h=mag_depth + 0.01, $fn=30);
+                teardrop_magnet_pocket();
         }
         for(my = mag_y_pos) {
             translate([shell_length/2 + 0.01, my, mag_z])
                 rotate([0, -90, 0])
-                cylinder(d=mag_dia, h=mag_depth + 0.01, $fn=30);
+                teardrop_magnet_pocket();
         }
 
-        // Braille letter 'F' (Front) embossed into front wall
-        translate([0, -shell_width/2, shell_height - 15]) {
-            rotate([90, 0, 0]) {
-                translate([-2.4,  2.6, 0]) cylinder(d=1.5, h=2, center=true, $fn=20);
-                translate([-2.4,  0.0, 0]) cylinder(d=1.5, h=2, center=true, $fn=20);
-                translate([ 2.4,  2.6, 0]) cylinder(d=1.5, h=2, center=true, $fn=20);
-            }
-        }
+        // Front tactile marker — bold chevron (^) groove, v6.1.
+        // Replaces the braille 'F' (1.5mm dots — FDM-unprintable, came out as mush).
+        // Band ~3mm perpendicular width, 1.2mm deep, 16mm wide: unmissable by touch.
+        front_chevron_groove();
     }
 
     // 2mm Ledge at Z=20 for Mid-Plate
@@ -169,10 +200,20 @@ union() {
 
     // Corner Bosses — M2.5 tap pilot for through-bolt
     // Ø7.8 so edge (26+3.9=29.9) doesn't touch cavity wall (x=30)
+    // v6.1: pilot 2.1→2.3 (FDM prints holes ~0.2-0.3 undersize; drill if still tight)
+    // v6.2: add a base GUSSET CONE under each boss — these Ø7.8 bosses SNAPPED on the
+    // real print. Cone widens d=13→7.8 over h=8 (z = floor-0.1 .. floor+7.9), merging
+    // into the cavity wall (base r=6.5 at x=26 spans x=19.5..32.5; cavity wall starts
+    // at x=30 → the outer flank fuses to the wall = the gusset). Inner flank reaches
+    // x=19.5, clearing the 36-wide pocket edge at x=18. Cone stays below the mid-plate
+    // ledge (z=20) and base plate (z=41) so it blocks nothing. Pilot drilled through it too.
     for(sx = [-1, 1]) for(sy = [-1, 1]) {
         translate([sx * 26, sy * 21, floor_thickness - 0.1]) difference() {
-            cylinder(d=7.8, h=boss_height + 0.1);
-            translate([0, 0, 3]) cylinder(d=2.1, h=boss_height + 0.1);
+            union() {
+                cylinder(d=7.8, h=boss_height + 0.1);
+                cylinder(d1=13, d2=7.8, h=8);   // gusset cone at base
+            }
+            translate([0, 0, 3]) cylinder(d=2.3, h=boss_height + 0.1);
         }
     }
 
@@ -191,10 +232,11 @@ union() {
     // Vertical wire guides on ±X inner walls
     vertical_wire_guides();
 
-    // Bottom-edge orientation ridge
-    translate([0, -shell_width/2 + 1.5, 2])
-        hull() {
-            translate([-10, 0, 0]) sphere(r=0.8, $fn=20);
-            translate([ 10, 0, 0]) sphere(r=0.8, $fn=20);
-        }
+    // Bottom-edge orientation ridge — v6.1 rebuilt.
+    // The old r=0.8 sphere hull sat at y=-32.5, INSIDE the 4mm wall — it never
+    // appeared on the print at all. New: 45°-diamond ridge ON the outer front face,
+    // ~1.4mm proud × 20mm long. Self-supporting on a vertical wall (both faces 45°).
+    translate([0, -shell_width/2, 5])
+        rotate([45, 0, 0])
+        cube([20, 2, 2], center=true);
 }

@@ -55,16 +55,19 @@ hall_pocket_y   = 20;      // +Y axis. Magnet path on cam = r17.35mm → 2.65mm 
                            // y=20 sits UNDER the disc. For tightest coupling the sensor could move
                            // to y~17.35 to sit directly under the magnet path; left at 20 —
                            // validated on breadboard, hall saturates within a few mm.)
-hall_pocket_w   = 5;       // SS49E / A3144 body footprint
-hall_pocket_d   = 4;
+hall_pocket_w   = 5.3;     // SS49E / A3144 body footprint (v6.1: +0.3 FDM clearance)
+hall_pocket_d   = 4.3;     // (v6.1: +0.3 FDM clearance — pockets print undersize)
 hall_pocket_h   = 3;       // 2mm floor remaining below sensor
 // Wire channel runs from sensor pocket to +Y plate edge (25mm)
 hall_wire_w     = 2;
 hall_wire_d     = 1;
 
-// Ribbing (underside structural ribs)
-rib_thickness   = 3;
-rib_height      = 3;
+// v6.1b: underside ribs REMOVED. Two reasons (both confirmed on the fit-test print):
+//  1. Printing flat put the ribs on the bed and BRIDGED the whole plate body over
+//     3mm of air → exposed-waffle underside, weak part.
+//  2. The ribs crossed the box corner-boss positions (±26,±21), so the plate sat on
+//     its ribs 3mm too high — the whole motor/cam/top-plate stack would rise 3mm and
+//     the top plate would poke above the box rim. A solid 5mm plate is stiff enough.
 
 $fn = 80;
 
@@ -141,20 +144,6 @@ module standoffs() {
     }
 }
 
-module ribs() {
-    // Underside structural ribs — avoid motor body area
-    // X-axis ribs (along plate edges in Y)
-    for(y_pos = [-base_width/2 + 2, base_width/2 - 2 - rib_thickness]) {
-        translate([-base_length/2, y_pos, -rib_height])
-            cube([base_length, rib_thickness, rib_height]);
-    }
-    // Y-axis ribs (along plate edges in X)
-    for(x_pos = [-base_length/2 + 2, base_length/2 - 2 - rib_thickness]) {
-        translate([x_pos, -base_width/2, -rib_height])
-            cube([rib_thickness, base_width, rib_height]);
-    }
-}
-
 // --- 3. ASSEMBLY ---
 
 union() {
@@ -166,9 +155,4 @@ union() {
         hall_sensor_pocket();
     }
     standoffs();
-    // Ribs clipped to plate footprint (no floating geometry)
-    intersection() {
-        translate([0, 0, -rib_height]) main_body();
-        ribs();
-    }
 }

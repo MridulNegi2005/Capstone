@@ -32,6 +32,14 @@ union() {
         // Slot for motor wires to drop down into the electronics bay
         translate([-8, 20, -1]) cube([15, 8, plate_h + 2], center=true);
 
+        // v6.1: ULN2003 connector relief slot. The off-the-shelf driver module measured
+        // ~20mm tall as wired vs the 16mm pocket. With wires soldered flat the stack is
+        // ~12mm, but the JST socket + plug needs headroom — this through-slot lets the
+        // connector corner poke past the plate. Positioned at (+X,-Y) clear of the motor
+        // collar (collar max x at y=-15 is x=0.5) and the boss hole at (26,-21).
+        // → Orient the ULN2003 with its JST/header edge toward this corner.
+        translate([3, -23, -1]) cube([17, 8, plate_h + 2]);
+
         // Wire pass-through notches: pogo wires drop from z31 into pocket
         // -X edge notch (pogo spring side)
         translate([-plate_l/2, -3, -1]) cube([6, 6, plate_h + 2]);
