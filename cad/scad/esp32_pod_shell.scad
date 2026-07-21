@@ -46,11 +46,12 @@ module pogo_pad_recess_cutout() {
 }
 
 module magnet_pockets() {
-    // Cell -X face = N/S/N; pod +X face = S/N/S → attract when docked
+    // Cell -X face = N/S; pod +X face = S/N → attract when docked
+    // v6.1: 8.4×1.2mm teardrop pockets for the real 8×1mm magnets (see params)
     for(my = mag_y_positions) {
-        translate([pod_length/2 - mag_depth + 0.01, my, mag_z])
-        rotate([0, 90, 0])
-            cylinder(d=mag_dia, h=mag_depth + 1, $fn=30);
+        translate([pod_length/2 + 0.01, my, mag_z])
+        rotate([0, -90, 0])
+            teardrop_magnet_pocket();
     }
 }
 
@@ -95,27 +96,39 @@ module header_retention_walls() {
     }
 }
 
-module switch_pockets() {
-    // 3× snap-in pockets for 6×6×5mm tactile switches behind nav button holes
+// v6.1b: REAL switch retention. The old "pockets + snap nibs" were geometry errors —
+// the pocket cut into open interior air and the nibs floated 5mm off the wall
+// (disconnected blobs in the STL). Nothing took the button press force: pressing a
+// nav cap would simply shove the switch backwards into the pod.
+// New: one cage per switch — two side fins + a solid BACK wall, all rising from the
+// pod floor (zero overhang in the upright print). Press force path:
+// front wall → switch body → back wall → floor. Switch drops in from the top,
+// rests on two corner tabs, leads pointing UP/DOWN (legs vertical — side-leg
+// orientation would foul the fins). Secure with a dab of hot glue after testing.
+module switch_cages() {
+    y_in   = -pod_width/2 + pod_wall;  // inner face of front wall
+    depth  = 7.2;   // wall face → back wall: 5mm body + 1.5mm plunger + play
+    bw_t   = 2;     // back wall thickness
+    fin_t  = 2;     // side fin thickness
+    slot_w = sw_body;            // 6.4 (6mm switch + clearance)
+    z_bot  = pod_floor;          // start at floor — printable upright
+    z_top  = nav_z + 6;          // ~6mm above switch top for finger access
+    tab    = 1.6;   // shelf tabs under the switch body corners (set its height;
+                    // minor FDM sag on their underside is fine)
+    sw_bot = nav_z - 3;          // bottom of the 6mm switch body
     for(nx = nav_x_positions) {
-        translate([nx, -pod_width/2 + pod_wall, nav_z]) {
-            rotate([-90, 0, 0]) {
-                // Main pocket cavity
-                translate([-sw_body/2, -sw_body/2, -0.01])
-                    cube([sw_body, sw_body, sw_depth]);
-            }
-        }
-    }
-}
-
-module switch_snap_nibs() {
-    // Small retention nibs at pocket edges to hold switches in place
-    for(nx = nav_x_positions) {
-        for(sy = [-1, 1]) {
-            translate([nx, -pod_width/2 + pod_wall + sw_depth - 0.5,
-                       nav_z + sy * (sw_body/2)])
-                cube([2, 0.8, sw_snap_nib], center=true);
-        }
+        // Side fins
+        for(sx = [-1, 1])
+            translate([nx + sx * slot_w/2 + (sx < 0 ? -fin_t : 0), y_in - 0.01, z_bot])
+                cube([fin_t, depth + 0.01, z_top - z_bot]);
+        // Back wall (takes the press force)
+        translate([nx - slot_w/2 - fin_t, y_in + depth, z_bot])
+            cube([slot_w + 2 * fin_t, bw_t, z_top - z_bot]);
+        // Corner shelf tabs — switch body rests here, bottom legs hang in the
+        // 3.2mm gap between the tabs
+        for(sx = [-1, 1])
+            translate([nx + sx * slot_w/2 + (sx < 0 ? 0 : -tab), y_in - 0.01, sw_bot - 1.6])
+                cube([tab, depth + 0.01, 1.6]);
     }
 }
 
@@ -141,37 +154,31 @@ module lid_locating_lip() {
         }
 }
 
-// Raised braille label on the front (-Y) wall next to a nav button.
-// dots = list of braille dot-numbers (1..6). Cell numbering:
-//   1 4
-//   2 5
-//   3 6
-module braille_label(cx, cz, dots) {
-    p = 2.4;  // braille pitch
-    // (dotnum) -> [x_off, z_off]
-    offs = [[-p/2, p], [-p/2, 0], [-p/2, -p], [p/2, p], [p/2, 0], [p/2, -p]];
-    for(d = dots) {
-        o = offs[d - 1];
-        translate([cx + o[0], -pod_width/2 + 0.4, cz + o[1]])
-            rotate([90, 0, 0])
-                cylinder(d=1.4, h=0.9, $fn=16);
+// v6.1: the P/S/N braille labels (1.4mm dots) were REMOVED — they printed as mush on
+// FDM (raised features <2.5mm fail on a 0.4mm nozzle). Replaced by count-coded grooves
+// below: 1 groove = Prev, 2 = Select, 3 = Next. Real braille lives on the resin nav caps.
+module nav_count_grooves() {
+    // Vertical grooves engraved into the front wall ~9mm below each nav hole.
+    // Each groove: 1.2mm wide × 1mm deep × 6mm tall, 3mm apart — bold enough to
+    // print cleanly and feel distinctly even through PETG layer texture.
+    groove_z = nav_z - 12;   // groove bottom; clears the 8mm cap flange above
+    counts = [1, 2, 3];      // Prev / Select / Next
+    for(i = [0 : 2]) {
+        n = counts[i];
+        for(g = [0 : n - 1]) {
+            gx = nav_x_positions[i] + (g - (n - 1) / 2) * 3;
+            translate([gx - 0.6, -pod_width/2 - 0.01, groove_z])
+                cube([1.2, 1.01, 6]);
+        }
     }
 }
 
-module nav_braille_labels() {
-    // P / S / N (Grade-1) below the Prev / Select / Next buttons. Redundant tactile label
-    // alongside the raised ◁ ○ ▷ cap symbols. Placed ~8mm below each cap hole, clear of flanges.
-    label_z = nav_z - 8;
-    braille_label(nav_x_positions[0], label_z, [1, 2, 3, 4]);     // P (prev)
-    braille_label(nav_x_positions[1], label_z, [2, 3, 4]);        // S (select)
-    braille_label(nav_x_positions[2], label_z, [1, 3, 4, 5]);     // N (next)
-}
-
 module usb_bridge() {
-    // Sacrificial single bridge layer across the TOP of the USB cutout so PETG prints the
-    // overhang cleanly (upright print). SNAP/CUT OUT after printing. (Not needed on resin.)
-    translate([-pod_length/2 - 1, -usb_w/2, usb_z + usb_h - 0.4])
-        cube([pod_wall + 2, usb_w, 0.4]);
+    // Sacrificial bridge across the TOP of the USB cutout so PETG prints the overhang
+    // cleanly (upright print). SNAP/CUT OUT after printing. (Not needed on resin.)
+    // v6.1: 0.4→0.6mm (3 layers @ 0.2) — a single layer adheres poorly.
+    translate([-pod_length/2 - 1, -usb_w/2, usb_z + usb_h - 0.6])
+        cube([pod_wall + 2, usb_w, 0.6]);
 }
 
 module lid_screw_bosses() {
@@ -200,17 +207,18 @@ module esp32_pod_shell() {
             magnet_pockets();
             antenna_grille();
             header_socket_channels();
-            switch_pockets();
+            nav_count_grooves();  // 1/2/3 grooves under Prev/Select/Next (v6.1)
         }
 
         // Positive interior features
         header_retention_walls();
-        switch_snap_nibs();
+        switch_cages();       // v6.1b: real switch retention (old nibs were floating)
         wire_tie_post();
-        lid_locating_lip();
+        // v6.2: lid_locating_lip() REMOVED — the new over-cap lid locates with an outer
+        // ±Y skirt, so the inner lip is redundant and would foul the skirt. Module kept
+        // below (unused) for reference.
         lid_screw_bosses();
         usb_bridge();         // PETG sacrificial bridge over USB cutout
-        nav_braille_labels(); // P/S/N braille beside the nav buttons
     }
 }
 

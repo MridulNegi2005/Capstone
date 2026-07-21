@@ -16,17 +16,71 @@ include <esp32_pod_params.scad>
 
 shell_h = pod_height - lid_h;
 
+// --- OVER-CAP DIMENSIONS (v6.2) ---
+// Lid is now an over-cap: X flush with pod outer (64, ±32 — NO skirt on ±X so the
+// +X dock face stays flat), Y 70 (±35 = 1mm overhang each side) with a downward
+// skirt on ±Y only. Underside at z=0, top at z=lid_h(4).
+lid_cap_x        = pod_length;        // 64 — flush, no overhang on dock faces
+lid_cap_y        = 70;                // 1mm overhang each side (±35) front/back
+skirt_depth      = 4.0;
+skirt_y_outer    = 35.0;             // flush with cap edge
+skirt_y_inner    = 34.4;             // 0.4mm off pod wall outer (pod_width=68 → ±34)
+skirt_x_half     = 28.0;             // skirt spans x within ±28 (clear of corners & dock)
+
+// --- JACK SUPPORT CRADLE (v6.2) ---
+// PLACEHOLDER — MEASURE REAL JACK. The user's barrel jack is a BARE socket (no nut),
+// so plug-in force would push it down/in. This U-pocket hangs under the lid around the
+// jack hole at (-22,18); the bottom shelf takes the downward push. Front (toward -X/USB)
+// left open for the wire/solder lugs.
+jack_body_w      = 9.5;   // PLACEHOLDER — MEASURE REAL JACK — Y dimension of jack body
+jack_body_l      = 12;    // PLACEHOLDER — MEASURE REAL JACK — X dimension of jack body
+jack_body_h      = 11;    // PLACEHOLDER — MEASURE REAL JACK — Z depth below lid
+cradle_t         = 1.5;   // cradle wall thickness
+
 // --- MODULES ---
 
-module barrel_jack_cutout() {
-    translate([barrel_jack_x, 0, -1])
-        cylinder(d=barrel_jack_dia, h=lid_h + 2);
+// Over-cap body: X flush (±32), Y overhang (±35), rounded corners match pod fillet.
+module lid_cap_body() {
+    pod_rounded_box(lid_cap_x, lid_cap_y, lid_h, pod_fillet);
 }
 
-module lid_inner_recess() {
-    translate([0, 0, -0.01])
-        pod_rounded_box(pod_int_length + 2 * 1.0 + 0.4,
-                        pod_int_width  + 2 * 1.0 + 0.4, 1.2, pod_fillet - 1);
+// Downward skirt on ±Y faces only — locates the lid over the pod wall.
+// Outer flush y=±35, inner y=±34.4 (0.4mm off the pod wall outer ±34), x within ±28.
+module yy_skirt() {
+    for(sy = [-1, 1]) {
+        y_lo = (sy < 0) ? -skirt_y_outer : skirt_y_inner;
+        translate([-skirt_x_half, y_lo, -skirt_depth])
+            cube([2 * skirt_x_half, skirt_y_outer - skirt_y_inner, skirt_depth]);
+    }
+}
+
+// Jack support cradle — open-topped U hanging below the lid underside.
+// Two side walls + a back wall (+X side) + a bottom shelf; front (-X) left open.
+module jack_cradle() {
+    inner_x = jack_body_l;          // X opening for the jack body
+    inner_y = jack_body_w;          // Y opening
+    x0 = barrel_jack_x - inner_x/2; // inner-X start (front/open side faces -X)
+    y0 = barrel_jack_y - inner_y/2;
+    z_bot = -jack_body_h;           // bottom shelf top sits jack_body_h below the lid
+    wall_h = jack_body_h + 0.5;     // overlap 0.5mm into the lid underside to fuse
+    // Side walls (along X) at ±Y of the pocket
+    for(sy = [-1, 1]) {
+        ywall = (sy < 0) ? y0 - cradle_t : y0 + inner_y;
+        translate([x0 - cradle_t, ywall, z_bot])
+            cube([inner_x + cradle_t * 2, cradle_t, wall_h]);
+    }
+    // Back wall (+X side, away from USB) — closes the dock-end of the pocket
+    translate([x0 + inner_x, y0 - cradle_t, z_bot])
+        cube([cradle_t, inner_y + cradle_t * 2, wall_h]);
+    // Bottom shelf — takes the downward insertion force
+    translate([x0 - cradle_t, y0 - cradle_t, z_bot])
+        cube([inner_x + cradle_t * 2, inner_y + cradle_t * 2, cradle_t]);
+}
+
+module barrel_jack_cutout() {
+    // v6.1b: now fully inside the lid (was overflowing the edge → open notch)
+    translate([barrel_jack_x, barrel_jack_y, -1])
+        cylinder(d=barrel_jack_dia, h=lid_h + 2);
 }
 
 module lid_screw_holes() {
@@ -40,30 +94,26 @@ module lid_screw_holes() {
 // --- RAISED TACTILE FEATURES (v6.0) ---
 
 module pod_id_marker() {
-    // Raised braille ⠿ (all 6 dots) on the lid top so a blind user can tell the BRAIN POD apart
-    // from the identical-looking cells by touch. Standard 2.5mm braille pitch, dome-topped dots.
-    id_col = 2.5; id_row = 2.5;
-    for(cx = [-id_col/2, id_col/2])
-        for(cy = [id_row, 0, -id_row])
-            translate([cx, cy, lid_h - 0.01])
-                hull() {
-                    cylinder(d=1.6, h=0.2, $fn=20);
-                    translate([0, 0, 0.7]) sphere(d=1.4, $fn=20);
-                }
+    // v6.1: was a braille ⠿ with 1.4mm dots — printed as mush on FDM (raised features
+    // <2.5mm fail on a 0.4mm nozzle). Now 3 bold parallel ridges so a blind user can
+    // tell the BRAIN POD apart from the identical-looking cells by touch.
+    // Each ridge: 3mm wide × 1.2mm proud × 15mm long, rounded top, 6mm apart.
+    for(ry = [-6, 0, 6])
+        translate([0, ry, lid_h - 0.01])
+            hull() {
+                translate([-7.5, -1.5, 0]) cube([15, 3, 0.6]);
+                translate([-6.5, -0.5, 0]) cube([13, 1, 1.2]);
+            }
 }
 
 module jack_guard_ring() {
-    // Raised ring around the barrel jack so a finger finds the power inlet without probing the
-    // live contact. Auto-trimmed to the lid footprint (the jack is near the edge → partial arc).
-    intersection() {
-        translate([barrel_jack_x, 0, lid_h - 0.01])
-            difference() {
-                cylinder(d=barrel_jack_dia + 5, h=1.4, $fn=40);
-                translate([0, 0, -1]) cylinder(d=barrel_jack_dia + 0.6, h=3.4, $fn=40);
-            }
-        translate([0, 0, lid_h - 0.02])
-            pod_rounded_box(pod_length, pod_width, 2, pod_fillet);
-    }
+    // Raised ring around the barrel jack so a finger finds the power inlet without
+    // probing the live contact. v6.1b: full ring now that the hole is inside the lid.
+    translate([barrel_jack_x, barrel_jack_y, lid_h - 0.01])
+        difference() {
+            cylinder(d=barrel_jack_dia + 5, h=1.4, $fn=40);
+            translate([0, 0, -1]) cylinder(d=barrel_jack_dia + 0.6, h=3.4, $fn=40);
+        }
 }
 
 // --- MAIN LID MODULE ---
@@ -71,13 +121,16 @@ module jack_guard_ring() {
 module esp32_pod_lid() {
     union() {
         difference() {
-            pod_rounded_box(pod_length, pod_width, lid_h, pod_fillet);
+            union() {
+                lid_cap_body();   // over-cap: X flush ±32, Y overhang ±35
+                yy_skirt();        // downward skirt on ±Y faces only
+            }
             barrel_jack_cutout();
-            lid_inner_recess();
             lid_screw_holes();
         }
         pod_id_marker();
         jack_guard_ring();
+        jack_cradle();             // U-pocket under the jack hole takes plug-in force
     }
 }
 

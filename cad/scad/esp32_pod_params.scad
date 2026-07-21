@@ -41,10 +41,14 @@ hdr_channel_depth = 1.0;   // Floor recess to locate strips
 // Board position: centred in Y, offset toward dock (+X) end for USB clearance
 devkit_x_offset  = 4;      // +X shift from pod centre (USB at -X end wall)
 
-// --- BARREL JACK ---
+// --- BARREL JACK (on the LID) ---
+// v6.1b FIX: was centered at x=-30 — the Ø11.5 hole overflowed the lid edge (±32)
+// and printed as an open NOTCH (confirmed on the fit-test print). A panel-mount
+// jack can't clamp in a notch. Moved fully onto the lid, offset in Y away from
+// the DevKit so the jack body hangs over open floor.
 barrel_jack_dia  = 11.5;   // 5.5/2.1mm panel-mount jack
-barrel_jack_x    = -pod_length/2 + pod_wall/2;  // -X end wall (next to USB)
-barrel_jack_z    = pod_height - lid_h - 8;       // Near top, accessible
+barrel_jack_x    = -22;    // near the -X/USB end, hole fully inside the lid
+barrel_jack_y    = 18;     // off the DevKit (board spans y±14)
 
 // --- USB CUTOUT (-X end wall) ---
 usb_w            = 10;
@@ -59,16 +63,17 @@ pogo_pad_recess  = 1;     // 1mm deep recess (anti-short)
 pogo_z_from_bot  = 31;    // Matches cell pogo_z
 
 // --- MAGNET POCKETS (+X dock wall) ---
-// 3× NeFeB disc press-fit, mirrors cell pattern
-// Cell -X face = N/S/N; pod +X face = S/N/S → attract, repel reversed
-mag_dia          = 3.2;
-mag_depth        = 2.1;
-mag_y_positions  = [-12, 0, 12];
+// v6.1: real magnets are 8mm dia × 1mm thick (was 3×2). 2 per face at y=±14,
+// matching the cell exactly so docked magnets align. Teardrop tops (FDM).
+// Cell -X face = N/S; pod +X face = S/N → attract, repel reversed
+mag_dia          = 8.4;   // 8mm magnet + 0.4mm FDM clearance
+mag_depth        = 1.2;   // 1mm magnet + glue gap (4mm wall keeps 2.8mm)
+mag_y_positions  = [-14, 14];
 mag_z            = pod_height / 2;   // 29mm — matches cell
 
 // --- WIFI ANTENNA GRILLE (+X end, near dock) ---
 antenna_wall     = 1.5;
-antenna_slot_w   = 2;
+antenna_slot_w   = 3;      // v6.1: 2→3mm (2mm slots fused on the fit-test printer)
 antenna_slot_h   = 8;
 antenna_slot_count = 3;
 
@@ -93,17 +98,33 @@ nav_x_positions  = [-20, 0, 20];
 // --- TACTILE SWITCH POCKET (behind each nav hole, inside front wall) ---
 sw_body          = 6.4;    // 6mm switch + 0.4mm clearance
 sw_depth         = 5.5;    // switch is 5mm + 0.5mm clearance behind
-sw_snap_nib      = 0.4;    // retention nib overhang
+sw_snap_nib      = 0.8;    // retention nib overhang (v6.1: 0.4→0.8, was sub-layer thin)
 
 // --- LID SCREW BOSSES ---
-lid_screw_x      = 25;     // ±25mm along X
-lid_screw_d      = 2.4;    // M2 clearance in lid
+// v6.1b: 25→27.5. At x=25 the Ø5 bosses FLOATED 0.5mm off the inner wall (x=28) —
+// disconnected bodies in the STL, printed as loose/spaghetti towers. At 27.5 the
+// boss embeds 2mm into the wall. Lid holes follow automatically (same param).
+lid_screw_x      = 27.5;   // ±27.5mm along X
+lid_screw_d      = 2.8;    // v6.2: 2.4→2.8 M2 clearance in lid (print tolerance)
 lid_boss_d       = 5.0;    // Boss OD in shell
-lid_boss_tap     = 1.7;    // M2 self-tap pilot
+lid_boss_tap     = 2.0;    // M2 self-tap pilot (v6.1: 1.7→2.0, FDM prints undersize; drill if tight)
 
 $fn = 60;
 
 // --- SHARED BASE MODULE ---
+
+module teardrop_magnet_pocket() {
+    // Horizontal-axis magnet pocket with a 45° "roof" — round side-wall holes fused
+    // closed on the fit-test print; the teardrop top is self-supporting on FDM.
+    // Drawn with axis along +Z, mouth at z=0; caller rotates it into the wall.
+    r = mag_dia / 2;
+    linear_extrude(mag_depth + 0.01) union() {
+        circle(r=r, $fn=40);
+        polygon([[-r * sin(45), r * cos(45)],
+                 [0, r * sqrt(2)],
+                 [ r * sin(45), r * cos(45)]]);
+    }
+}
 
 module pod_rounded_box(l, w, h, r) {
     hull() {
