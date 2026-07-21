@@ -27,11 +27,24 @@ BATCH 3 — Small Parts (3 files)
   Folder: Batch3_Small_Parts/
   Files:  braille_cam.stl  — print with hub/cylinder DOWN, tracks UP
           nav_cap.stl
-          pogo_end_cap.stl  — print flat
+          pogo_end_cap.stl  — print flat (TPU if available, else PETG)
   Layer height: 0.16mm (finer for small details)
   Infill: 30%
   Est. time: ~2h total (can print together)
 
-TOTAL: 10 STL files, ~11h combined print time
-TOTAL PARTS: 10 printed bodies
+BATCH 4 — RESIN / SLA ONLY (4 files) — do NOT print these in PETG
+  Folder: Batch4_Resin/
+  Files:  braille_cam.stl   (precision tracks)
+          top_plate.stl     (precision holes)
+          nav_cap.stl       (tactile symbols)
+          linkage.stl       — print x8 plies on one plate (6 needed + 2 spares)
+  Material: TOUGH or ABS-like resin (NOT standard brittle resin)
+  Orientation: linkages FLAT on plate; cam hub down
+  Note: the PETG copies of cam/top_plate/nav_cap in Batches 2-3 are fit-test
+        only; resin versions are the functional ones.
+
+TOTAL: 10 PETG files (~11h) + 4 resin files
+v6.1 (2026-06-12): updated outer_box, esp32_pod_shell, esp32_pod_lid, base_plate,
+mid_plate, pogo_end_cap — magnet pockets resized for 8x1mm magnets (teardrop),
+bold tactile markers replacing braille on PETG, thicker bridges, bigger pilots.
 
