@@ -164,3 +164,26 @@ failed to compile on ESP32. Helped debug wiring and test behavior.
   For final use, normal moves can be fast while homing should be slower.
 
 ---
+
+## [2026-06-13 12:00] — Claude Code
+**Task:** CAD hardening v6.1/v6.2 from physical PETG fit-tests + software-team handoff
+**Changes:** Two CAD rounds driven by holding printed PETG parts (Anycubic Kobra Neo, 0.4mm):
+- v6.1: magnet pockets resized for REAL 8x1mm magnets (teardrop tops, 2/face at y=+-14);
+  all fine braille removed from PETG parts -> bold ridges/grooves; bridges 0.6mm; pilots
+  enlarged; pogo_end_cap floating-geometry bug fixed; base_plate ribs deleted (caused
+  bridged-waffle underside + 3mm stack error); linkages -> RESIN (Batch4_Resin, x8);
+  new docs/SOURCING.md; WIRING_AND_ASSEMBLY.md updated (ULN2003 solder-flat, comb removed).
+- v6.2: top_plate + pod_lid -> OVER-CAPS (cover walls, skirt on +-Y only so +-X dock faces
+  stay flush); box walls shortened 58->54 (total stays 58); corner bosses reinforced with
+  base gussets (+ slicer note: Wall Loops=5); bare-jack cradle added (PLACEHOLDER dims);
+  pod switch retention rebuilt as cages (old nibs floated); floating lid bosses fixed;
+  barrel jack relocated (was overflowing lid edge as an open notch). Built via
+  builder+supervisor agent loop (supervisor visually verified PNG renders).
+- Created docs/SOFTWARE_TEAM_README.md (+ .pdf): architecture, text->braille->cam-position
+  pipeline (reuses firmware/braille_converter.py), I2C chain auto-detect (count muscle cells
+  per pod, total pods, same layout to every pod), pinout, command protocol.
+**Status:** completed (CAD verified Simple: yes); NOT committed to git; motor + jack redesign
+DEFERRED pending Mridul's caliper measurements.
+**Notes:** All work uncommitted since v6.0 (67258a8). Blockers = motor measurements (body dia,
+can height, shaft offset, shaft dia, flat width, shaft height, mount spacing+dia) and bare-jack
+body WxLxH + barrel dia. print_batch/zip NOT rebuilt for v6.2 (waiting on jack cradle dims).
