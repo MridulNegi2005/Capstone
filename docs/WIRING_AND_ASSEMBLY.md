@@ -1,4 +1,22 @@
-# Braillix v5.0 — Wiring & Assembly Guide
+# Braillix v6.1 — Wiring & Assembly Guide
+
+## Prototype Cell Electronics (no muscle board yet) — ULN2003 module fit
+
+The off-the-shelf ULN2003 driver module DOES fit the 36×46×16mm electronics pocket,
+**but only with low-profile wiring** (measured: ~20mm tall with vertical Dupont jumpers
+plugged in — too tall; ~12mm with wires soldered flat):
+
+1. Cut the female Dupont housings off 6 jumper wires (IN1–IN4, +5V, GND); strip ~3mm.
+2. Solder each wire **flat against its header pin, lying parallel to the board** (bend the
+   wire 90° at the pin base, then solder). Beginner-level joint — tin pin, tin wire, touch.
+3. Press the ULN2003 DIP chip fully down into its socket (it often sits raised).
+4. Lay the board **flat on the pocket floor** (NOT on the 4mm muscle-board bosses), with the
+   JST/header edge toward the **front-right (+X, −Y) corner** — the mid-plate has a relief
+   slot there (v6.1) giving the JST plug extra headroom.
+5. The white JST motor plug inserts before the mid-plate goes in.
+
+When the custom muscle board is fabricated later, it mounts on the 4 M2 bosses as designed.
+
 
 ## Pogo Daisy-Chain Pinout (4-pin, same everywhere)
 ```
@@ -73,12 +91,15 @@ Total:     ~1.4A    5V/3A adapter = 2x headroom
 7. **Outside the box:** bolt motor to base plate (M4 x2), TRIM SHAFT TO 4mm, press cam onto D-shaft, seat hall sensor
 8. Lower motor+baseplate module in (motor enters collar, plate on bosses)
 9. Connect motor->J2, hall->J3 through mid-plate slots
-10. Slide linkage comb onto standoffs, lock with M2 grub screw
-11. Drop 6 linkages into comb slits (feet on cam, nubs up)
-12. Glue 2mm bearing balls onto nub tips
-13. Drop springs into top plate pockets
-14. Lower top plate over standoffs (balls through 2.5mm holes)
-15. 4x M2.5x25 corner bolts (top->standoff->base->boss)
+10. Place 6 resin-printed linkages: feet on their cam tracks, nubs up at the braille dot
+    positions (the comb was scrapped in v6.0 — linkages are constrained by cam foot below
+    + top-plate hole above)
+11. Glue 2mm bearing balls onto nub tips
+12. Drop springs into top plate pockets
+13. Lower top plate over standoffs (balls through 2.5mm holes)
+14. 4x M2.5x25 corner bolts (top->standoff->base->boss)
+15. Glue 2× 8×1mm magnets into each ±X face teardrop pocket
+    (-X face = N/S out, +X face = S/N out — test-dock before the glue sets!)
 16. Last cell: snap TPU end cap on +X pads
 
 ## Assembly — Pod
@@ -88,7 +109,8 @@ Total:     ~1.4A    5V/3A adapter = 2x headroom
 3. Seat 2 female 1x15 headers in floor channels, wire 5V/GND/SDA/SCL to dock pogo
 4. Wire barrel jack: (+)->VIN, (-)->GND
 5. Solder 2x 4.7k pull-ups: 3V3->SDA, 3V3->SCL
-6. Press 3 magnets into +X dock face (S/N/S polarity)
+6. Glue 2× 8×1mm magnets into +X dock face teardrop pockets (S/N polarity — must
+   attract a cell's -X face; test-dock before the glue sets)
 7. Plug ESP32 DevKit into female headers
 8. Press 3 nav caps into front holes
 9. Close lid (2x M2x6)

@@ -5,6 +5,57 @@
 
 ---
 
+## v6.2 — 2026-06-13 (over-cap lids + boss reinforcement; built via builder/supervisor agents)
+
+Driven by a 2nd round of fit-test photos. Built by a BUILDER agent and visually verified
+by a SUPERVISOR agent (rendered PNGs from multiple angles, checked for floating/colliding
+geometry). All parts `Simple: yes`; topology as expected.
+
+- **Top plate + pod lid → OVER-CAP design.** The old inset plate/lid left a visible gap ring
+  whenever a PETG print came out slightly small. Both are now caps that cover the full
+  footprint with a 1mm overhang + 4mm skirt on the **±Y faces only** (±X stay flush — they're
+  docking faces and must mate flat). Mounting/screw holes enlarged for print tolerance
+  (top plate screw 2.8→3.2, c-bore 5.0→5.6; pod lid screw 2.4→2.8).
+- **Box walls shortened 58→54mm** (`wall_top_h`) so the 4mm over-cap sits on top and total
+  height stays 58. `shell_height=58` kept as the reference for all feature positions, so
+  nothing else moved.
+- **Corner screw bosses reinforced** (they snapped on the real print): added a cone gusset
+  flaring from Ø13 at the floor to Ø7.8, fused into the floor + cavity wall, below the
+  mid-plate. Pairs with a print-setting fix → **set Wall Loops/perimeters = 5** on the slicer
+  so small bosses print solid (perimeters matter more than infill % for these).
+- **Pod lid jack cradle** (bare-socket jack has no nut): a box/U-pocket under the jack hole
+  takes the plug insertion force. ⚠️ **PLACEHOLDER dims — must measure the real jack.**
+- Pod shell: removed the now-redundant inner lid-locating lip (the over-cap skirt locates it).
+
+DEFERRED to next round (awaiting Mridul's measurements): motor redesign (real shaft/body/
+mount dims), and finalizing the jack cradle to the real bare-socket dimensions. print_batch/
++ zip NOT rebuilt yet for this reason.
+
+## v6.1 — 2026-06-12 (physical fit-test fixes — Anycubic Kobra Neo, 0.4mm PETG)
+
+Full PETG batch was printed and inspected in hand. See the **v6.1 addendum (§6.5)** in
+`.ai-sync/artifacts/cad_audit_v6_2026-06-04.md` for measured FDM limits.
+
+- **Magnet pockets resized for the REAL magnets — 8×1mm discs** (CAD assumed 3×2). Now 2 per
+  docking face at y=±14 with **teardrop tops** (round side-wall pockets fused closed on FDM).
+  Center magnet dropped (8.4mm pocket would collide with the pogo window).
+- **All fine braille removed from PETG parts** — 1.4mm dots printed as mush. Replaced with bold
+  shapes: box front chevron groove, 1/2/3 count-grooves under pod nav buttons, 3 bold ridges as
+  pod lid ID, 45° diamond orientation ridge (the old one was buried INSIDE the wall — never
+  printed). Real braille remains on resin parts only.
+- Sacrificial bridges 0.4→0.6mm; pilot holes M2 1.7→2.0 / M2.5 2.1→2.3; end-cap snap lips
+  0.5→1.0; switch nibs thickened; antenna slots 2→3mm; lid lip clearance +0.2; hall pocket +0.3.
+- **`pogo_end_cap.scad` had broken geometry** (mis-centered interior cube gutted the shell;
+  floating end marker) — fixed, now a proper hollow snap cap.
+- **Linkages: laser-cut metal → RESIN-printed** (rev 3.1; no laser vendor available). New
+  `print_batch/Batch4_Resin/` with cam, top_plate, nav_cap, linkage ×8. Stale reference table
+  refreshed for inner_radius=12.
+- **ULN2003 prototype fit:** module fits the 16mm cell pocket only with wires soldered flat
+  (~12mm vs 20mm with Duponts). Mid-plate gained a relief slot at (+X,−Y). Muscle-board PCB
+  fab deferred. Procedure documented in WIRING_AND_ASSEMBLY.md (also fixed stale comb step).
+- New `docs/SOURCING.md` (springs + pen-spring fallback, 2mm balls, deferred pogo, fasteners).
+- All changed parts render `Simple: yes`; print_batch + workshop zip rebuilt.
+
 ## v6.0 — 2026-06-04 (pre-patent polish pass)
 
 See `.ai-sync/artifacts/cad_audit_v6_2026-06-04.md` for the full audit.
