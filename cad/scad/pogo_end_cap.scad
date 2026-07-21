@@ -26,7 +26,8 @@ cap_depth        = 8;                // How deep the cap inserts into slot
 cap_wall         = 1.5;             // Cap shell thickness
 
 // Snap lip — catches on inner edge of pogo slot
-snap_lip_h       = 0.5;   // Overhang height
+// v6.1: 0.5→1.0mm — 0.5 was below FDM layer resolution and gave no real snap (TPU flexes)
+snap_lip_h       = 1.0;   // Overhang height
 snap_lip_depth   = 1.0;   // How far the lip extends inward
 
 // Rounded edges for comfort
@@ -48,11 +49,11 @@ module cap_outer() {
 }
 
 module cap_inner() {
-    // Hollow out interior (leave cap_wall thickness shell)
+    // Hollow out interior (leave cap_wall thickness on all sides)
     inner_w = cap_w - 2 * cap_wall;
     inner_h = cap_h - 2 * cap_wall;
-    translate([0, 0, cap_wall])
-        cube([inner_w, inner_h, cap_depth], center=true);
+    translate([-inner_w/2, -inner_h/2, cap_wall])
+        cube([inner_w, inner_h, cap_depth]);
 }
 
 module snap_lips() {
@@ -66,12 +67,13 @@ module snap_lips() {
 }
 
 module end_marker() {
-    // Raised ridge on the EXPOSED (outward, -Z) face so a blind user feels "end of chain".
-    // The soft TPU + this bar together unambiguously mark the last cell's tail.
-    hull() {
-        translate([-3, 0, 0]) sphere(d=2.4, $fn=20);
-        translate([ 3, 0, 0]) sphere(d=2.4, $fn=20);
-    }
+    // Raised ridge on the EXPOSED (outward, Z=0) face so a blind user feels "end of chain".
+    // v6.1: 2.4→3.2mm wide, 1.2mm proud — anything narrower distorts on FDM/TPU.
+    translate([0, 0, -0.4])
+        hull() {
+            translate([-3, 0, 0]) cylinder(d=3.2, h=1.6, $fn=20);
+            translate([ 3, 0, 0]) cylinder(d=3.2, h=1.6, $fn=20);
+        }
 }
 
 module pogo_end_cap() {

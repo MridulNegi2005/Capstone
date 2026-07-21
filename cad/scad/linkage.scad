@@ -1,11 +1,14 @@
 // =========================================================
-// BRAILLIX LINKAGE SET — Laser-Cut Metal Cranks
-// Revision 3.0 — Inline Feet (Phase-Shift Fix)
-// Updated 2026-05-06
+// BRAILLIX LINKAGE SET — Resin-Printed Cranks
+// Revision 3.1 — Resin manufacturing (v6.1, 2026-06-12)
+// (Rev 3.0 — Inline Feet / Phase-Shift Fix, 2026-05-06)
 //
-// NOT 3D-printed. Export as DXF for laser cutting.
-// Material: 1mm stainless steel or 1mm aluminium sheet.
+// v6.1 MANUFACTURING CHANGE: originally spec'd as laser-cut 1mm metal,
+// but no laser-cut vendor was available — now RESIN/SLA printed alongside
+// the cam/top_plate/nav_cap batch. Print 8 (6 + 2 spares) in TOUGH or
+// ABS-like resin, parts flat on the plate, 1mm thickness as-designed.
 // Post-process: sand foot tip smooth, lubricate with silicone grease.
+// (Fallback if resin proves too fragile: export DXF, laser-cut 1mm steel.)
 //
 // --- CRITICAL FIX FROM v2.0 (Audit 4.1) ---
 // v2.0 BUG: linkages were rotated by atan2(dot_y, dot_x) — each foot
@@ -60,8 +63,8 @@ row_spacing   = 2.6;    // Rows at y=+2.6, 0, -2.6
 
 // Track centre radius for track index t
 function track_r(t) = inner_radius + t * (track_width + track_gap) + track_width / 2;
-//  t=0: 8.85mm   t=1: 10.55mm   t=2: 12.25mm
-//  t=3: 13.95mm  t=4: 15.65mm   t=5: 17.35mm
+//  (inner_radius=12.0)  t=0: 12.8mm   t=1: 14.5mm   t=2: 16.2mm
+//                       t=3: 17.9mm   t=4: 19.6mm   t=5: 21.3mm
 
 function dot_x(dot) = (dot < 3) ? -col_spacing/2 : col_spacing/2;
 function dot_y(dot) = (dot == 0 || dot == 3) ?  row_spacing :
@@ -172,14 +175,15 @@ for(dot = [0:5]) {
 //         linkage_3d_v3(dot);
 // }
 
-// --- 4. REFERENCE TABLE ---
-// Dot | Track | Track r | Dot pos      | arm_y | arm_span | asm_ang  | lr   | ur
-//  0  |   0   |  8.85   | (-2.4, +2.6) |  3.5  |  11.55   | -13.0deg |  1.0 |  6.0
-//  1  |   1   | 10.55   | (-2.4,  0.0) |  4.0  |  12.95   | 180.0deg |  1.5 |  5.5
-//  2  |   2   | 12.25   | (-2.4, -2.6) |  9.5  |  14.88   | +10.1deg |  7.0 |  0.0
-//  3  |   3   | 13.95   | (+2.4, +2.6) |  3.5  |  11.84   | -12.7deg |  1.0 |  6.0
-//  4  |   4   | 15.65   | (+2.4,  0.0) |  7.8  |  13.25   |   0.0deg |  5.3 |  1.7
-//  5  |   5   | 17.35   | (+2.4, -2.6) |  9.5  |  15.18   |  +9.9deg |  7.0 |  0.0
+// --- 4. REFERENCE TABLE (refreshed v6.1 for inner_radius=12.0; values are
+// computed LIVE by the functions above — this table is documentation only) ---
+// Dot | Track | Track r | Dot pos      | arm_y | arm_span | asm_ang | lr   | ur
+//  0  |   0   |  12.8   | (-2.4, +2.6) |  3.5  |  15.42   |  -9.7deg |  1.0 |  6.0
+//  1  |   1   |  14.5   | (-2.4,  0.0) |  4.0  |  16.90   |   0.0deg |  1.5 |  5.5
+//  2  |   2   |  16.2   | (-2.4, -2.6) |  9.5  |  18.78   |  +8.0deg |  7.0 |  0.0
+//  3  |   3   |  17.9   | (+2.4, +2.6) |  3.5  |  15.72   |  -9.5deg |  1.0 |  6.0
+//  4  |   4   |  19.6   | (+2.4,  0.0) |  7.8  |  17.20   |   0.0deg |  5.3 |  1.7
+//  5  |   5   |  21.3   | (+2.4, -2.6) |  9.5  |  19.08   |  +7.8deg |  7.0 |  0.0
 //
 // Collision clearance (dots 1 & 4 — critical pair, both at world Y=0):
 //   Static gap:  7.8 - 4.0 - 1.0 = 2.8mm

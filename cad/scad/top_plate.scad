@@ -31,18 +31,28 @@ hole_dia        = 2.5;    // Fits 2.2mm linkage nub + 0.15mm/side clearance (was
 spring_pocket_dia   = 4.5;   // was 3.5 — wider for 2.5mm hole clearance (wall=1.0mm)
 spring_pocket_depth = 2.0;   // was 3.0 — shallower: 4mm plate - 2mm pocket = 2mm floor
 
-// Plate body — rectangular, matches outer_box internal cavity
-plate_length    = 59.0;   // X — 0.5mm clearance/side in 60mm internal cavity
-plate_width     = 59.0;   // Y — 0.5mm clearance/side in 60mm internal cavity
-plate_thickness = 4.0;    // Z — increased from 3mm: 3mm pocket + 1mm floor
-corner_radius   = 2.0;
+// Plate body — v6.2: now an OVER-CAP covering the full box footprint (was an inset plate).
+// Underside at z=0, top at z=4. X flush with box outer (no overhang on ±X dock faces);
+// Y 1mm overhang each side with a downward skirt (front/back only).
+plate_length    = 68.0;   // X — flush with box outer (±34), NO overhang (dock faces)
+plate_width     = 70.0;   // Y — 1mm overhang each side (±35) front/back
+plate_thickness = 4.0;    // Z — cap thickness (3mm spring pocket + 1mm floor)
+corner_radius   = 3.0;    // matches box outer fillet
 finger_pad_depth = 0.8;   // Shallow recess on top face
 
-// Mounting — 4 corner holes at +/-15mm matching base_plate standoffs
+// Over-cap skirt — ±Y faces only (front/back); hangs from z=0 down to z=-4.
+// Outer flush with cap edge (y=±35); inner face y=±34.4 → 0.4mm clearance off the
+// box wall outer (±34). MUST NOT appear on the ±X dock faces.
+skirt_depth      = 4.0;
+skirt_y_outer    = 35.0;
+skirt_y_inner    = 34.4;
+skirt_x_half     = 30.0;  // skirt spans x within ±30 (stays clear of the rounded corners)
+
+// Mounting — 4 corner holes at ±26,±21 matching base_plate standoffs
 standoff_x       = 26.0;
 standoff_y       = 21.0;
-screw_dia        = 2.8;   // M2.5 clearance
-counterbore_dia  = 5.0;   // M2.5 button-head
+screw_dia        = 3.2;   // v6.2: 2.8→3.2 M2.5 clearance for print tolerance
+counterbore_dia  = 5.6;   // v6.2: 5.0→5.6 M2.5 button-head
 counterbore_depth = 1.5;
 
 $fn = 60;
@@ -55,6 +65,18 @@ module rounded_rect(lx, ly, r, h) {
         translate([ lx/2 - r, -ly/2 + r, 0]) cylinder(r=r, h=h);
         translate([-lx/2 + r,  ly/2 - r, 0]) cylinder(r=r, h=h);
         translate([ lx/2 - r,  ly/2 - r, 0]) cylinder(r=r, h=h);
+    }
+}
+
+// Downward skirt on the ±Y (front/back) faces only — locates the cap over the box
+// wall. Two cuboid lips, outer flush y=±35, inner y=±34.4 (0.4mm clearance), spanning
+// x within ±30 (clear of corners and the ±X dock faces). Hangs z=0 down to z=-4.
+module yy_skirt() {
+    for(sy = [-1, 1]) {
+        // y-span runs from inner (±34.4) to outer (±35) edge
+        y_lo = (sy < 0) ? -skirt_y_outer : skirt_y_inner;
+        translate([-skirt_x_half, y_lo, -skirt_depth])
+            cube([2 * skirt_x_half, skirt_y_outer - skirt_y_inner, skirt_depth]);
     }
 }
 
@@ -97,8 +119,12 @@ module mounting_holes() {
 // --- 3. MAIN ASSEMBLY ---
 
 difference() {
-    // A. Rectangular body (52x60mm — full cavity coverage)
-    rounded_rect(plate_length, plate_width, corner_radius, plate_thickness);
+    union() {
+        // A. Over-cap body — full box footprint (68×70), underside z=0, top z=4
+        rounded_rect(plate_length, plate_width, corner_radius, plate_thickness);
+        // A2. Downward skirt on ±Y faces only
+        yy_skirt();
+    }
 
     // B. Finger pad recess (ergonomic boundary on top face)
     translate([0, 0, plate_thickness - finger_pad_depth])
@@ -132,7 +158,10 @@ translate([0, -plate_width/2 + 1.5, plate_thickness])
 // --- 6. MODULE WRAPPER (used by print_small_parts.scad) ---
 module top_plate() {
     difference() {
-        rounded_rect(plate_length, plate_width, corner_radius, plate_thickness);
+        union() {
+            rounded_rect(plate_length, plate_width, corner_radius, plate_thickness);
+            yy_skirt();
+        }
         translate([0, 0, plate_thickness - finger_pad_depth])
             rounded_rect(plate_length - 6, plate_width - 6, corner_radius, finger_pad_depth + 1);
         braille_holes();
