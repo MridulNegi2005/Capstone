@@ -187,3 +187,30 @@ DEFERRED pending Mridul's caliper measurements.
 **Notes:** All work uncommitted since v6.0 (67258a8). Blockers = motor measurements (body dia,
 can height, shaft offset, shaft dia, flat width, shaft height, mount spacing+dia) and bare-jack
 body WxLxH + barrel dia. print_batch/zip NOT rebuilt for v6.2 (waiting on jack cradle dims).
+
+## [2026-07-26 20:30] — Claude Code
+**Task:** v7.0 "spread feet" — make the braille mechanism actually buildable
+**Changes:** Investigation of Mridul's question about linkage orientation exposed that the
+v6.x mechanism could not be assembled at all: (a) all six feet sat on one radial line so 14
+arm pairs overlapped and needed 6 stacked heights, but only 3 fit in the 6.5mm band; three
+arms sat inside the top plate; (b) linkage was 1mm too short (top plate had been thickened
+3->4mm long ago and linkage.scad never updated) so the dot topped out 0.2mm BELOW the reading
+surface; (c) return springs were impossible at the dot axis (2.6mm row pitch, 2.2mm nub =
+0.4mm free) and the existing 4.5mm "pockets" in top_plate merged into one slot.
+Fix = spread the six feet 60deg apart, assigning each dot the foot pointing the way that dot
+already sits. Arms then fan out and never cross (closest 2.60mm vs 1.0mm needed) -> ALL SIX
+AT ONE ARM HEIGHT. New cad/scad/mech_layout.scad is now the single source of truth for
+track radii / dot positions / dot->track+angle assignment / vertical stack / spring seats,
+included by braille_cam, linkage and top_plate. braille_cam gained a per-track phase (one
+line) so each track's pattern is carved pre-rotated to its own foot angle. linkage.scad
+rev 4.0: one common arm_y, total_h 12->13, proper rolled foot (was a teardrop wedge),
+PRINTED DOME braille dot (no bearing ball / glue / cup), spring pad on the arm, fillets
+everywhere, count-dots on the pad rim. top_plate spring pockets moved onto the arm pads.
+SOFTWARE_TEAM_README dot->bit is now a DOT_TO_BIT lookup.
+**Status:** completed — all parts Simple: yes with correct volume counts; 8/8 numeric audit
+checks pass; virtual assembly rendered and visually confirmed.
+**Notes:** Two bugs were caught by verification rather than by reading: OpenSCAD applies
+offset() INSIDE-OUT, so the fillet pair written the natural-reading way eroded 0.6mm first
+and deleted every 1.0mm member; and the count-dots initially sat flush on the arm surface
+(zero overlap = separate floating bodies). Still NOT built/tested physically — Mridul has no
+springs yet. Cheap PETG proving print recommended before spending on resin.

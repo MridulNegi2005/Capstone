@@ -5,6 +5,45 @@
 
 ---
 
+## v7.0 — 2026-07-26 (spread feet — the mechanism becomes buildable)
+
+The v6.x mechanism could not be assembled. Two independent checks proved it:
+six arms all ran from the braille cluster to the SAME radial line, so 14 pairs
+overlapped in plan view and each needed its own height — six stacked levels
+need ~11.5mm and only 6.5mm exists between the cam surface and the top plate.
+Three arms sat inside the top plate. Separately, the dot never emerged: the
+linkage was 1mm too short, so it topped out 0.2mm BELOW the reading surface.
+
+**Fix: spread the six feet 60° apart around the disc**, and give each braille
+dot the foot that points the way that dot already sits. The arms then fan
+outward and never cross (closest pair 2.60mm vs 1.0mm needed), so **all six
+share one arm height** and the crowding problem disappears instead of being
+fought. Device size, cam diameter and print cost are all unchanged.
+
+- **`mech_layout.scad` (NEW)** — single source of truth for everything the cam,
+  linkages and top plate must agree on (track radii, dot positions, the
+  dot→track/angle assignment, the vertical stack, spring seats). Created
+  specifically to stop the stale-duplicate-number bugs that produced v6.x.
+- **`braille_cam.scad`** — per-track phase: each track's bump pattern is carved
+  pre-rotated by its own foot's angle, so all six feet still read the same state.
+  One line. Without it each foot reads a different letter.
+- **`linkage.scad` rev 4.0** — `arm_y` is now ONE constant (was six heights);
+  `total_h` 12→13 so the dot actually reaches the surface; foot rebuilt as a
+  proper 0.5mm roll (was a teardrop wedge tapering to a 0.2mm point); braille
+  dot is a **printed dome** (no glued 2mm ball, no machined cup, nothing to
+  source); return-spring pad added on the arm; fillets on every internal corner
+  (strength — sharp corners are where resin cracks); count-dots on the pad rim
+  so the six parts can be told apart in the hand.
+- **`top_plate.scad`** — spring pockets moved OFF the dot axis. At 2.6mm row
+  pitch three 4.5mm pockets merged into one slot; there were never six pockets.
+  Now over the arm pads, 9.6mm apart.
+- **Software** — `DOT_TO_BIT` lookup replaces the old formula; authority is
+  `dot_track` in `mech_layout.scad`.
+
+Verified: closest arms 2.60mm (need 1.0), spring seats 9.58mm apart (need 5.4),
+arm-to-plate clearance 3.70mm, dot proud 0.80mm, foot clearance inside its own
+track 0.10mm. Arms also got SHORTER (10.4–17.9mm, was 15.4–19.1mm) = stiffer.
+
 ## v6.2 — 2026-06-13 (over-cap lids + boss reinforcement; built via builder/supervisor agents)
 
 Driven by a 2nd round of fit-test photos. Built by a BUILDER agent and visually verified

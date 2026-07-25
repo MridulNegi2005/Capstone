@@ -45,14 +45,42 @@
 //   - Magnet pocket unchanged (still on underside, flush)
 // =========================================================
 
+// =========================================================
+// v7.0 (2026-07-26) — PER-TRACK PHASE, for the spread feet
+//
+// The six linkage feet no longer sit on one radial line; they are 60deg
+// apart (see mech_layout.scad for why). A foot 60deg round the disc is
+// looking at a DIFFERENT part of the disc, so if every track were still
+// carved with state 0 starting at 0deg, the six feet would each read a
+// different state and the output would be garbage:
+//
+//   foot at    reads disc angle    which is state
+//     0deg          0.00deg              0     correct
+//    60deg         60.00deg             10     WRONG
+//   120deg        120.00deg             21     WRONG   ...etc
+//
+// Fix: carve each track's pattern pre-rotated by ITS OWN foot angle,
+// via track_phase(t) from mech_layout.scad. Then:
+//
+//   foot at    reads angle   minus its phase    state
+//     0deg        0.00deg        0.00deg          0
+//    60deg       60.00deg        0.00deg          0
+//   120deg      120.00deg        0.00deg          0    ...all six agree
+//
+// Analogy: six people round a table, each with the same book. To get
+// them all on page 24 at once you pre-turn each book so page 24 faces
+// that person. Same disc, same diameter, same print cost — the bumps
+// just sit at different places around it.
+// =========================================================
+
+include <mech_layout.scad>   // track geometry + track_phase(t) — SHARED, do not duplicate
+
 // --- 1. CONFIGURATION PARAMETERS ---
 states = 64;                // Total positions (6-bit binary)
 dots = 6;                   // Number of tracks
 disk_base_thickness = 2.0;  // Base thickness (mm)
-pin_lift = 0.8;             // Height of the bump (mm)
-track_width = 1.6;          // Width of each track (mm)
-track_gap = 0.1;            // Gap between tracks (Drop to 0.1 for Resin/SLA)
-inner_radius = 12.0;        // Was 8.0 — increased to reduce foot-span on inner tracks (v5.1)
+// pin_lift, track_width, track_gap and inner_radius now come from
+// mech_layout.scad so the cam, linkages and top plate cannot drift apart.
 angular_ramp_fraction = 0.2;// v6.3: 0.3->0.2 — more flat dwell per slice, free (no size/cost change)
 subdivisions_per_slice = 4; // Smoothness (Higher = smoother, slower)
 preview_mode = false;       // Set FALSE for final high-quality render!
@@ -92,11 +120,16 @@ function lerp(start, end, bias) = (1 - bias) * start + bias * end;
 function s_curve(t) = (1 - cos(t * 180)) / 2;
 
 // Height Calculation Logic (The Core Algorithm)
-function get_height_at_angle(angle, track) = 
+function get_height_at_angle(angle, track) =
     let(
+        // v7.0: rotate this track's whole pattern to its own foot angle, so
+        // that a foot sitting at track_phase(track) reads the same state as
+        // every other foot. This is the ONE line that makes spread feet work.
+        a_eff = (angle - track_phase(track) + 720) % 360,
+
         // Identify which "Slice" (Letter) we are in
-        k = floor(angle / slice_angle),
-        angle_in_slice = angle - (k * slice_angle),
+        k = floor(a_eff / slice_angle),
+        angle_in_slice = a_eff - (k * slice_angle),
         
         // Identify Neighbors for blending
         prev_k = (k - 1 + states) % states,

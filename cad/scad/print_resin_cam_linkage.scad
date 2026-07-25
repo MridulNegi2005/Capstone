@@ -33,8 +33,9 @@
 // rendered — this is comfortably inside every common small/mid MSLA bed).
 // =========================================================
 
-use <braille_cam.scad>   // braille_cam()
-use <linkage.scad>       // linkage_3d_v3(dot)
+include <mech_layout.scad>   // arm_span() — used to space the grid correctly
+use <braille_cam.scad>       // braille_cam()
+use <linkage.scad>           // linkage_3d_v4(dot)
 
 $fn = 60;
 
@@ -44,11 +45,10 @@ $fn = 60;
 braille_cam();
 
 // --- LINKAGES (right, tight 2-col x 4-row grid) ---
-// 6 required (dot 0..5) + 2 spares (dot 2 and dot 5 duplicated — these
-// have the longest arm_span in the v6.1 reference table, ~18.8/19.1mm,
-// so they're the most likely to snap in handling. Spares are EXACT
-// duplicates, drop-in replacements — not new/invalid dot indices.
-linkage_dots = [0, 1, 2, 3, 4, 5, 2, 5];
+// v7.0: dots use standard braille numbering 1..6. Print all six, plus two
+// spares duplicating dots 6 and 3 — the two longest arms (17.9mm / 16.2mm)
+// and so the most likely to snap in handling. Spares are exact duplicates.
+linkage_dots = [1, 2, 3, 4, 5, 6, 6, 3];
 
 // Cam outer radius ~22.2mm (inner_radius=12 + 6 tracks x 1.7mm pitch).
 // Grid starts at x=26 — clears the cam edge with a small safety margin.
@@ -57,7 +57,7 @@ grid_x0 = 26;
 // will fuse into a single blob (rule of thumb: keep >=0.5mm, prefer ~2mm, between
 // separate parts on one plate). 23 gives a ~2.4mm gap. Verified by measuring actual
 // part X-extents (nub at -1.1 .. foot at arm_span+foot_w/2), not by eyeballing.
-col_w   = 23;   // grid cell width  (widest column part ~19.5mm + ~2.4mm gap)
+col_w   = 23;   // grid cell width (widest arm 17.9mm + foot + ~4mm gap)
 row_h   = 14;   // grid cell height (linkage total_h=12mm + 2mm gap)
 cols    = 2;
 
@@ -65,5 +65,5 @@ for (i = [0 : len(linkage_dots) - 1]) {
     col = floor(i / 4);
     row = i % 4;
     translate([grid_x0 + col * col_w, row * row_h, 0])
-        linkage_3d_v3(linkage_dots[i]);
+        linkage_3d_v4(linkage_dots[i]);
 }

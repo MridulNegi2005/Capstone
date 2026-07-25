@@ -17,19 +17,39 @@
 //   - Thumb ridge kept for blind user orientation
 // =========================================================
 
+// =========================================================
+// v7.0 (2026-07-26) — SPRING POCKETS MOVED OFF THE DOT AXIS
+//
+// The old design put a 4.5mm spring pocket concentric with each braille
+// hole. That could never work: braille ROWS are 2.6mm apart, so three
+// 4.5mm circles in a column do not sit side by side — they merge into
+// one slot. There were never 6 pockets, only 2 blobs, and no spring
+// could be located by them.
+//
+// Root cause is the dot pitch itself: with a 2.2mm nub at 2.6mm pitch
+// there is 0.4mm of free space at the dot. Nothing fits there.
+//
+// v7.0 puts the return spring where there IS room — on a pad partway
+// along each linkage arm. With the feet spread 60deg (see
+// mech_layout.scad) the six arms fan out, and at 7mm along the arm the
+// six seats are 7.5mm apart, versus 4.8mm needed for a 4mm spring.
+// Pocket centres come straight from spring_seat_pos(d) in the shared
+// layout file, so they cannot drift from the linkage pads.
+// =========================================================
+
+include <mech_layout.scad>   // dot positions, arm geometry, spring seat positions
+
 // --- 1. PARAMETERS ---
 
-// Braille dot positions (must match linkage.scad, braille_cam.scad)
-col_spacing     = 4.8;    // Left col at x=-2.4, right at x=+2.4
-row_spacing     = 2.6;    // Rows at y=+2.6, 0, -2.6
+// Braille dot positions and arm geometry now come from mech_layout.scad
+// (col_spacing, row_spacing, dot_pos(), spring_seat_pos()).
 
 // Braille holes — round (replaces 1.2x3mm rectangular slots)
-hole_dia        = 2.5;    // Fits 2.2mm linkage nub + 0.15mm/side clearance (was 2.0 for cap pin)
+hole_dia        = 2.5;    // Fits 2.2mm linkage nub + 0.15mm/side clearance
 
-// Spring pockets — on underside, concentric around each braille hole
-// Audit 2 fix: wider pocket, shallower depth for stronger annular wall
-spring_pocket_dia   = 4.5;   // was 3.5 — wider for 2.5mm hole clearance (wall=1.0mm)
-spring_pocket_depth = 2.0;   // was 3.0 — shallower: 4mm plate - 2mm pocket = 2mm floor
+// Return-spring pockets — on the underside, over each linkage's arm pad
+spring_pocket_dia   = 4.6;   // 4.0mm pen spring + 0.6mm clearance
+spring_pocket_depth = 2.0;   // 4mm plate - 2mm pocket = 2mm floor above
 
 // Plate body — v6.2: now an OVER-CAP covering the full box footprint (was an inset plate).
 // Underside at z=0, top at z=4. X flush with box outer (no overhang on ±X dock faces);
@@ -80,27 +100,27 @@ module yy_skirt() {
     }
 }
 
-// One braille hole with spring pocket underneath
-module braille_hole_with_spring(cx, cy) {
-    // Round through hole — fits 2.2mm linkage nub with 0.15mm/side clearance
-    translate([cx, cy, -1])
-        cylinder(d=hole_dia, h=plate_thickness + 2);
-
-    // Spring retaining pocket — from underside (z=0) upward
-    translate([cx, cy, -0.01])
-        cylinder(d=spring_pocket_dia, h=spring_pocket_depth + 0.01);
+// 6 braille dot through-holes — the printed dome on each linkage nub
+// rises through these. Positions from the shared layout file.
+module braille_holes() {
+    for (d = [1 : 6]) {
+        p = dot_pos(d);
+        translate([p[0], p[1], -1])
+            cylinder(d = hole_dia, h = plate_thickness + 2);
+    }
 }
 
-module braille_holes() {
-    // 6 Braille dot positions: 2 columns x 3 rows
-    // Left column: dots 0 (top), 1 (mid), 2 (bot)
-    braille_hole_with_spring(-col_spacing/2,  row_spacing);
-    braille_hole_with_spring(-col_spacing/2,  0);
-    braille_hole_with_spring(-col_spacing/2, -row_spacing);
-    // Right column: dots 3 (top), 4 (mid), 5 (bot)
-    braille_hole_with_spring( col_spacing/2,  row_spacing);
-    braille_hole_with_spring( col_spacing/2,  0);
-    braille_hole_with_spring( col_spacing/2, -row_spacing);
+// 6 return-spring pockets on the underside, each centred over that
+// linkage's arm pad. Glue the spring into the pocket; the pad below
+// pushes up against it, so the spring returns the dot when the cam
+// bump passes. Positions come from spring_seat_pos(d) — same function
+// the linkage uses to place the pad, so they cannot disagree.
+module spring_pockets() {
+    for (d = [1 : 6]) {
+        p = spring_seat_pos(d);
+        translate([p[0], p[1], -0.01])
+            cylinder(d = spring_pocket_dia, h = spring_pocket_depth + 0.01);
+    }
 }
 
 module mounting_holes() {
@@ -130,8 +150,9 @@ difference() {
     translate([0, 0, plate_thickness - finger_pad_depth])
         rounded_rect(plate_length - 6, plate_width - 6, corner_radius, finger_pad_depth + 1);
 
-    // C. 6 round braille holes + spring pockets on underside
+    // C. 6 round braille holes (dots) + 6 spring pockets (over the arm pads)
     braille_holes();
+    spring_pockets();
 
     // D. Mounting holes (4 corners, M2.5)
     mounting_holes();
@@ -148,12 +169,16 @@ translate([0, -plate_width/2 + 1.5, plate_thickness])
     }
 
 // --- 5. SPRING SPEC (for BOM / sourcing) ---
-// OD:  4.0-4.5mm (fits 4.5mm pocket)
-// ID:  >= 2.5mm (clears 2.2mm linkage nub — was 2.0mm for cap pin)
-// Free length: 5-6mm
-// Spring constant: <= 0.1 N/mm (lowest available — avoid motor stall)
-// Source: 4mm x 5mm or 4.5mm x 6mm micro compression spring
-// NOTE: Spring now pushes directly on metal linkage nub (braille_cap deprecated)
+// OD:  4.0mm  (pocket is 4.6mm)
+// Free length: ~4mm — a ballpoint click-pen spring CUT DOWN to about 4 coils
+// Spring constant: as soft as possible (<= 0.1 N/mm) — the 28BYJ-48 has to
+//   compress all six at once, so stiff springs risk stalling the motor
+// Travel: pad top sits 3.5mm below the plate underside with the dot DOWN,
+//   2.7mm with it UP, so the spring must be shorter than 2.7mm when fully
+//   compressed (4 coils of 0.3mm wire = 1.2mm solid — fine)
+// Fitting: glue the spring into the plate pocket. The linkage's arm pad then
+//   pushes up against it — no threading it over anything, the nub+dome never
+//   passes through the spring.
 
 // --- 6. MODULE WRAPPER (used by print_small_parts.scad) ---
 module top_plate() {
@@ -165,6 +190,7 @@ module top_plate() {
         translate([0, 0, plate_thickness - finger_pad_depth])
             rounded_rect(plate_length - 6, plate_width - 6, corner_radius, finger_pad_depth + 1);
         braille_holes();
+        spring_pockets();
         mounting_holes();
     }
     // Thumb ridge — bottom edge

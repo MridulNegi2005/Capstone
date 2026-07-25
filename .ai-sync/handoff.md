@@ -1,22 +1,35 @@
 # Active Handoff
 > Last updated by: Claude Code
-> Timestamp: 2026-06-12T18:00:00+05:30
+> Timestamp: 2026-07-26T20:30:00+05:30
 
 ## Current Task
-**v6.2 over-cap lids + boss reinforcement — DONE & supervisor-verified, NOT committed,
-print_batch NOT rebuilt.** Built via builder/supervisor agent loop. See CHANGES.md v6.2.
-Two things DEFERRED awaiting Mridul's caliper measurements:
-  1. **Motor redesign** — the real motor differs (brass flatted/splined shaft). Need: body
-     dia, can height, shaft→body-center offset, shaft dia, flat width, shaft height, mount
-     hole spacing + dia. Feeds base_plate + mid_plate + braille_cam bore.
-  2. **Jack cradle** in esp32_pod_lid.scad has PLACEHOLDER dims — need real bare-socket
-     body W×L×H + barrel inner dia.
-Also pending: rebuild print_batch + zip once the above land. Slicer note for workshop:
-**Wall Loops/perimeters = 5** (makes small bosses solid).
+**v7.0 "spread feet" — DONE, verified, committed. The mechanism is buildable now.**
+Read `cad/scad/mech_layout.scad` FIRST — it is the single source of truth for track radii,
+dot positions, the dot->track+angle assignment, the vertical stack and the spring seats.
+Do NOT re-declare any of those numbers in individual part files.
 
-**v6.1 (prior round) — DONE.** Read the v6.1 addendum (§6.5) in
-`.ai-sync/artifacts/cad_audit_v6_2026-06-04.md` for the measured FDM limits + hardware
-spec corrections.
+### Why v7.0 exists (do not undo it)
+v6.x could not be assembled: six feet on one radial line -> 14 overlapping arm pairs -> 6
+stacked arm heights needed but only 3 fit; three arms sat inside the top plate; the linkage
+was 1mm too short so the dot never cleared the surface; and return springs cannot fit at the
+dot axis (0.4mm free at 2.6mm row pitch). Spreading the feet 60deg with a smart dot->foot
+assignment makes all six arms non-overlapping at ONE height and frees ~9.6mm between spring
+seats. Cam diameter, box size and print cost unchanged.
+
+### v7.0 headline facts
+- Feet are 60deg apart; `braille_cam.scad` carves each track pre-rotated by its own foot
+  angle (`track_phase(t)`). Without that one line every foot reads a different letter.
+- ALL SIX ARMS share `arm_y = 3.5`. `total_h` is 13.0 (was 12.0 — dot never emerged).
+- Braille dot is a PRINTED DOME on the nub. No bearing balls, no glue, no machined cup.
+- Return spring sits in a top-plate pocket over a PAD ON THE ARM, never at the dot.
+- Software dot->bit is a lookup: `DOT_TO_BIT = {1:3, 2:2, 3:1, 4:4, 5:5, 6:0}`.
+
+### Still open
+1. **Not physically tested.** No springs in hand. Do the cheap PETG proving print
+   (loose-gap cam + a couple of linkages) and make ONE dot go up and down before
+   paying for resin.
+2. Motor redesign + jack cradle still blocked on Mridul's caliper measurements.
+3. print_batch/ + zip not yet rebuilt for v7.0.
 
 ## v6.1 headline facts (do not regress)
 - Real magnets = **8×1mm** (not 3×2). 2 per dock face at y=±14, teardrop pockets.
