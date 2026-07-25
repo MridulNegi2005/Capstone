@@ -65,18 +65,22 @@ Each Muscle Cell has a 6-track cam. The 6 dots = 6 bits = a number from 0 to 63.
 cell tuple to that number:
 
 ```python
-def cell_to_cam(cell):           # cell = tuple of dots, e.g. (1,2,5)
+def cell_to_cam(cell):            # cell = tuple of dots, e.g. (1,2,5)
     value = 0
-    for dot in cell:             # dot is 1..6
-        value |= 1 << (dot - 1)  # dot1=bit0, dot2=bit1, ... dot6=bit5
-    return value                 # 0..63
+    for dot in cell:               # dot is 1..6 (standard braille dot number)
+        track = dot - 1            # 0..5 — physical cam track (0 = innermost)
+        bit = 5 - track             # v6.3: innermost track carries the SLOWEST-
+                                     # changing bit (see braille_cam.scad get_pattern_bit)
+        value |= 1 << bit
+    return value                   # 0..63
 ```
-Examples: `()` (blank) → `0`; `(1,)` → `1`; `(1,2,5)` → `19`.
+Examples: `()` (blank) → `0`; `(1,)` → `32`; `(1,2,5)` → `50`.
 
-> ⚠️ **ONE THING TO LOCK WITH THE HARDWARE TEAM:** the bit order above (dot1 = bit0 …
-> dot6 = bit5) must match the physical order of the 6 cam tracks. If a printed cell shows
-> the wrong dots, it's almost always this mapping. Confirm against the cam (`braille_cam.scad`)
-> before assuming the math is wrong.
+> ⚠️ **LOCKED 2026-06-14 — do not use `1 << (dot-1)`.** The cam's inner track physically
+> cannot hold a fast-toggling bit (the flat zone is narrower than the linkage foot), so
+> `braille_cam.scad` now drives the innermost track with the slowest-changing bit and the
+> outermost with the fastest. The formula above (`bit = 5 - (dot-1)`) matches that. If a
+> printed cell shows the wrong dots, check this mapping first.
 
 ### Step 3 — Send cam numbers to the pods
 The pod relays each cam number to the matching muscle cell over I²C; the cell's motor moves

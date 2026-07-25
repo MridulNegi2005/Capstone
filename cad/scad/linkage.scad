@@ -3,6 +3,16 @@
 // Revision 3.1 — Resin manufacturing (v6.1, 2026-06-12)
 // (Rev 3.0 — Inline Feet / Phase-Shift Fix, 2026-05-06)
 //
+// >>> v6.3 NOTE (2026-06-14): braille_cam.scad reordered which BIT
+// >>> drives which TRACK (innermost track now gets the slowest bit,
+// >>> outermost gets the fastest — fixes an inner-track dwell zone
+// >>> that was physically too narrow for the 1mm-thick foot). THIS
+// >>> FILE NEEDS NO CHANGE: arm_span(d)/asm_ang(d)/track_r(d) below
+// >>> depend only on the PHYSICAL track radius for dot index d, never
+// >>> on which cam bit lights that track up. dot index 0-5 here still
+// >>> = physical track index 0-5, unchanged. Only the software's
+// >>> cell_to_cam() bit math changed — see docs/SOFTWARE_TEAM_README.md.
+//
 // v6.1 MANUFACTURING CHANGE: originally spec'd as laser-cut 1mm metal,
 // but no laser-cut vendor was available — now RESIN/SLA printed alongside
 // the cam/top_plate/nav_cap batch. Print 8 (6 + 2 spares) in TOUGH or
@@ -39,10 +49,18 @@
 
 // --- 1. PARAMETERS ---
 
-thickness     = 1.0;    // Sheet metal thickness (extrusion depth for DXF)
-foot_w        = 2.0;    // Foot width — straddles cam track (1.6mm wide), 0.2mm overhang each side
+thickness     = 1.0;    // Sheet thickness. NOTE: this is the foot's TANGENTIAL (arc-direction)
+                        // contact width once assembled — it must fit inside the cam's flat
+                        // dwell zone. See braille_cam.scad v6.3 header for the dwell budget.
+// v6.3 FIX — FALSE-DOT-LIFT BUG: foot_w was 2.0mm on a 1.6mm-wide track at 1.7mm
+// track pitch, i.e. the foot hung 0.1mm PAST its own track onto BOTH neighbours.
+// The foot is rigid and can only rest on the highest contact point, so whenever a
+// neighbouring track was UP (0.8mm bump) and this one was DOWN, the foot rode the
+// neighbour's bump and lifted THIS dot by the full 0.8mm — a wrong dot, on every
+// track, constantly. Foot must stay strictly inside its own 1.6mm track.
+foot_w        = 1.4;    // Foot width (RADIAL) — 1.6mm track - 0.1mm clearance each side
 foot_len      = 2.5;    // Foot contact patch length
-foot_radius   = 0.8;    // Rounded foot tip (reduces cam surface wear)
+foot_radius   = 0.6;    // Rounded foot tip. MUST be <= foot_w/2 (0.7) or the foot hull inverts.
 nub_w         = 2.2;    // Nub width — widened for 2mm bearing ball cup (was 1.2mm)
 nub_len       = 2.0;    // Nub length (radial extent)
 nub_h         = 1.5;    // Nub protrusion above arm/upper-riser top

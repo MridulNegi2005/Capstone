@@ -1,9 +1,42 @@
 // =========================================================
 // ADVANCED PARAMETRIC BRAILLE CAM GENERATOR (Production Spec)
-// Revision 2 — Hub Inverted (drops below disc underside)
-// Updated 2026-05-06
+// Revision 3 — Track/Bit Reorder (v6.3, 2026-06-14)
+// (Rev 2 — Hub Inverted, 2026-05-06)
 //
-// Changes from v1:
+// v6.3 FIX — INNER TRACK GEOMETRY WAS PHYSICALLY IMPOSSIBLE:
+//   Each cam position is a 5.625deg slice. At the OLD bit order (bit t
+//   drove track t, i.e. innermost track = LSB = toggles every single
+//   state), the innermost track's single-slice flat "dwell" zone was
+//   only ~0.88mm wide (0.7 * slice-arc-at-r12.8, with 0.7 = 1 -
+//   angular_ramp_fraction). The linkage foot is 1.0mm thick (=
+//   `thickness` in linkage.scad — the sheet extrudes to a 1mm-thick
+//   tangential contact edge). A 1.0mm foot cannot rest inside a 0.88mm
+//   dwell zone — it was ALWAYS straddling a ramp. Every dot on that
+//   track would sit half-up, all the time.
+//
+//   FIX: reverse which bit drives which track. get_pattern_bit() below
+//   now assigns the SLOWEST-changing bit (MSB, flips only twice per
+//   revolution -> its flat zone is dozens of slices wide, radius
+//   doesn't matter) to the INNERMOST track, and the FASTEST-changing
+//   bit (LSB, toggles every single state -> needs the widest possible
+//   single-slice dwell) to the OUTERMOST track, where the arc is
+//   biggest. This is a pure logic change — no geometry/size/cost
+//   change to the disc. Linkage.scad is UNAFFECTED (arm_span/asm_ang
+//   depend only on physical track radius, never on which bit lights
+//   a track — see the note in linkage.scad).
+//
+//   Worst-case (LSB) dwell after the fix, at the outermost track
+//   (r=21.3mm, arc=2.09mm/slice): 0.7*2.09 = 1.46mm dwell vs 1.0mm
+//   foot -> ~0.23mm clearance per side. Tight but workable on resin.
+//   Also dropped angular_ramp_fraction 0.3->0.2 (free — pure curve
+//   tuning, doesn't change disc size) for a bit more margin: dwell
+//   becomes 0.8*2.09 = 1.67mm -> ~0.335mm clearance per side.
+//
+//   >>> SOFTWARE TEAM: this changes which bit sets which dot. See
+//   >>> docs/SOFTWARE_TEAM_README.md Step 2 (cell_to_cam) — updated
+//   >>> to match. <<<
+//
+// Older history (Rev 2, 2026-05-06):
 //   - D-shaft hub now extends DOWNWARD from disc underside
 //     (was protruding upward above tracks — blocked linkage feet)
 //   - Hub height = 4mm below z=0 (drops over motor shaft from above)
@@ -20,7 +53,7 @@ pin_lift = 0.8;             // Height of the bump (mm)
 track_width = 1.6;          // Width of each track (mm)
 track_gap = 0.1;            // Gap between tracks (Drop to 0.1 for Resin/SLA)
 inner_radius = 12.0;        // Was 8.0 — increased to reduce foot-span on inner tracks (v5.1)
-angular_ramp_fraction = 0.3;// % of slice used for ramping (0.0-1.0)
+angular_ramp_fraction = 0.2;// v6.3: 0.3->0.2 — more flat dwell per slice, free (no size/cost change)
 subdivisions_per_slice = 4; // Smoothness (Higher = smoother, slower)
 preview_mode = false;       // Set FALSE for final high-quality render!
 
@@ -44,10 +77,13 @@ ramp_angle = slice_angle * angular_ramp_fraction;
 
 // --- 2. LOGIC FUNCTIONS ---
 
-// Default Binary Mapping (Index -> Binary Pattern)
+// Binary Mapping (Index -> Binary Pattern) — v6.3 REORDERED
 // Returns 1 if the dot is UP, 0 if DOWN
-function get_pattern_bit(state_idx, track_idx) = 
-    floor(state_idx / pow(2, track_idx)) % 2;
+// track_idx 0 = innermost (smallest arc/slice -> gets the SLOWEST bit, MSB)
+// track_idx dots-1 = outermost (biggest arc/slice -> gets the FASTEST bit, LSB)
+// i.e. bit_for_track = (dots-1-track_idx). See the v6.3 header note above for why.
+function get_pattern_bit(state_idx, track_idx) =
+    floor(state_idx / pow(2, dots - 1 - track_idx)) % 2;
 
 // Linear Interpolation (Lerp)
 function lerp(start, end, bias) = (1 - bias) * start + bias * end;
