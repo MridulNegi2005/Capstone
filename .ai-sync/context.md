@@ -243,3 +243,28 @@ directly rather than trusting the source.
 bore, so the spring is threaded on by twisting — Mridul's own "turn and turn" idea, which
 turned out to be exactly the right trick here. Still nothing physically built; no springs in
 hand. Cheap PETG proving print before any resin spend.
+
+## [2026-07-29 14:30] — Claude Code
+**Task:** v7.2 — pull the top plate out of the resin batch; fix the dot-flush bug
+**Changes:** Mridul asked whether the top plate could be FDM. Mostly yes: it is 68x70mm of
+plain flat structure, but the six 1.7mm dot holes (the dome must SLIDE through them) and the
+six 2.2mm spring bores (0.4mm dividing walls = one nozzle width) cannot be FDM. Split them
+out into dot_insert.scad — a 15x15x3.2mm resin tile, top-hat form, that glues into a pocket
+in the now-PETG plate. The rebate floor is the glue shelf (2mm wide all round, ~106mm2).
+Resin dropped 19.85 -> 4.48 cm3, about 4.5x.
+While measuring for the pocket, found a REAL BUG: the plate has a 0.8mm finger-pad recess
+over its middle, so the surface the dots emerge through is at 57.2, not the 58.0 that
+link_total_h was measured to. Every dot stood 0.8mm proud when DOWN and 1.6mm when UP — all
+six permanently readable, i.e. not braille. link_total_h 13.0 -> 12.2; now flush at rest.
+Also per Mridul: linkages 8 -> 12 (two full sets; the cam is 94% of the plate so a second set
+costs ~2%), and the count-dots moved to the arm UNDERSIDE and shrunk to 0.6mm dia x 0.35mm
+proud. Kept rather than deleted because arms differ by as little as 0.67mm and a mis-fitted
+linkage puts its foot on the wrong cam track. Removed superseded v7.0 print files.
+Earlier in the same session: scrubbed the committed WiFi password + SSID from all git history
+with git-filter-repo and force-pushed; credentials now live in a gitignored secrets.h with
+secrets.example.h as the template.
+**Status:** completed — all parts Simple: yes, plate volume counts 14/15/18 correct, 12/12
+fit and clearance checks pass, insert/plate mating surfaces measured off the rendered STLs
+(0.0 / 2.0 / 3.2mm) rather than trusted from source.
+**Notes:** Mridul MUST still change the actual WiFi password — history scrubbing does not
+undo the exposure. Still nothing physically built; no springs in hand.

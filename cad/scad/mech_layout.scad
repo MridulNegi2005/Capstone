@@ -89,10 +89,20 @@ function track_phase(t) =
 cam_flat_z    = 45.0;  // cam surface, dot DOWN
 pin_lift      = 0.8;   // cam bump height = how far a dot rises
 plate_under_z = 54.0;  // top plate underside (sits on base-plate standoffs)
-plate_top_z   = 58.0;  // top plate top surface = the reading surface
+plate_top_z   = 58.0;  // top plate OUTER top surface (the rim)
 
-// Linkage foot bottom sits on cam_flat_z, nub top must reach plate_top_z
-link_total_h  = plate_top_z - cam_flat_z;   // 13.0mm
+// The plate has a shallow finger-pad recess over its middle, so the surface the
+// dots actually emerge through is 0.8mm BELOW the rim. v7.2 bug fix: link_total_h
+// used to be measured to plate_top_z, which put every dot 0.8mm proud even when
+// DOWN (and 1.6mm when up) — i.e. all six dots permanently readable, which is
+// not braille. Measure to the recessed READING SURFACE instead.
+finger_pad_depth = 0.8;
+reading_surface_z = plate_top_z - finger_pad_depth;   // 57.2
+
+// Linkage foot bottom sits on cam_flat_z; dome top must reach the reading surface
+link_total_h  = reading_surface_z - cam_flat_z;   // 12.2mm
+//   dot DOWN: dome top 57.2 = flush with the reading surface
+//   dot UP  : dome top 58.0 = 0.8mm proud
 
 // --- RETURN SPRING: COAXIAL WITH EACH DOT (v7.1) ---
 // The spring sits in a counterbore in the top plate's underside, wrapped
@@ -128,10 +138,26 @@ flange_h      = 0.8;   // flange thickness
 plate_under_y = plate_under_z - cam_flat_z;      // 9.0
 flange_top_y  = 8.0;   // 0.8mm lift still leaves 0.2mm clear of the plate
 flange_bot_y  = flange_top_y - flange_h;         // 7.2
-spring_recess_depth = 2.5;                       // counterbore into the plate
+spring_recess_depth = 2.0;                       // counterbore into the dot insert
 // spring works between flange_top_y and the recess ceiling:
-//   dot DOWN 8.0 -> 11.5 = 3.5mm ;  dot UP 8.8 -> 11.5 = 2.7mm
-// so a 4mm free length compresses comfortably and never goes solid (1.5mm).
+//   dot DOWN 8.0 -> 11.0 = 3.0mm ;  dot UP 8.8 -> 11.0 = 2.2mm
+// so a ~3.5mm free length compresses comfortably and never goes solid (1.5mm).
+
+// --- DOT INSERT (v7.2) — the only part that still has to be resin ---
+// The top plate is 68x70mm and was ~80% of the resin bill (19.85 of 23.8 cm3),
+// yet the only features that genuinely need resin are the six 1.7mm dot holes
+// (the dome has to slide freely) and the 2.2mm spring bores whose 0.4mm dividing
+// walls are one nozzle width on FDM. So those move into a small resin tile and
+// the big plate becomes an ordinary PETG print. Resin drops ~20 -> ~5 cm3.
+//
+// The tile is a top-hat: a body that drops through the plate, and a flange that
+// lands on a rebate. The rebate FLOOR is the glue shelf (~106mm2 of contact).
+insert_body   = 11.0;  // square body, passes through the plate
+insert_flange = 15.0;  // square flange, sits on the glue shelf
+insert_flange_h = 1.2; // flange thickness
+insert_fit    = 0.2;   // total clearance (0.1mm/side) for glue
+insert_h      = 3.2;   // = reading surface height above the plate underside
+// body 0 -> 2.0, flange 2.0 -> 3.2; top is flush with the reading surface.
 
 // ASSEMBLY NOTE: the 1.5mm dome is 0.1mm wider than the 1.4mm spring bore,
 // so the spring is THREADED over the dome by twisting it on (Mridul's own

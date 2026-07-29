@@ -18,6 +18,20 @@
 // =========================================================
 
 // =========================================================
+// v7.2 (2026-07-29) — THIS PART IS NOW PLAIN FDM/PETG
+//
+// The precision features (six 1.7mm dot holes, six 2.2mm spring bores with
+// 0.4mm dividing walls) moved OUT of this plate and into dot_insert.scad,
+// a small resin tile that glues into a pocket in the middle. Reason: this
+// plate is 68x70mm and was ~80% of the resin bill, but only that tiny
+// central area actually needs resin precision. Resin drops ~20 -> ~5 cm3
+// and this becomes an ordinary PETG print.
+//
+// What is left here is all FDM-friendly: an 11.2mm square opening and a
+// 15.2mm rebate whose floor is the glue shelf for the insert.
+// =========================================================
+
+// =========================================================
 // v7.1 (2026-07-26) — RETURN SPRING IS COAXIAL WITH EACH DOT
 //
 // History, so nobody re-treads it:
@@ -42,10 +56,8 @@ include <mech_layout.scad>   // dot positions, arm geometry, spring seat positio
 // Braille dot positions and arm geometry now come from mech_layout.scad
 // (col_spacing, row_spacing, dot_pos(), spring_seat_pos()).
 
-// Braille dot holes and spring counterbores both come from mech_layout.scad
-hole_dia            = plate_hole_dia;        // 1.7mm — passes the 1.5mm dome
-spring_pocket_dia   = spring_od + 0.2;       // 2.2mm — 2mm spring + clearance
-spring_pocket_depth = spring_recess_depth;   // 2.5mm into the 4mm plate
+// Dot holes and spring bores now live in dot_insert.scad (resin).
+// This plate only carries the pocket that tile glues into.
 
 // Plate body — v6.2: now an OVER-CAP covering the full box footprint (was an inset plate).
 // Underside at z=0, top at z=4. X flush with box outer (no overhang on ±X dock faces);
@@ -54,7 +66,7 @@ plate_length    = 68.0;   // X — flush with box outer (±34), NO overhang (doc
 plate_width     = 70.0;   // Y — 1mm overhang each side (±35) front/back
 plate_thickness = 4.0;    // Z — cap thickness (3mm spring pocket + 1mm floor)
 corner_radius   = 3.0;    // matches box outer fillet
-finger_pad_depth = 0.8;   // Shallow recess on top face
+// finger_pad_depth comes from mech_layout.scad (the linkage height depends on it)
 
 // Over-cap skirt — ±Y faces only (front/back); hangs from z=0 down to z=-4.
 // Outer flush with cap edge (y=±35); inner face y=±34.4 → 0.4mm clearance off the
@@ -96,33 +108,23 @@ module yy_skirt() {
     }
 }
 
-// 6 braille dot through-holes — the printed dome on each linkage nub
-// rises through these. Positions from the shared layout file.
-module braille_holes() {
-    for (d = [1 : 6]) {
-        p = dot_pos(d);
-        translate([p[0], p[1], -1])
-            cylinder(d = hole_dia, h = plate_thickness + 2);
-    }
-}
-
-// 6 return-spring counterbores on the underside, COAXIAL with each dot hole.
-// The 2mm spring drops in here and is glued; the dot travels up and down
-// through the middle of it, and it pushes down on the flange on the linkage's
-// upper riser.
-//
-// NOTE ON WALL THICKNESS: braille rows are 2.6mm apart and this bore is
-// 2.2mm, so only 0.4mm of plate is left between the three bores in a column.
-// That is thin but printable in resin, and it is the direct consequence of
-// putting a spring on the dot axis at braille pitch — there is no way to have
-// both. If it proves too fragile in practice, let the three merge into one
-// slot per column: the spring is glued, so the bore only has to clear it.
-module spring_pockets() {
-    for (d = [1 : 6]) {
-        p = dot_pos(d);
-        translate([p[0], p[1], -0.01])
-            cylinder(d = spring_pocket_dia, h = spring_pocket_depth + 0.01);
-    }
+// --- DOT INSERT POCKET (v7.2) ---
+// A top-hat pocket for the resin dot tile:
+//   * an 11.2mm square opening straight through the plate (the tile's body)
+//   * a 15.2mm rebate in the recessed reading surface (the tile's flange)
+// The rebate FLOOR is the GLUE SHELF: a 2mm-wide ledge all round, ~106mm2 of
+// contact. Both features are easy on a 0.4mm nozzle, which is the whole point.
+module insert_pocket() {
+    body_op  = insert_body + insert_fit;      // 11.2
+    flange_op = insert_flange + insert_fit;   // 15.2
+    // through opening for the tile body
+    translate([0, 0, -1])
+        linear_extrude(plate_thickness + 2)
+            square([body_op, body_op], center = true);
+    // rebate for the flange — cut down from the recessed reading surface
+    translate([0, 0, plate_thickness - finger_pad_depth - insert_flange_h])
+        linear_extrude(insert_flange_h + finger_pad_depth + 1)
+            square([flange_op, flange_op], center = true);
 }
 
 module mounting_holes() {
@@ -152,9 +154,8 @@ difference() {
     translate([0, 0, plate_thickness - finger_pad_depth])
         rounded_rect(plate_length - 6, plate_width - 6, corner_radius, finger_pad_depth + 1);
 
-    // C. 6 braille dot holes + 6 coaxial spring counterbores
-    braille_holes();
-    spring_pockets();
+    // C. Pocket for the resin dot insert (dot_insert.scad)
+    insert_pocket();
 
     // D. Mounting holes (4 corners, M2.5)
     mounting_holes();
@@ -195,8 +196,7 @@ module top_plate() {
         }
         translate([0, 0, plate_thickness - finger_pad_depth])
             rounded_rect(plate_length - 6, plate_width - 6, corner_radius, finger_pad_depth + 1);
-        braille_holes();
-        spring_pockets();
+        insert_pocket();
         mounting_holes();
     }
     // Thumb ridge — bottom edge

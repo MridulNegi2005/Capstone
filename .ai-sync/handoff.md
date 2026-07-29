@@ -1,12 +1,37 @@
 # Active Handoff
 > Last updated by: Claude Code
-> Timestamp: 2026-07-26T23:59:00+05:30
+> Timestamp: 2026-07-29T14:30:00+05:30
 
 ## Current Task
-**v7.1 — return spring is COAXIAL WITH THE DOT. Done, verified.**
+**v7.2 — top plate left the resin batch; dot-flush bug fixed. Done, verified, committed.**
 Read `cad/scad/mech_layout.scad` FIRST — single source of truth for track radii, dot
-positions, dot->track+angle assignment, the vertical stack, AND the spring/nub/dome/flange
-sizes. Do NOT re-declare any of those in part files.
+positions, dot->track+angle assignment, the vertical stack, spring/nub/dome/flange sizes
+AND the dot-insert dimensions. Do NOT re-declare any of those in part files.
+
+### v7.2 headline
+- The 68x70mm **top plate is now PETG/FDM**, not resin. Only a 15x15x3.2mm **dot insert**
+  (`dot_insert.scad`, 0.45cm3) still needs resin — it carries the six 1.7mm dot holes and
+  the six 2.2mm spring bores (0.4mm dividing walls = one nozzle width, impossible on FDM).
+  It glues into a top-hat pocket; the rebate floor is the glue shelf, ~106mm2 contact.
+  **Resin went 19.85 -> 4.48 cm3 (~4.5x cheaper).**
+- **BUG FIXED: every dot was permanently raised.** `link_total_h` measured to the plate's
+  outer top (58.0) but the plate has a 0.8mm finger-pad recess, so the real reading surface
+  is 57.2. Dots stood 0.8mm proud when DOWN, 1.6mm when UP. Now `link_total_h` = 12.2 ->
+  flush at rest, 0.8mm proud when lifted. DO NOT measure dot height to plate_top_z again.
+- **12 linkages (two full sets).** The cam disc is 94% of the plate; all linkages are 4%,
+  so a second set costs ~2%. Laid out 3 cols x 4 rows.
+- **Count-dots are on the arm UNDERSIDE**, 0.6mm dia x 0.35mm proud. Keep them: arms differ
+  by as little as 0.67mm and a mis-fitted linkage lands on the wrong cam track.
+
+### Print files (v7.2)
+| file | contents | resin |
+|---|---|---|
+| print_resin_3_cam_linkages | cam + 12 linkages | 4.03 cm3 |
+| print_resin_2_no_buttons | + dot insert | 4.48 cm3 |
+| print_resin_1_all | + 3 nav buttons | 5.05 cm3 |
+| top_plate.stl | **PETG, print locally** | 15.46 cm3 |
+Recommended quote: plate 3 at 0.1mm layer height. Layer height only affects Z resolution —
+the tight XY fits are set by the printer's LCD pixel and do not improve with finer layers.
 
 ### The spring story (settled — do not relitigate)
 - pre-v7: 4.5mm pockets on the dot axis. Never worked; at 2.6mm row pitch the three in a

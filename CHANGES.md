@@ -5,6 +5,46 @@
 
 ---
 
+## v7.2 — 2026-07-29 (top plate leaves the resin batch; dot-flush bug fixed)
+
+**Resin cost cut ~4.5x.** The 68x70mm top plate was 19.85 of the 23.8 cm3 resin
+bill, but almost all of it is plain flat structure an FDM printer handles fine.
+Only two features genuinely need resin: the six 1.7mm dot holes (the dome has to
+SLIDE through them, and a 0.4mm nozzle prints them ~1.4mm and furry) and the six
+2.2mm spring bores, whose 0.4mm dividing walls are one nozzle width on FDM.
+
+Those moved into **`dot_insert.scad`** — a 15x15x3.2mm resin tile, **0.45 cm3** —
+which glues into a pocket in the now-PETG top plate.
+
+```
+              RESIN                    PETG
+  before   19.85 cm3  (incl. plate)      -
+  after     4.38 cm3  (incl. insert)   15.46 cm3  (print it yourself)
+```
+
+- **`dot_insert.scad` (NEW)** — top-hat form: an 11mm body drops through the plate,
+  a 15mm flange lands on a rebate whose floor is the **glue shelf** (2mm wide all
+  round, ~106mm2 of contact). Top chamfered so a reading finger doesn't catch the
+  seam. Verified surfaces at 0.0 / 2.0 / 3.2mm.
+- **`top_plate.scad`** — dot holes and spring bores removed; now carries only an
+  11.2mm opening + 15.2mm rebate. Fully FDM-friendly.
+
+**BUG FIXED — every dot was permanently raised.** `link_total_h` measured to the
+plate's outer top (58.0), but the plate has a 0.8mm finger-pad recess over the
+middle, so the surface the dots actually emerge through is at 57.2. Every dot
+therefore stood 0.8mm proud when DOWN and 1.6mm when UP — all six always readable,
+which is not braille. `link_total_h` 13.0 -> 12.2mm. Now flush at rest, 0.8mm proud
+when lifted (verified: 0.00mm error).
+
+- **Linkages: 12 (two full sets).** All eight were only 4% of the plate — the cam
+  disc is 94% of it — so a second full set costs ~4% and covers a snapped part or a
+  second cell. Laid out 3 columns x 4 rows.
+- **Count-dots moved to the arm UNDERSIDE and shrunk** (0.9 -> 0.6mm dia, 0.5 ->
+  0.35mm proud): invisible in normal view, still countable by fingernail. They earn
+  their place because arms differ by as little as 0.67mm and fitting the wrong one
+  puts its foot on the wrong cam track. 2.35mm clearance above the cam bump.
+- Removed superseded v7.0 files `print_resin_cam_linkage` / `print_resin_nav_buttons`.
+
 ## v7.1 — 2026-07-26 (return spring moves onto the dot axis)
 
 v7.0 seated the return spring on a 5mm pad **halfway along the arm**. Rejected by Mridul,

@@ -122,16 +122,24 @@ module spring_flange_3d() {
 }
 
 // --- 4. COUNT-DOTS: which linkage is which ---
-// Raised dots on the arm, 1..6 = braille dot number. Assembly is otherwise
-// self-aligning (nub in its hole + rigid arm puts the foot on its own track
-// automatically), so this is purely to tell the six parts apart in the hand.
-// Sunk 0.3mm INTO the arm — sitting flush on the surface leaves them as
-// separate touching bodies that resin prints as loose specks.
+// 1..6 small bumps = the braille dot number this linkage drives.
+//
+// They matter because the six arms differ by as little as 0.67mm in length
+// (dot 5 = 10.40 vs dot 4 = 11.08), so by eye they are indistinguishable —
+// and fitting the wrong one puts its foot on the wrong cam track, which
+// makes that dot read the wrong bit and garbles the letter.
+//
+// v7.2: moved to the arm's UNDERSIDE and shrunk (0.9 -> 0.6mm dia, 0.5 ->
+// 0.35mm proud) so they are invisible in normal view but still countable
+// with a fingernail. The underside faces the cam, with ~2.4mm of clearance
+// above the bump, so nothing touches. Sunk 0.3mm INTO the arm — sitting
+// flush on the surface leaves them as separate touching bodies that resin
+// prints as loose specks.
 module count_dots_3d(dot) {
     for (i = [0 : dot - 1])
-        translate([1.8 + i * 1.4, arm_y + arm_h - 0.3, thickness/2])
-            rotate([-90, 0, 0])
-                cylinder(d = 0.9, h = 0.8, $fn = 16);
+        translate([1.8 + i * 1.0, arm_y + 0.3, thickness/2])
+            rotate([90, 0, 0])            // +Z -> -Y, i.e. downward
+                cylinder(d = 0.6, h = 0.65, $fn = 16);
 }
 
 // --- 5. COMPLETE LINKAGE ---

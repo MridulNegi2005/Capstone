@@ -50,6 +50,15 @@ Your 8×1mm magnets are for DOCKING. The cam's homing pocket (`braille_cam.scad`
 The braille dot is now **printed as a dome on the linkage itself**. No steel balls, no
 glue, no machined cup. If you already bought balls, keep them for something else.
 
+### 3b. Glue for the dot insert (v7.2)
+The top plate is now PETG/FDM with a small **resin dot insert** glued into a pocket.
+- **CA (superglue) or 5-min epoxy** — either works. Epoxy is more forgiving (you get
+  time to seat it square); CA is instant but unforgiving.
+- Bead it on the **rebate shelf** (the 2mm-wide ledge, ~106mm² of contact), not on the
+  insert. Drop the insert in flange-down; it self-locates.
+- **Wipe squeeze-out from the top face before it cures.** If glue reaches the six dot
+  holes the domes will jam and the cell is dead.
+
 ### 4. Pogo connector (4-pin) — DEFERRED DECISION (per v6 audit)
 Don't buy until the design is pinned. Two candidate styles:
 - **Spring-loaded pogo pin strip, 4-pin, 2.54mm pitch** (search "pogo pin connector 4 pin

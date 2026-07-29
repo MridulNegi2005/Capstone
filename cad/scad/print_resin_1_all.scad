@@ -1,53 +1,53 @@
 // =========================================================
-// RESIN PRINT PLATE 1 of 3 — CAM + LINKAGES + TOP PLATE + NAV BUTTONS
-// v7.1 — 2026-07-26
+// RESIN PRINT PLATE 1 of 3 — CAM + LINKAGES + DOT INSERT + NAV BUTTONS
+// v7.2 — 2026-07-29
 //
 // The full resin batch: one complete braille cell mechanism plus the
-// three nav button caps for the ESP32 brain pod.
+// three nav button caps for the ESP32 brain pod. Pair with an FDM top_plate.
 //
-// Material: TOUGH or ABS-like resin (NOT standard brittle resin).
-// Orientation: as laid out (nav caps shaft-DOWN, dome + raised symbol UP,
-// so the tactile symbols need no supports). A service may re-orient.
+// v7.2: the 68x70mm TOP PLATE is no longer a resin part. It is now an
+// ordinary PETG/FDM print (cad/stl/top_plate.stl); only the small
+// dot_insert tile still needs resin, and it glues into a pocket in that
+// plate. This cut the resin volume by roughly 4x.
 //
-// NOTE: the top plate dominates the cost — roughly 4x the volume of the
-// cam and all eight linkages together. The three nav caps add very little.
-//
+// Material: TOUGH or ABS-like resin (NOT standard brittle resin — the
+// linkages are 1mm sections under repeated spring load).
 // Needs separately: 6x 2mm-OD micro compression springs (see SOURCING.md).
 // =========================================================
 
 use <braille_cam.scad>   // braille_cam()
 use <linkage.scad>       // linkage_3d_v4(dot)
-use <top_plate.scad>     // top_plate()
+use <dot_insert.scad>    // dot_insert()
 use <nav_cap.scad>       // nav_cap_prev() / _select() / _next()
 
 $fn = 60;
 
-linkage_dots = [1, 2, 3, 4, 5, 6, 6, 3];
+// TWO FULL SETS (12). All eight linkages together were only 4% of this
+// plate — the cam disc is 94% of it — so a whole second set costs ~4% more
+// and covers snapping a 1mm-thin part during assembly, or building a second
+// cell later. Laid out 3 columns x 4 rows by the loop below.
+linkage_dots = [1, 2, 3, 4, 5, 6,
+                1, 2, 3, 4, 5, 6];
+col_pitch = 22;   // widest linkage ~19.7mm across -> ~2.3mm gap
+row_pitch = 14;   // linkage 13mm tall -> 1mm gap
+grid_x0   = 27;   // clears the cam's 22.2mm outer radius
+grid_y0   = -22;
 
-col_pitch = 22;
-row_pitch = 14;
-grid_x0   = 38;
-grid_y0   = -82;
-
-cam_y     = -60;
-nav_x     = -29;   // left of the cam's -22.2 edge, inside the plate's -34
-nav_y0    = -74;
-nav_pitch = 12;
-
-// --- TOP PLATE: centred at origin, lifted so the skirt rests on z=0 ---
-translate([0, 0, 4]) top_plate();
-
-// --- CAM ---
-translate([0, cam_y, 0]) braille_cam();
+// --- CAM: centred at origin, hub already resting on z=0 ---
+braille_cam();
 
 // --- LINKAGES: 2 columns x 4 rows ---
+// lifted 0.6mm so the spring flange (which hangs below the body) sits on z=0
 for (i = [0 : len(linkage_dots) - 1])
     translate([grid_x0 + floor(i / 4) * col_pitch,
                grid_y0 + (i % 4) * row_pitch,
                0.6])
         linkage_3d_v4(linkage_dots[i]);
 
-// --- NAV BUTTON CAPS: column to the left of the cam ---
-translate([nav_x, nav_y0 + 2 * nav_pitch, 0]) nav_cap_prev();
-translate([nav_x, nav_y0 + 1 * nav_pitch, 0]) nav_cap_select();
-translate([nav_x, nav_y0 + 0 * nav_pitch, 0]) nav_cap_next();
+// --- DOT INSERT ---
+translate([0, -32, 0]) dot_insert();
+
+// --- NAV BUTTON CAPS: shaft DOWN, dome + raised symbol UP (no supports) ---
+translate([14, -32, 0]) nav_cap_prev();
+translate([26, -32, 0]) nav_cap_select();
+translate([38, -32, 0]) nav_cap_next();
