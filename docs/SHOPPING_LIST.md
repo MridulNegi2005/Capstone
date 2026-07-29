@@ -1,3 +1,13 @@
+> # [!] SUPERSEDED — DO NOT BUY FROM THIS LIST
+>
+> **Use `docs/MASTER_BOM.md` instead.** This file is kept only for history.
+>
+> At least two entries here are now WRONG and would waste money:
+> * **4mm pen-style springs** — ruled out permanently in v7.1. Braille rows are 2.6mm apart,
+>   so a 4mm spring fouls its neighbour. You need **2mm OD micro springs**.
+> * **2mm bearing balls** — no longer needed at all since v7.1. The braille dot is printed
+>   as a dome on the linkage itself; there is nothing to glue a ball onto.
+
 # Braillix v5.1 — Complete Electronics & Hardware Shopping List
 
 **Assuming: 1 Brain Pod + 1 Cell (prototype). Multiply cell items by N for more cells.**

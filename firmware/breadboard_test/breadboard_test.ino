@@ -212,21 +212,21 @@ void handleData() {
 
 // --- Command handlers ---
 void handleCW() {
-  log("[CMD] CW 90 degrees (512 steps)");
+  log("[CMD] CW 90 degrees (1024 steps)");
   currentStatus = "Spinning CW...";
-  stepper.move(512);
+  stepper.move(1024);   // 90 deg = 4096/4
   server.send(200, "text/plain", "OK");
 }
 
 void handleCCW() {
-  log("[CMD] CCW 90 degrees (512 steps)");
+  log("[CMD] CCW 90 degrees (1024 steps)");
   currentStatus = "Spinning CCW...";
-  stepper.move(-512);
+  stepper.move(-1024);  // 90 deg = 4096/4
   server.send(200, "text/plain", "OK");
 }
 
 void handleFullRev() {
-  log("[CMD] Full CW revolution (2048 steps)");
+  log("[CMD] Full CW revolution (4096 steps)");
   currentStatus = "Full revolution...";
   stepper.move(STEPS_PER_REV);
   server.send(200, "text/plain", "OK");
@@ -279,6 +279,7 @@ void doHoming() {
     log("  Already in magnet zone, spinning out...");
     stepper.move(STEPS_PER_REV / 2);
     while (stepper.run()) {
+      server.handleClient();          // keep the dashboard alive while homing
       if (analogRead(HALL_PIN) > HALL_AWAY) break;
     }
     stepper.stop();
@@ -297,6 +298,7 @@ void doHoming() {
   stepper.setCurrentPosition(0);
   stepper.move(maxSteps);
   while (stepper.run()) {
+    server.handleClient();            // keep the dashboard alive while homing
     h = analogRead(HALL_PIN);
     long pos = stepper.currentPosition();
 
@@ -328,7 +330,7 @@ void doHoming() {
   log("  Midpoint = step " + String(homePosition) + ", backing up " + String(backtrack));
 
   stepper.move(-backtrack);
-  while (stepper.run()) {}
+  while (stepper.run()) { server.handleClient(); }
 
   stepper.setCurrentPosition(0);
   isHomed = true;
@@ -358,7 +360,7 @@ void runTests() {
     case 2: {
       log("\n[TEST 2] Smooth CW quarter turn...");
       currentStatus = "Test 2: CW quarter turn";
-      stepper.move(512);
+      stepper.move(1024);   // 90 deg = 4096/4
       while (stepper.run()) { server.handleClient(); }
       stepper.disableOutputs();
       log("  Done. Motor turned ~90 degrees CW.");
@@ -369,7 +371,7 @@ void runTests() {
     case 3: {
       log("\n[TEST 3] Smooth CCW quarter turn (back)...");
       currentStatus = "Test 3: CCW quarter turn";
-      stepper.move(-512);
+      stepper.move(-1024);  // 90 deg = 4096/4
       while (stepper.run()) { server.handleClient(); }
       stepper.disableOutputs();
       log("  Done. Motor back at start.");

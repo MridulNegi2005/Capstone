@@ -5,6 +5,63 @@
 
 ---
 
+## v7.3 — 2026-07-29 (pre-assembly audit — 5 blocking CAD defects found)
+
+Full pre-assembly audit ahead of a presentation demo, run as five parallel agents and then
+**independently re-verified against source** before being believed. Six new documents.
+
+### Firmware bugs FIXED in breadboard_test.ino
+1. **"CW 90 deg" moved 512 steps = 45 deg.** At 4096 steps/rev, 90 deg is 1024. Button label,
+   log line and self-tests all claimed 90. Fixed to 1024.
+2. **Full-revolution log said "2048 steps" while moving 4096** — 2048 is exactly the full-step
+   error this project already corrected once; printing it on the dashboard undid that.
+3. **The dashboard froze for the whole ~10s of homing.** `doHoming()` never called
+   `server.handleClient()` inside its `while (stepper.run())` loops (unlike `runTests()`, which
+   does). The page died at precisely the moment you say "watch it find home." 3 calls added.
+
+### CAD defects found — ALL VERIFIED FROM SOURCE, all block assembly
+1. **The hall sensor pocket does not exist.** Its farthest corner is at r=22.31mm and the Ø46
+   cam pocket has r=23.00mm, cut over the identical z-range (2..6). It is entirely subsumed —
+   the printed part has no hall pocket at all. Separately, the pocket was sized 5.3x4.3x3mm for
+   a bare TO-92, but the owned part is a blue MH-Sensor-Series module several times larger.
+2. **The motor's right mounting ear has nothing to screw into.** Hole at x=+9.5, y=0 sits inside
+   the 22x16mm spring-cavity through-window. One-screw motor mount.
+3. **Nav buttons cannot actuate.** Shaft 4.5mm minus flange 1.5mm = 3.0mm projecting, against a
+   4.0mm pod wall — 1mm short of even reaching through, before the switch gap.
+4. **ESP32 DevKit overruns the pod cavity by 1.75mm** (board +29.75 vs cavity +28.00). Also the
+   USB cutout is at the wrong height, and devkit_width/hdr_row_pitch describe a 38-pin board
+   while every doc says 30-pin.
+5. **The cam homing-magnet pocket craters the running surface.** Ø3.0 at r=17.35 spans
+   r 15.85..18.85 and overlaps **tracks 2, 3 AND 4** — the 1mm linkage foot rides over that hole
+   once per revolution. (The audit reported two tracks; re-verification found three.)
+
+Also found: the cam bore is a through-hole giving 6mm engagement, not the 8mm its comment
+claims, and the hub lands 2mm proud; the barrel-jack cradle collides with the cavity wall so
+the lid cannot close; base-plate standoffs overhang the plate edge by 1mm.
+
+**None of these block the presentation demo**, which runs on a breadboard and needs no printed
+parts. They all block physical assembly.
+
+### Print troubleshooting — previous advice was wrong
+The old guidance to print `outer_box` rim-down was incorrect and probably CAUSED the
+unremovable supports: nothing bridges a 60mm cavity, and it hangs the four Ø7.8x37mm bosses
+tip-first in air. Root cause of welded supports is `Support Placement = Everywhere` plus
+Cura's PLA-tuned Z distance; PETG needs ~0.4mm Top Distance and `Support Distance Priority =
+Z overrides X/Y`. The real fix is that **no PETG part needs supports at all** — every overhang
+is already handled in CAD (teardrop pockets, 0.6mm printed bridges, boss gussets).
+
+### New documents (all with PDFs)
+`MASTER_BOM.md` · `ASSEMBLY_BIBLE.md` · `CAD_FIT_CHECK.md` · `DEMO_SCRIPT.md` ·
+`PRINT_TROUBLESHOOTING.md` · `BRAILLE_READABILITY.md` · plus `docs/md2pdf.py` (reusable
+markdown->PDF converter). `SHOPPING_LIST.md` stamped SUPERSEDED — it still listed 4mm pen
+springs and 2mm bearing balls, both wrong since v7.1.
+
+### Braille standards check
+Dot diameter 1.5mm is **in spec** (1.44-1.60). Dot height 0.8mm is 1.6x too tall. Vertical
+spacing 2.6mm is fine; horizontal 4.8mm is 1.9x too wide — and the reason for that (2.5mm holes
+merging) disappeared in v7.1 when holes shrank to 1.7mm. Nobody revisited it. Worth ~4h after
+the demo to make the cell genuinely standard-compliant within the character.
+
 ## v7.2 — 2026-07-29 (top plate leaves the resin batch; dot-flush bug fixed)
 
 **Resin cost cut ~4.5x.** The 68x70mm top plate was 19.85 of the 23.8 cm3 resin
