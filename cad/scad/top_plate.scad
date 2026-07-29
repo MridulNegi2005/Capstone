@@ -18,23 +18,21 @@
 // =========================================================
 
 // =========================================================
-// v7.0 (2026-07-26) — SPRING POCKETS MOVED OFF THE DOT AXIS
+// v7.1 (2026-07-26) — RETURN SPRING IS COAXIAL WITH EACH DOT
 //
-// The old design put a 4.5mm spring pocket concentric with each braille
-// hole. That could never work: braille ROWS are 2.6mm apart, so three
-// 4.5mm circles in a column do not sit side by side — they merge into
-// one slot. There were never 6 pockets, only 2 blobs, and no spring
-// could be located by them.
+// History, so nobody re-treads it:
+//   pre-v7  4.5mm pockets concentric with each dot. Never worked — braille
+//           rows are 2.6mm apart, so the three pockets in a column merged
+//           into one slot. There were never six pockets, only two blobs.
+//   v7.0    moved the spring OFF the dot onto a pad mid-arm. Geometrically
+//           fine, but physically wrong: the return force belongs on the dot.
+//   v7.1    back on the dot axis, and made to actually fit by shrinking the
+//           spring to a 2mm OD micro spring and the nub to 1.0mm. The dot
+//           drops to 1.5mm, which is the REAL braille standard (1.44-1.6mm).
 //
-// Root cause is the dot pitch itself: with a 2.2mm nub at 2.6mm pitch
-// there is 0.4mm of free space at the dot. Nothing fits there.
-//
-// v7.0 puts the return spring where there IS room — on a pad partway
-// along each linkage arm. With the feet spread 60deg (see
-// mech_layout.scad) the six arms fan out, and at 7mm along the arm the
-// six seats are 7.5mm apart, versus 4.8mm needed for a 4mm spring.
-// Pocket centres come straight from spring_seat_pos(d) in the shared
-// layout file, so they cannot drift from the linkage pads.
+// The spring sits in a counterbore here in the plate underside, wraps around
+// the dot, and pushes down on a flange on the linkage's upper riser. The dot
+// travels up and down through the middle of it.
 // =========================================================
 
 include <mech_layout.scad>   // dot positions, arm geometry, spring seat positions
@@ -44,12 +42,10 @@ include <mech_layout.scad>   // dot positions, arm geometry, spring seat positio
 // Braille dot positions and arm geometry now come from mech_layout.scad
 // (col_spacing, row_spacing, dot_pos(), spring_seat_pos()).
 
-// Braille holes — round (replaces 1.2x3mm rectangular slots)
-hole_dia        = 2.5;    // Fits 2.2mm linkage nub + 0.15mm/side clearance
-
-// Return-spring pockets — on the underside, over each linkage's arm pad
-spring_pocket_dia   = 4.6;   // 4.0mm pen spring + 0.6mm clearance
-spring_pocket_depth = 2.0;   // 4mm plate - 2mm pocket = 2mm floor above
+// Braille dot holes and spring counterbores both come from mech_layout.scad
+hole_dia            = plate_hole_dia;        // 1.7mm — passes the 1.5mm dome
+spring_pocket_dia   = spring_od + 0.2;       // 2.2mm — 2mm spring + clearance
+spring_pocket_depth = spring_recess_depth;   // 2.5mm into the 4mm plate
 
 // Plate body — v6.2: now an OVER-CAP covering the full box footprint (was an inset plate).
 // Underside at z=0, top at z=4. X flush with box outer (no overhang on ±X dock faces);
@@ -110,14 +106,20 @@ module braille_holes() {
     }
 }
 
-// 6 return-spring pockets on the underside, each centred over that
-// linkage's arm pad. Glue the spring into the pocket; the pad below
-// pushes up against it, so the spring returns the dot when the cam
-// bump passes. Positions come from spring_seat_pos(d) — same function
-// the linkage uses to place the pad, so they cannot disagree.
+// 6 return-spring counterbores on the underside, COAXIAL with each dot hole.
+// The 2mm spring drops in here and is glued; the dot travels up and down
+// through the middle of it, and it pushes down on the flange on the linkage's
+// upper riser.
+//
+// NOTE ON WALL THICKNESS: braille rows are 2.6mm apart and this bore is
+// 2.2mm, so only 0.4mm of plate is left between the three bores in a column.
+// That is thin but printable in resin, and it is the direct consequence of
+// putting a spring on the dot axis at braille pitch — there is no way to have
+// both. If it proves too fragile in practice, let the three merge into one
+// slot per column: the spring is glued, so the bore only has to clear it.
 module spring_pockets() {
     for (d = [1 : 6]) {
-        p = spring_seat_pos(d);
+        p = dot_pos(d);
         translate([p[0], p[1], -0.01])
             cylinder(d = spring_pocket_dia, h = spring_pocket_depth + 0.01);
     }
@@ -150,7 +152,7 @@ difference() {
     translate([0, 0, plate_thickness - finger_pad_depth])
         rounded_rect(plate_length - 6, plate_width - 6, corner_radius, finger_pad_depth + 1);
 
-    // C. 6 round braille holes (dots) + 6 spring pockets (over the arm pads)
+    // C. 6 braille dot holes + 6 coaxial spring counterbores
     braille_holes();
     spring_pockets();
 
@@ -169,8 +171,12 @@ translate([0, -plate_width/2 + 1.5, plate_thickness])
     }
 
 // --- 5. SPRING SPEC (for BOM / sourcing) ---
-// OD:  4.0mm  (pocket is 4.6mm)
-// Free length: ~4mm — a ballpoint click-pen spring CUT DOWN to about 4 coils
+// OD:  2.0mm micro compression spring, 0.3mm stainless wire (STOCK SIZE)
+// Free length: ~4mm (~5 coils; 1.5mm solid height, so it never bottoms out)
+// A 4mm ballpoint-pen spring CANNOT be used — it needs ~4.2mm of row pitch
+// and braille rows are 2.6mm apart. Buy an assortment kit so several sizes
+// are on hand. See docs/SOURCING.md.
+// OLD SPEC (do not use): 4.0mm pen spring on a mid-arm pad
 // Spring constant: as soft as possible (<= 0.1 N/mm) — the 28BYJ-48 has to
 //   compress all six at once, so stiff springs risk stalling the motor
 // Travel: pad top sits 3.5mm below the plate underside with the dot DOWN,

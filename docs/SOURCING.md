@@ -14,16 +14,31 @@
 
 ## 🛒 TO BUY
 
-### 1. Return springs ×6 (+ spares) — the only fiddly item
-**Spec the CAD assumes:** OD ≤ 4.5mm, free length 5–6mm, VERY soft (≤ 0.1 N/mm —
-the 28BYJ-48 must compress all 6 at once without stalling).
-- Search: **"micro compression spring 4mm OD"** / "small compression spring assorted kit"
-  on robu.in, Amazon.in, or a local hardware market.
-- **Free fallback that usually works:** springs from click-type ballpoint pens
-  (Cello/Reynolds clicky pens) — typically ~4mm OD and very soft. Cut to ~6mm with
-  side cutters. Buy 3–4 pens, that's 3–4 springs each... well, one each, so 6 pens. 😄
-- Bench-test before final assembly: motor must complete a full cam revolution with all
-  6 linkages + springs loaded. If it stalls → softer springs or trim coils.
+### 1. Return springs x6 (+ spares) — 2mm OD MICRO springs
+**Spec: 2.0mm OD, ~0.3mm stainless wire, ~4mm free length.** One per braille dot.
+
+> ⚠️ **Ballpoint-pen springs CANNOT be used.** They are ~4mm OD and need ~4.2mm of
+> spacing; braille rows are only **2.6mm** apart, so a pen spring would overlap the
+> spring of the dot above it by 1.4mm. This is geometry, not preference — no nub size
+> fixes it. 2mm OD is the largest that fits (0.6mm to spare).
+
+- Search **"micro compression spring 2mm OD"** or **"compression spring assortment kit"**
+  on Amazon.in. 2mm/3mm/4mm/5mm/6mm OD in 0.3mm stainless is a standard catalogue range.
+- **Buy an assortment kit** (200-400pcs, 15-30 sizes, roughly Rs 400-700) rather than one
+  size — it covers us if the free length needs adjusting after the first assembly.
+- If a seller offers **0.2mm wire**, prefer it: same OD but a wider bore, which gives more
+  clearance around the 1.0mm nub.
+- Working range in the design: 3.5mm when the dot is down, 2.7mm when raised. A ~4mm free
+  length with ~5 coils is ideal (1.5mm solid height, so it never bottoms out).
+
+**Fitting them:** thread each spring over the 1.5mm dome by TWISTING it on (the coil acts
+like a thread against the 1.4mm bore — 0.1mm interference, trivial for steel). Then it sits
+on the linkage flange and drops into the counterbore in the top plate. Glue optional.
+
+**Backup if springs cannot be sourced:** a small disc of **soft open-cell sponge** in place
+of each spring. Must be squishy sponge/upholstery/packing foam — **NOT stiff EVA craft
+foam**, which is roughly 20x too stiff and risks stalling the motor. Free from packaging.
+The printed parts are identical either way, so this can be tested without a reprint.
 
 ### 2. Homing magnets 3×2mm ×1 per cell — small but specific
 Your 8×1mm magnets are for DOCKING. The cam's homing pocket (`braille_cam.scad`) needs a
@@ -31,10 +46,9 @@ Your 8×1mm magnets are for DOCKING. The cam's homing pocket (`braille_cam.scad`
 - Search: **"3x2mm neodymium magnet"** on robu.in / Amazon.in — ₹100–200 for 10–20 pcs.
 - Glue flush into the cam underside pocket at r=17.35 (the 90° position).
 
-### 3. Bearing balls 2mm ×6 (+ spares) — easy
-- Search: **"2mm steel balls bearing"** on Amazon.in / robu.in — usually sold 100+ for
-  ₹100–250. Stainless preferred (chrome steel is fine too, indoors).
-- Glued (CA/superglue) onto the linkage nub tips. Buy once, lifetime supply.
+### 3. ~~Bearing balls 2mm~~ — NO LONGER NEEDED (v7.1)
+The braille dot is now **printed as a dome on the linkage itself**. No steel balls, no
+glue, no machined cup. If you already bought balls, keep them for something else.
 
 ### 4. Pogo connector (4-pin) — DEFERRED DECISION (per v6 audit)
 Don't buy until the design is pinned. Two candidate styles:

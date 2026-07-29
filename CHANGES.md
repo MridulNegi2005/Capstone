@@ -5,6 +5,50 @@
 
 ---
 
+## v7.1 — 2026-07-26 (return spring moves onto the dot axis)
+
+v7.0 seated the return spring on a 5mm pad **halfway along the arm**. Rejected by Mridul,
+and he was right: physically the return force belongs on the dot axis, where the dot is.
+v7.1 puts it there and makes it actually fit.
+
+**Why it did not fit before, and what changed.** Braille rows are 2.6mm apart, so a spring
+wrapped around one dot must be under ~2.4mm OD or it fouls the springs above and below it.
+With the old 2.2mm nub that was impossible at any wire gauge:
+
+```
+nub 2.2mm -> spring ID 2.6, OD 3.1  COLLIDES (-0.5mm)
+nub 1.8mm -> spring ID 2.2, OD 2.7  COLLIDES (-0.1mm)
+nub 1.0mm -> spring ID 1.4, OD 2.0  FITS, 0.6mm to spare
+```
+
+So the nub slimmed 2.2 -> 1.0mm and the spring became a **2mm OD micro spring** (a stock
+catalogue size, 0.3mm stainless). **Ballpoint-pen springs are ruled out permanently** —
+at ~4mm OD they need 4.2mm of pitch and we have 2.6mm.
+
+Side effect worth having: the dot dropped 2.2 -> **1.5mm, which is the real braille
+standard** (1.44-1.6mm). The old dome was oversized.
+
+- **`linkage.scad` rev 4.1** — mid-arm pad deleted; **spring flange** (2.2mm) added on the
+  upper riser; nub 2.2 -> 1.0mm; dome 2.2 -> 1.5mm; count-dots back on the arm.
+- **`top_plate.scad`** — spring counterbores are **coaxial with each dot hole** again (2.2mm
+  x 2.5mm deep), dot hole 2.5 -> 1.7mm. Documented honestly: only 0.4mm of plate is left
+  between the three bores in a column, which is the unavoidable price of a spring on the
+  dot axis at braille pitch.
+- **`mech_layout.scad`** — spring/nub/dome/flange dimensions and the vertical placement now
+  live here, shared by linkage and plate.
+- **`docs/SOURCING.md`** — 2mm micro springs (assortment kit recommended), soft-sponge
+  fallback, and bearing balls marked NO LONGER NEEDED (the dot is printed).
+- **New print plates** for quoting: `print_resin_1_all` (cam+linkages+plate+buttons),
+  `print_resin_2_no_buttons`, `print_resin_3_cam_linkages`.
+
+Assembly: thread each spring over the 1.5mm dome by twisting it on past the 1.4mm bore —
+Mridul's own idea, and exactly the right trick for a 0.1mm interference on a steel coil.
+
+Verified: 15/15 numeric checks pass (spring vs row pitch 0.60mm, flange vs neighbour 0.40mm,
+flange-to-plate clearance when raised 0.20mm, spring working length 3.5mm down / 2.7mm up
+against 1.5mm solid). Flange and dome diameters confirmed by measuring the rendered STL
+directly: 2.20mm at Y=8.0 and 1.50mm at the dome, total height 13.00mm.
+
 ## v7.0 — 2026-07-26 (spread feet — the mechanism becomes buildable)
 
 The v6.x mechanism could not be assembled. Two independent checks proved it:

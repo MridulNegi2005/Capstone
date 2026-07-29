@@ -94,12 +94,46 @@ plate_top_z   = 58.0;  // top plate top surface = the reading surface
 // Linkage foot bottom sits on cam_flat_z, nub top must reach plate_top_z
 link_total_h  = plate_top_z - cam_flat_z;   // 13.0mm
 
-// --- RETURN SPRING SEAT ---
-// Spring pushes DOWN on a pad partway along each arm, out where there is
-// room (NOT at the dot cluster — only 0.4mm free there).
-spring_seat_dist = 7.0;   // distance along the arm from the nub
-spring_od        = 4.0;   // ballpoint-pen spring outer diameter
-spring_seat_d    = 5.0;   // pad diameter on the linkage arm
+// --- RETURN SPRING: COAXIAL WITH EACH DOT (v7.1) ---
+// The spring sits in a counterbore in the top plate's underside, wrapped
+// around the dot, and pushes DOWN on a flange on the linkage's upper riser.
+// The dot travels up and down THROUGH the middle of the spring.
+//
+// v7.0 put this pad mid-arm instead. Rejected: physically the return force
+// belongs on the dot axis, where the dot actually is.
+//
+// SIZE IS FORCED BY THE BRAILLE PITCH. Rows are 2.6mm apart, so a spring
+// around one dot must be under ~2.4mm OD or it fouls the spring above and
+// below it. A 4mm ballpoint-pen spring cannot fit at ANY nub size:
+//    nub 2.2 -> ID 2.6, OD 3.1  COLLIDES (-0.5mm)
+//    nub 1.8 -> ID 2.2, OD 2.7  COLLIDES (-0.1mm)
+//    nub 1.0 -> ID 1.4, OD 2.0  FITS, 0.6mm gap
+// Hence a 2mm OD micro spring (stock size, 0.3mm stainless wire) and a
+// slimmed-down nub. Happy side effect: the dot drops to 1.5mm, which is
+// the REAL braille standard (1.44-1.6mm) instead of the oversized 2.2mm.
+spring_od     = 2.0;   // 2mm OD micro compression spring (stock size)
+spring_wire   = 0.3;   // stainless wire diameter
+spring_id     = spring_od - 2 * spring_wire;   // 1.4mm bore
+spring_free_l = 4.0;   // free length to order (~5 coils; 1.5mm solid)
 
-// Seat centre for dot d, in cam coordinates
-function spring_seat_pos(d) = dot_pos(d) + arm_dir(d) * spring_seat_dist;
+// --- DOT / NUB / FLANGE (shared by linkage.scad and top_plate.scad) ---
+dot_dome_dia  = 1.5;   // the braille dot itself = braille standard size
+nub_width     = 1.0;   // slides inside spring_id (1.4) with 0.2mm/side
+plate_hole_dia = 1.7;  // passes the 1.5mm dome with 0.1mm/side
+flange_dia    = 2.2;   // MUST be > spring_id (or the spring slips past) and
+                       // < row_spacing 2.6 (or it hits the neighbour flange)
+flange_h      = 0.8;   // flange thickness
+
+// Vertical placement, in linkage-local Y (0 = foot bottom = cam surface)
+plate_under_y = plate_under_z - cam_flat_z;      // 9.0
+flange_top_y  = 8.0;   // 0.8mm lift still leaves 0.2mm clear of the plate
+flange_bot_y  = flange_top_y - flange_h;         // 7.2
+spring_recess_depth = 2.5;                       // counterbore into the plate
+// spring works between flange_top_y and the recess ceiling:
+//   dot DOWN 8.0 -> 11.5 = 3.5mm ;  dot UP 8.8 -> 11.5 = 2.7mm
+// so a 4mm free length compresses comfortably and never goes solid (1.5mm).
+
+// ASSEMBLY NOTE: the 1.5mm dome is 0.1mm wider than the 1.4mm spring bore,
+// so the spring is THREADED over the dome by twisting it on (Mridul's own
+// "turn and turn" idea) — trivial interference for a steel coil, and it lets
+// the dot stay full braille size instead of being shrunk to clear the bore.

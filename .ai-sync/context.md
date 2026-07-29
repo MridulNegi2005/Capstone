@@ -214,3 +214,32 @@ offset() INSIDE-OUT, so the fillet pair written the natural-reading way eroded 0
 and deleted every 1.0mm member; and the count-dots initially sat flush on the arm surface
 (zero overlap = separate floating bodies). Still NOT built/tested physically — Mridul has no
 springs yet. Cheap PETG proving print recommended before spending on resin.
+
+## [2026-07-26 23:59] — Claude Code
+**Task:** v7.1 — move the return spring onto the dot axis (Mridul's correction of v7.0)
+**Changes:** Mridul rejected v7.0's mid-arm spring pad: physically the return force belongs
+around the braille dot, with the dot travelling up/down through the middle of the spring and
+a flange on the linkage for the spring to push against. That layout is right, but it only
+fits if the spring shrinks: braille rows are 2.6mm apart, so a coaxial spring must be under
+~2.4mm OD. With the old 2.2mm nub that was impossible at any wire gauge (ID 2.6 -> OD 3.1,
+collides by 0.5mm). Resolution: 2mm OD micro compression spring (stock catalogue size, 0.3mm
+stainless), nub slimmed 2.2 -> 1.0mm, dome 2.2 -> 1.5mm (which is the REAL braille standard,
+1.44-1.6mm, so the dot got better not worse). BALLPOINT-PEN SPRINGS ARE PERMANENTLY OUT —
+4mm OD needs 4.2mm pitch.
+linkage.scad rev 4.1: mid-arm pad deleted, 2.2mm spring flange added on the upper riser,
+count-dots back on the arm. top_plate.scad: spring counterbores coaxial with each dot hole
+(2.2 x 2.5mm deep), dot hole 2.5 -> 1.7mm; documented that only 0.4mm of plate remains
+between the three bores in a column, which is the unavoidable price of a spring on the dot
+axis at braille pitch. mech_layout.scad now owns the spring/nub/dome/flange dimensions.
+SOURCING.md: 2mm micro springs (assortment kit recommended), soft open-cell sponge as the
+no-sourcing backup (NOT EVA craft foam, ~20x too stiff), bearing balls marked NO LONGER
+NEEDED since the dot is printed.
+Three new print plates for price comparison: print_resin_1_all (cam+linkages+plate+buttons),
+print_resin_2_no_buttons, print_resin_3_cam_linkages.
+**Status:** geometry complete and verified — 15/15 numeric checks pass; flange (2.20mm) and
+dome (1.50mm) diameters and total height (13.00mm) confirmed by measuring the rendered STL
+directly rather than trusting the source.
+**Notes:** Assembly detail worth keeping: the 1.5mm dome is 0.1mm wider than the 1.4mm spring
+bore, so the spring is threaded on by twisting — Mridul's own "turn and turn" idea, which
+turned out to be exactly the right trick here. Still nothing physically built; no springs in
+hand. Cheap PETG proving print before any resin spend.
