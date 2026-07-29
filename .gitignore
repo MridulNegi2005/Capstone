@@ -26,3 +26,7 @@ desktop.ini
 *.swp
 *.swo
 *~
+
+# --- Secrets: real credentials, never committed (see *.example.h) ---
+secrets.h
+**/secrets.h

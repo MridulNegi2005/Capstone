@@ -33,9 +33,11 @@
 #include <ArduinoOTA.h>
 
 // ========== WIFI CREDENTIALS ==========
-// >>> CHANGE THESE TO YOUR WIFI <<<
-const char* WIFI_SSID = "***REMOVED***";      // 2.4GHz network (ESP32 can't do 5GHz)
-const char* WIFI_PASS = "***REMOVED***";     // <<< PUT YOUR WIFI PASSWORD HERE
+// Values live in secrets.h, which is GITIGNORED and never committed.
+// First time on a new machine: copy secrets.example.h -> secrets.h and edit it.
+#include "secrets.h"
+const char* WIFI_SSID = WIFI_SSID_VALUE;   // 2.4GHz network (ESP32 can't do 5GHz)
+const char* WIFI_PASS = WIFI_PASS_VALUE;
 // ======================================
 
 // --- Pin definitions ---
@@ -454,7 +456,7 @@ void setup() {
     // After this first USB upload, you can upload wirelessly!
     // In Arduino IDE: Tools -> Port -> "Braillix (192.168.x.x)"
     ArduinoOTA.setHostname("Braillix");
-    ArduinoOTA.setPassword("braillix");
+    ArduinoOTA.setPassword(OTA_PASSWORD);
     ArduinoOTA.onStart([]() {
       // Stop motor during OTA update
       stepper.disableOutputs();
