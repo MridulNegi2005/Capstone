@@ -268,3 +268,17 @@ fit and clearance checks pass, insert/plate mating surfaces measured off the ren
 (0.0 / 2.0 / 3.2mm) rather than trusted from source.
 **Notes:** Mridul MUST still change the actual WiFi password — history scrubbing does not
 undo the exposure. Still nothing physically built; no springs in hand.
+
+## [2026-07-29 15:05] — Claude Code
+**Task:** Close out v7.2 — push, security cleanup, remote control, comment hygiene
+**Changes:** Committed and pushed v7.2 (282fd06) after running the pre-push security gate
+(no secrets in the pushed diff, none in local history, secrets.h still ignored, nothing
+sensitive newly tracked). Fixed stale comments in the three print_resin_* files left over
+from the 8->12 linkage change ("2 columns x 4 rows" -> 3, "+2 spares" -> two full sets,
+"~4% more" -> ~2%) — this project has been bitten repeatedly by stale comments drifting
+from live values, so they get corrected on sight. Enabled Remote Control for all sessions
+(`/config remoteControl=true`) so the local session can be driven from phone/browser.
+**Status:** completed — working tree clean, origin/main == local.
+**Notes:** Remote Control runs the session ON THIS MACHINE (phone is just a window); it is
+NOT the same as Claude Code on the web, which runs in the cloud against the GitHub repo and
+therefore cannot reach OpenSCAD or render STLs.
