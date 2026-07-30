@@ -384,6 +384,7 @@ else.
 | Waiting on | Fixes |
 |---|---|
 | M2, M6, M7 | The cam sits 2mm too high, which makes every dot permanently readable |
+| M2 | A second, separate 2mm error: the mid-plate rests on top of its ledge, not level with it, so the motor face lands 2mm higher than the box expects |
 | M11b | Whether the hall sensor pocket I just built is deep enough |
 | M12–M16 | The barrel jack holder, which is currently 100% invented |
 | M18, M21 | Whether your ESP32 can physically plug into the pod |

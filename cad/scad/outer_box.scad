@@ -14,6 +14,22 @@ internal_length   = 60;
 internal_width    = 60;
 elec_pocket_h     = 16;
 // >>> BLOCKED ON MEASUREMENT (M2) — see docs/MEASUREMENTS_NEEDED.md <<<
+//
+// v7.6: THIS NUMBER IS ALSO ARITHMETICALLY WRONG BY 2mm, independently of the
+// motor. The breakdown below counts floor + pocket + midplate + motor, but the
+// mid-plate does not sit at z=20 — it sits ON TOP of the 2mm ledge, because its
+// edge (29.75) is wider than the ledge opening (28.5) so it cannot drop inside.
+// Real seating is z 22..24, which puts the motor face at 43, not 41.
+//
+// Do NOT just change 41 to 43. That raises the base plate to 48, the standoffs
+// carry the top plate to 56..60, and the box is only 58 tall — the top plate ends
+// up 2mm proud. The two candidate repairs are:
+//   (a) drop the ledge to z 18..20, costing 2mm of electronics pocket, or
+//   (b) shorten base_plate standoff_height 8 -> 6, changing link_total_h
+// Which is correct depends on the measured motor height, so this is deliberately
+// left alone to be re-derived with the cam z-stack in ONE pass. Fixing links in
+// this chain individually only relocates the error.
+//
 // The "19" here is the 28BYJ-48 can height taken from a datasheet, never measured.
 // It sets how high the base plate sits, which sets the cam height, which sets the
 // linkage length. If the real motor is taller or shorter than 19mm, EVERY dot ends
