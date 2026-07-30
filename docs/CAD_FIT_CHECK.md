@@ -1,5 +1,27 @@
 # CAD FIT CHECK — will the real parts fit the printed parts?
 
+> ## ⚠️ SUPERSEDED IN PART — read `CAD_CHANGELOG_v7.5.md` alongside this
+>
+> This document audited **v7.2/v7.3**. On 2026-07-30 a repair pass (**v7.5**) fixed every
+> defect that did not require calipers. The findings below are preserved as the *record of
+> what was wrong*, but the following are **FIXED and no longer describe the source**:
+>
+> | Section | Defect | Status |
+> |---|---|---|
+> | §2a | Hall pocket entirely inside the cam pocket | ✅ rebuilt on the plate underside at (0, 17.35) |
+> | §2c | Homing magnet craters the cam tracks | ✅ blind 1.2mm pocket, 3×1mm magnet (it craters **three** tracks, not two — §2c undercounts) |
+> | §3a | Right motor screw opens into the spring cavity | ✅ spring cavity deleted; pilots instead of clearance holes |
+> | §3b | Left ear hole 0.35mm from the plate edge | ✅ `base_length` 56 → 58, wall now 1.35mm |
+> | §5 | Muscle-board bosses clash with the ULN2003 | ✅ bosses now default OFF |
+> | §6a | ESP32 overruns the pod by 1.75mm | ✅ `pod_length` 64 → 68 |
+> | §6c | USB cutout ~2mm too high | ✅ arithmetic bug fixed (ignored `hdr_channel_depth`) |
+> | §6d | USB cutout too small for a real plug | ✅ 10×7 → 13×9 |
+> | §7a | Jack cradle overruns the cavity | ✅ fixed, plus an assert so it can't recur silently |
+>
+> **Still open, blocked on measurement** (see `MEASUREMENTS_NEEDED.md`):
+> §4c cam z-stack · §2b hall sensor thickness · §7b real jack dimensions ·
+> §6b **30-pin vs 38-pin row pitch — the one that decides whether the ESP32 fits at all**.
+
 **Date:** 2026-07-29
 **Scope:** physical fit of purchased/owned components inside the v7.2 printed parts.
 **Status of the build:** nothing has ever been assembled. This is the last check before spending.

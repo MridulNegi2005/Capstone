@@ -75,9 +75,9 @@ For assembly later you either desolder the bare 3-pin sensor off the module, or 
 | # | Component | Spec | Qty | Est. ₹ |
 |---|---|---|---|---|
 | 6 | **Micro compression springs** | **2.0mm OD**, ~0.3mm stainless wire, ~4mm free length. Buy an assortment kit. 🔴 Pen springs (4mm) **cannot** work — braille rows are 2.6mm apart. | 6 + spares | ~500 |
-| 7 | **Homing magnet** | **3mm dia × 2mm thick** neodymium. Your 8×1mm ones will **not** fit the cam pocket. | 1 (buy 10) | ~120 |
+| 7 | **Homing magnet** | 🔴 **3mm dia × 1mm thick** neodymium — **CHANGED from 3×2mm in v7.5.** The cam disc floor is only 2mm, so a 2mm magnet's pocket cut clean through it and punched a hole across three cam tracks. 1mm leaves 0.8mm of floor and couples just as well. Your 8×1mm ones are too wide. | 1 (buy 10) | ~120 |
 | 8 | **M2.5 × 25mm bolts** | Top plate → standoffs → box bosses | 4 | ~60 |
-| 9 | **M4 × 10mm bolts + nuts** | Motor mounting ears | 2 | ~30 |
+| 9 | **M4 × 10mm screws** | Motor mounting ears. **v7.5: nuts no longer needed** — the right-hand ear sits under the spinning cam with nowhere to put a nut, so the screws now thread directly into Ø3.3 pilot holes in the base plate. Self-tapping/thread-forming M4 preferred. | 2 | ~30 |
 | 10 | **M2 × 8mm self-tap** | Pod lid. **NOT M2×6** — through a 4mm lid that leaves only 2mm of thread. | 2 | ~40 |
 | 11 | **Superglue or 5-min epoxy** | Glues the resin dot insert into the PETG plate. Epoxy preferred — you get time to seat it square. | 1 | ~80 |
 | 12 | **Digital calipers** | 150mm digital | 🔴 Both open project blockers are *measurements* (motor ×8, jack body). | 1 | ~600 |
