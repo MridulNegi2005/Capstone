@@ -137,11 +137,26 @@ module teardrop_magnet_pocket() {
 
 module vertical_wire_guides() {
     // Thin ribs on ±X inner walls channelling pogo wires from z31 down to pocket
+    //
+    // v7.6 FIX — the -X rib was a free-standing blade. cube() is NOT centred: it
+    // always grows in +X. Placing it at x = sx*29 therefore pushed the +X rib INTO
+    // its wall (29..31, buried 1mm, correct) but pushed the -X rib AWAY from its
+    // wall (-29..-27, a 1mm gap). That left a 2 x 1.5 x 27mm blade — 18:1
+    // slenderness — attached by nothing but the 0.1mm floor overlap over 3mm².
+    // It survived the Volumes==2 check precisely BECAUSE of that sliver, which is
+    // why an STL volume count is necessary but not sufficient: connected is not
+    // the same as attached.
+    // Now built from an explicit span per side so each rib protrudes guide_depth
+    // inward from its own wall and buries 1mm into it. Also centred in Y.
     guide_w = 1.5;
     guide_depth = 2;
+    bury = 1.0;
+    h = 31 - floor_thickness + 0.1;
     for(sx = [-1, 1]) {
-        translate([sx * (internal_length/2 - guide_depth/2), 0, floor_thickness - 0.1])
-            cube([guide_depth, guide_w, 31 - floor_thickness + 0.1], center=false);
+        x_outer = sx * (internal_length/2 + bury);   // 1mm inside the wall
+        x_inner = sx * (internal_length/2 - guide_depth);
+        translate([min(x_outer, x_inner), -guide_w/2, floor_thickness - 0.1])
+            cube([guide_depth + bury, guide_w, h]);
     }
 }
 
