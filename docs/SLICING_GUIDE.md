@@ -78,16 +78,26 @@ choose **Advanced**), or you won't see half of these.
 |---|---|
 | **Enable support** | **OFF (unchecked)** |
 
-**Every overhang in these parts is already solved in the CAD:**
-- Magnet pockets are **teardrop-shaped** so they self-support
-- Pogo windows have **0.6mm printed-in bridges**
-- The wire-exit hole has a **printed-in bridge** (added 2026-07-30 after your feedback — that
-  one genuinely was missing, you were right)
-- Corner bosses have **gusset cones** that widen toward the floor
+**Nothing in these parts needs support, for two separate reasons:**
 
-> ⚠️ **These bridges are meant to be removed.** After printing, push them out with a small
-> screwdriver or snip them with flush cutters. They are thin (0.6mm) and pop out easily.
-> If you leave them in, the pogo pins and wires won't fit through.
+**1. The overhangs that could be solved by shape, are.** Magnet pockets are **teardrop-shaped**
+(a 45° peak instead of a round top) so they hold themselves up. Corner bosses have **gusset
+cones** widening toward the floor. Neither leaves anything to remove.
+
+**2. Everything else is just a normal bridge.** Every hole in a wall is a 10–15mm span, and a
+well-cooled printer bridges **20–30mm** unaided:
+
+| Opening | Span | |
+|---|---|---|
+| Pogo slots (×2) | 10mm | routine bridge |
+| Wire exit | 15mm | routine bridge |
+| USB cutout (pod) | 10mm | routine bridge |
+| Nav holes (×3) | 4.2mm | trivial |
+
+> **Note (v7.4):** earlier versions modelled thin sacrificial bridges into these holes. They
+> have been **removed** — they were redundant at these spans, and if you forgot to snap them
+> out the pogo pins and wires could not pass through. **There is now nothing to remove from
+> any hole.** The STL is exactly the finished part.
 
 **If you print with supports ON, the slicer fills the whole 60×60×50mm cavity with lattice
 that you cannot reach.** That is exactly what happened to you.
@@ -199,7 +209,6 @@ ceiling.
 
 | Job | How |
 |---|---|
-| Remove the sacrificial bridges | Push out with a small flat screwdriver, or snip with flush cutters. Pogo windows (×2) and wire exit (×1). |
 | Clean the screw holes | The M2.5 pilots print ~0.2–0.3mm undersize. Run a **2.5mm drill bit** through by hand — do not power-drill, you'll melt it. |
 | Magnet pockets | Should be clear (teardrop shape). If tight, a **8mm** bit turned by hand. |
 | Stringing wisps | Snip with flush cutters, or wave a heat gun / lighter **quickly** past them (do not hold it there) |

@@ -173,13 +173,8 @@ module nav_count_grooves() {
     }
 }
 
-module usb_bridge() {
-    // Sacrificial bridge across the TOP of the USB cutout so PETG prints the overhang
-    // cleanly (upright print). SNAP/CUT OUT after printing. (Not needed on resin.)
-    // v6.1: 0.4→0.6mm (3 layers @ 0.2) — a single layer adheres poorly.
-    translate([-pod_length/2 - 1, -usb_w/2, usb_z + usb_h - 0.6])
-        cube([pod_wall + 2, usb_w, 0.6]);
-}
+// USB-cutout sacrificial bridge REMOVED (v7.4) — the cutout is a 10mm span, which any
+// slicer bridges unaided. See the note in outer_box.scad. Do not add it back.
 
 module lid_screw_bosses() {
     // 2× bosses on shell top rim for M2 lid screws (F14 fix)
@@ -218,7 +213,6 @@ module esp32_pod_shell() {
         // ±Y skirt, so the inner lip is redundant and would foul the skirt. Module kept
         // below (unused) for reference.
         lid_screw_bosses();
-        usb_bridge();         // PETG sacrificial bridge over USB cutout
     }
 }
 

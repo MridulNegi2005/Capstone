@@ -68,8 +68,12 @@ module cable_hook(px, py, pz) {
     post_w = 2;
     post_h = wire_hook_h;
     hook_overhang = 1.5;
-    translate([px - post_w/2, py - post_w/2, pz - 0.1]) {
-        cube([post_w, post_w, post_h + 0.1]);
+    // v7.4: sink 0.4mm INTO the pocket floor. The hooks sit inside the electronics
+    // pocket, whose cut removes the floor from z=3.9 up — so a hook starting at exactly
+    // 3.9 only TOUCHED the floor and never merged, leaving 4 separate bodies in the STL.
+    // Slicers usually cope, but a coplanar touch is fragile; a real overlap is not.
+    translate([px - post_w/2, py - post_w/2, pz - 0.4]) {
+        cube([post_w, post_w, post_h + 0.4]);
         translate([0, 0, post_h - 1])
             cube([post_w, post_w + hook_overhang, 1]);
     }
@@ -86,27 +90,21 @@ module floor_wire_gutters() {
         cube([gutter_w, 40, gutter_d + 0.1]);
 }
 
-module pogo_window_bridges() {
-    // Sacrificial bridge across the TOP of each ±X pogo slot for clean PETG printing of
-    // the overhang. SNAP/CUT OUT after printing. (Not needed on resin.)
-    // v6.1: 0.4→0.6mm (3 layers @ 0.2) — a single layer adheres poorly on the Kobra Neo.
-    // Pogo slot = cube([6,10,8]) centered at (±34, 0, 31) → top face at z=35.
-    for(sx = [-1, 1])
-        translate([sx * shell_length/2, 0, 35 - 0.3])
-            cube([6, 10, 0.6], center=true);
-}
-
-module wire_exit_bridge() {
-    // v7.4: the +Y wire-exit hole is 15mm wide and its top edge was a completely
-    // unsupported horizontal span — the ONLY hole in this part without a bridge.
-    // On the first real print this is exactly the sort of overhang that either sags
-    // into the opening or forces the slicer to generate interior support that then
-    // cannot be reached with pliers.
-    // Hole = cube([15, wall+2, 6]) centred at (0, shell_width/2, floor+3),
-    // so its top face is at z = floor_thickness + 3 + 3 = 10.
-    translate([0, shell_width/2, 10 - 0.3])
-        cube([15, wall_thickness + 2, 0.6], center=true);
-}
+// --- SACRIFICIAL BRIDGES REMOVED (v7.4, 2026-07-30) ---
+// v6.0 through v7.3 modelled thin 0.6mm "sacrificial bridge" layers across the pogo
+// windows and the wire-exit hole. They have been REMOVED deliberately. Do not add
+// them back.
+//
+// Reason: every opening in this part is a 10-15mm span, and a well-cooled FDM printer
+// bridges 20-30mm unsupported. The slicer spans these on its own, with no supports and
+// no help from the CAD. The bridges were redundant, they made the STL not represent the
+// finished part, and they carried a real failure mode: if they were not snapped out, the
+// pogo pins and wires could not pass through. A slightly sagged hole edge is cosmetic;
+// a blocked hole is a functional failure.
+//
+// KEPT, and do NOT remove: teardrop_magnet_pocket(). That is shape-based self-support
+// (a 45 degree peak instead of a round top), which needs no post-processing and is the
+// correct way to solve an overhang in CAD.
 
 module teardrop_magnet_pocket() {
     // Horizontal-axis magnet pocket with a 45° "roof" — round side-wall holes fused
@@ -228,11 +226,6 @@ union() {
             translate([0, 0, 3]) cylinder(d=2.3, h=boss_height + 0.1);
         }
     }
-
-    // Sacrificial bridges over every wall opening (PETG print aid).
-    // SNAP/CUT THESE OUT after printing — they are meant to be removed.
-    pogo_window_bridges();
-    wire_exit_bridge();
 
     // Muscle board mounting bosses
     muscle_board_bosses();
