@@ -33,7 +33,3 @@ secrets.h
 
 # --- Agent scratch (Codex nav-cap review artifacts) ---
 .tmp_nav_review/
-
-# Sliced G-code — regenerable from cad/stl + printing/orca profiles
-# via: bash printing/orca/slice.sh
-printing/gcode/
