@@ -135,30 +135,28 @@ module teardrop_magnet_pocket() {
     }
 }
 
-module vertical_wire_guides() {
-    // Thin ribs on ±X inner walls channelling pogo wires from z31 down to pocket
-    //
-    // v7.6 FIX — the -X rib was a free-standing blade. cube() is NOT centred: it
-    // always grows in +X. Placing it at x = sx*29 therefore pushed the +X rib INTO
-    // its wall (29..31, buried 1mm, correct) but pushed the -X rib AWAY from its
-    // wall (-29..-27, a 1mm gap). That left a 2 x 1.5 x 27mm blade — 18:1
-    // slenderness — attached by nothing but the 0.1mm floor overlap over 3mm².
-    // It survived the Volumes==2 check precisely BECAUSE of that sliver, which is
-    // why an STL volume count is necessary but not sufficient: connected is not
-    // the same as attached.
-    // Now built from an explicit span per side so each rib protrudes guide_depth
-    // inward from its own wall and buries 1mm into it. Also centred in Y.
-    guide_w = 1.5;
-    guide_depth = 2;
-    bury = 1.0;
-    h = 31 - floor_thickness + 0.1;
-    for(sx = [-1, 1]) {
-        x_outer = sx * (internal_length/2 + bury);   // 1mm inside the wall
-        x_inner = sx * (internal_length/2 - guide_depth);
-        translate([min(x_outer, x_inner), -guide_w/2, floor_thickness - 0.1])
-            cube([guide_depth + bury, guide_w, h]);
-    }
-}
+// --- vertical_wire_guides() DELETED IN v7.6. DO NOT ADD IT BACK. ---
+// It was a single flat blade, 2 x 1.5mm in section and 27mm tall, standing off
+// each ±X inner wall. It was called a "wire guide", but a lone blade cannot guide
+// anything: retaining a wire needs it captured on more than one side — a channel
+// (two walls), a hook (an overhang), or a tie loop. This had none. A wire laid
+// against it simply falls away.
+//
+// Two reasons it went rather than getting fixed:
+//   1. 27mm tall at 1.5mm thick is 18:1 slenderness — precisely the geometry that
+//      snaps or gets knocked over mid-print. Real parts have already been lost to
+//      slender features on this box.
+//   2. It aimed to guide wires from the pogo carrier, whose dimensions are all
+//      still marked "measure real part!" and whose pogo pins are not even owned.
+//      It was managing wires from a component that does not exist.
+//
+// If pogo wiring ever does need managing, copy cable_hook() below — that is the
+// correct pattern, an L with a 1.5mm overhang that actually traps a bundle — and
+// size it to the real connector.
+//
+// NOT the same thing as floor_wire_gutters() above, which is KEPT: those are
+// recessed channels cut into the pocket floor, and a recess with two side walls
+// and a base genuinely does retain a wire.
 
 module front_chevron_groove() {
     // Bold ^ groove engraved into the front (-Y) wall, apex up = "this side front, this way up".
@@ -267,9 +265,6 @@ union() {
     cable_hook(-14,  20, floor_thickness);
     cable_hook( 14, -20, floor_thickness);
     cable_hook( 14,  20, floor_thickness);
-
-    // Vertical wire guides on ±X inner walls
-    vertical_wire_guides();
 
     // Bottom-edge orientation ridge — v6.1 rebuilt.
     // The old r=0.8 sphere hull sat at y=-32.5, INSIDE the 4mm wall — it never
