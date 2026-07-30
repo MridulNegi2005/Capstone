@@ -30,6 +30,7 @@
 //   Nav caps     — shaft DOWN on plate, dome + raised symbol UP
 // =========================================================
 
+include <esp32_pod_params.scad>  // nav_shaft_len for cap build-plane placement
 use <nav_cap.scad>       // nav_cap_prev(), nav_cap_select(), nav_cap_next()
 use <braille_cam.scad>  // braille_cam()
 
@@ -47,7 +48,7 @@ translate([0, 0, 0])
 // Each cap: Ø8mm base × 6.2mm tall, 12mm pitch
 // -------------------------------------------------------
 translate([0, -40, 0]) {
-    translate([-12, 0, 0]) nav_cap_prev();
-    translate([  0, 0, 0]) nav_cap_select();
-    translate([ 12, 0, 0]) nav_cap_next();
+    translate([-12, 0, nav_shaft_len]) nav_cap_prev();
+    translate([  0, 0, nav_shaft_len]) nav_cap_select();
+    translate([ 12, 0, nav_shaft_len]) nav_cap_next();
 }

@@ -10,16 +10,16 @@
 //   - Right cap  : ▷ filled triangle (Next)
 //
 // Assembly (unchanged from v1.0):
-//   1. Insert cap shaft through Ø4.2mm hole in pod front wall (-Y)
-//   2. Flange (Ø8mm) sits flush against outside of pod wall
-//   3. Shaft protrudes 0.5mm inside pod — rests on 6x6x5mm tactile switch
+//   1. Insert the rear-facing cap stem through the Ø4.2mm hole in pod front wall (-Y)
+//   2. Flange (Ø8mm) sits flush against the outside of the pod wall
+//   3. Stem projects 0.5mm inside the 4mm wall — rests on 6x6x5mm tactile switch
 //   4. Press cap → compresses switch → electrical signal
 //   5. Switch spring returns cap to rest position
 //
 // Tactile switch: 6×6×5mm DIP
 //
 // Print: PETG or resin. Print flat (dome up). No supports needed.
-// Post: sand dome smooth if desired. No glue — friction + switch spring retains.
+// Post: sand dome smooth if desired. No glue — flange + switch spring retain the cap.
 // =========================================================
 
 include <esp32_pod_params.scad>
@@ -31,8 +31,11 @@ $fn = 60;
 
 module cap_body() {
     union() {
-        // A. Shaft — inserts through pod wall, 0.5mm protrudes inside to press switch
-        cylinder(d=nav_shaft_dia, h=nav_shaft_len);
+        // A. Rear-facing stem — starts at the flange's inner face (z=0) and reaches
+        // through the 4mm wall, 0.5mm into the pod. It must be negative Z so it
+        // actually protrudes behind the flange rather than being buried in the dome.
+        translate([0, 0, -nav_shaft_len])
+            cylinder(d=nav_shaft_dia, h=nav_shaft_len);
 
         // B. Retention flange — sits on pod outer face, prevents cap falling through
         cylinder(d=nav_flange_dia, h=nav_flange_h);
@@ -102,7 +105,7 @@ module nav_cap_next() {
 }
 
 // --- GENERATE ALL 3 CAPS laid out for printing (12mm pitch) ---
-// Shaft faces DOWN on build plate — dome + raised symbol face up — no supports needed
+// Stem faces DOWN on build plate — dome + raised symbol face up — no supports needed
 translate([-12, 0, 0]) nav_cap_prev();
 translate([  0, 0, 0]) nav_cap_select();
 translate([ 12, 0, 0]) nav_cap_next();

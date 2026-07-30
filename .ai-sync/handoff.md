@@ -1,9 +1,21 @@
 # Active Handoff
-> Last updated by: Claude Code
-> Timestamp: 2026-07-29T15:05:00+05:30
+> Last updated by: Claude Code (verifying Codex)
+> Timestamp: 2026-07-30T01:30:00+05:30
 
 ## Current Task
-**v7.2 is complete, verified, committed and pushed (282fd06). Nothing is half-finished.**
+**Nav-button CAD repaired (Codex) and VERIFIED (Claude). But the v7.3 audit found FIVE
+blocking CAD defects — the mechanism is NOT ready for assembly. See `docs/CAD_FIT_CHECK.md`.**
+
+Blocking, all verified from source:
+1. **Hall pocket does not exist** — corner r=22.31 sits inside the r=23.00 cam pocket, same
+   z-range. Also sized for a bare TO-92, not the owned blue module.
+2. **Motor right ear hole (x=+9.5) is over the spring-cavity void** — nothing to screw into.
+3. **Nav buttons** — FIXED by Codex, verified: stem now 4.5mm behind the flange, reaches
+   0.5mm past the 4mm wall.
+4. **ESP32 overruns the pod cavity by 1.75mm**; USB cutout at the wrong height.
+5. **Cam homing-magnet pocket craters tracks 2, 3 AND 4** on the linkage running surface.
+
+None of these block the PPT demo, which is breadboard-only (Tier 0).
 
 The braille cell mechanism is now geometrically sound and split sensibly between resin and
 PETG. The project is blocked on PHYSICAL work, not CAD.
@@ -14,7 +26,9 @@ sizes and the dot-insert dimensions. Do NOT re-declare any of those numbers in p
 duplicated constants drifting out of sync is what caused most of the v6.x bugs.
 
 ## In Progress
-Nothing is mid-edit. Two things are DEFERRED, both waiting on Mridul, not on code:
+No CAD edit is mid-flight. The nav caps are now printable: a Ø3.8 mm rear-facing stem projects 4.5 mm behind the flange, through the Ø4.2 mm pod hole. The combined resin plate and standalone nav-cap STL were regenerated and checked as closed manifold shells.
+
+Two other items are DEFERRED, both waiting on Mridul, not on code:
 
 1. **Motor redesign** — his real 28BYJ-48 has a different shaft/body than the CAD assumes.
    Needs 8 caliper measurements (body dia, can height, shaft->body-centre offset, shaft dia,
@@ -24,6 +38,7 @@ Nothing is mid-edit. Two things are DEFERRED, both waiting on Mridul, not on cod
    body W x L x H plus the barrel bore.
 
 ## Next Steps
+1. Bench-test one printed nav cap against the actual 6x6 tactile switch before ordering the final resin batch. The switch body is located forward by the pod's inner front wall; the back cage wall takes press load.
 1. 🔴 **Mridul must change his actual WiFi password.** History was scrubbed with
    git-filter-repo and force-pushed, and GitHub is clean, but the password was public —
    GitHub caches by SHA and any fork retains it. Treat it as burned.

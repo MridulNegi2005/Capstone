@@ -30,3 +30,6 @@ desktop.ini
 # --- Secrets: real credentials, never committed (see *.example.h) ---
 secrets.h
 **/secrets.h
+
+# --- Agent scratch (Codex nav-cap review artifacts) ---
+.tmp_nav_review/

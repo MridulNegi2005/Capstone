@@ -15,6 +15,10 @@
 // Needs separately: 6x 2mm-OD micro compression springs (see SOURCING.md).
 // =========================================================
 
+// nav_shaft_len lives in esp32_pod_params.scad. 'use' imports MODULES ONLY,
+// never variables, so nav_cap.scad alone leaves it undef and the caps silently
+// vanish from the plate. Must be include, not use.
+include <esp32_pod_params.scad>
 use <braille_cam.scad>   // braille_cam()
 use <linkage.scad>       // linkage_3d_v4(dot)
 use <dot_insert.scad>    // dot_insert()
@@ -47,7 +51,9 @@ for (i = [0 : len(linkage_dots) - 1])
 // --- DOT INSERT ---
 translate([0, -32, 0]) dot_insert();
 
-// --- NAV BUTTON CAPS: shaft DOWN, dome + raised symbol UP (no supports) ---
-translate([14, -32, 0]) nav_cap_prev();
-translate([26, -32, 0]) nav_cap_select();
-translate([38, -32, 0]) nav_cap_next();
+// --- NAV BUTTON CAPS: rear-facing stem on the plate, dome + symbol upward ---
+// nav_cap's flange is at local z=0 and its stem extends to -nav_shaft_len.
+// Lift only the caps so their stems share the build plane with the cam/linkages.
+translate([14, -32, nav_shaft_len]) nav_cap_prev();
+translate([26, -32, nav_shaft_len]) nav_cap_select();
+translate([38, -32, nav_shaft_len]) nav_cap_next();

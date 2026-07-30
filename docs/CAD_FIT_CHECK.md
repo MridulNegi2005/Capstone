@@ -44,11 +44,32 @@ Only the 8x1mm docking magnets have ever been physically measured (`docs/SOURCIN
 | **Barrel jack hole** | Ø11.5 at (-22, +18) on the lid | 5.5/2.1 panel jack, ~Ø11 thread [SPEC] | **UNVERIFIED** | User's jack is a yellow screw-terminal type, not the modelled panel jack |
 | **Barrel jack cradle** | inner 12 x 9.5 x 11, walls 1.5 → outer reaches **x = -29.5** | must fit inside cavity x ≥ -28 | **FAILS** | 1.5 mm interference — the lid will not close. And all three dims are PLACEHOLDERS |
 | **Docking magnets** | Ø8.4 x 1.2 pockets, 2 per face at y=±14, 4 mm wall | 8 x 1 mm NdFeB discs — **measured, in hand** | **FITS** | Only re-confirm the newly bought batch is the same 8x1 |
-| **Nav buttons — cap shaft** | shaft h=4.5 from z=0, flange also from z=0 → only **3.0 mm** of shaft beyond the flange | must cross a 4 mm wall | **FAILS** | Shaft is 1 mm short of even reaching the inside of the wall |
-| **Nav buttons — switch reach** | cage depth 7.2 mm, switch 5 mm total, nothing locates it forward | plunger must meet the shaft | **FAILS** | ~1.7 mm dead gap even if the shaft were long enough |
-| **6x6x5 tactile switch in cage** | 6.4 mm slot, 7.2 mm depth, legs vertical | 6.0 x 6.0 x 5.0 body [SPEC] | **FITS** | Body fits; actuation does not (above) |
+| **Nav buttons — cap stem** | Ø3.8 stem projects **4.5 mm behind** the flange through a Ø4.2 hole | must cross a 4 mm wall | **FITS (nominal)** | Stem reaches 0.5 mm inside; 0.4 mm diametral clearance allows resin-in-PETG sliding |
+| **Nav buttons — switch reach** | The 6 mm switch body is stopped by the pod's inner front wall; cage back wall takes press load | plunger must meet the stem | **FITS (nominal)** | The front wall is the forward datum; bench-test the actual switch's plunger before final resin batch |
+| **6x6x5 tactile switch in cage** | 6.4 mm slot, 7.2 mm depth, legs vertical | 6.0 x 6.0 x 5.0 body [SPEC] | **FITS** | Body and revised cap reach fit on the nominal switch geometry |
 | **Dot insert into top plate** | body 11.0 into 11.2 opening; flange 15.0 into 15.2 rebate; heights 2.0 / 1.2; glue shelf 2.0 mm wide, 105.6 mm² | resin tile printed from the same file | **FITS** | Verified numerically. Only risk is FDM square holes printing undersize |
 | **Base-plate standoffs** | Ø6 posts at x=±26, plate half-length 28 → 1 mm hangs off the edge | supported footprint | **UNVERIFIED / cosmetic** | Prints as a small unsupported overhang; not structural |
+
+---
+
+## Required outer-box changes — handout checklist
+
+These items are deliberately **not** applied to `outer_box.scad` yet. They either require
+the real motor dimensions or a hardware-choice decision; changing them from catalogue
+numbers would simply move the fit failure somewhere else.
+
+| Priority | Required change | Why | Prerequisite |
+|---|---|---|---|
+| Blocker | Re-derive `base_plate_z` and the motor-height allowance | The current 41 mm motor-face height is an unmeasured assumption. It controls the cam/linkage vertical stack. | Measure the actual motor can height and shaft height. |
+| Blocker | Redesign the base-plate spring cavity around both motor ears | The right motor screw opens into the existing 22 × 16 mm through-window, leaving a one-screw mount. | Measure the actual motor mounting-ear envelope and hole centres. |
+| Blocker | Widen/reposition the base-plate support footprint if the motor-ear fix needs it | The left ear currently has only a 0.35 mm edge wall and the base standoffs overhang the plate by 1 mm. | Motor-ear measurement, then confirm the revised plate still clears the 60 mm shell cavity and corner bosses. |
+| Required before installing the owned Hall module | Add a real Hall-module bracket in the outer-box electronics area, or commit to a measured bare-sensor design | The current base-plate pocket is entirely subsumed by the cam pocket and cannot hold the owned module. | Decide module versus desoldered sensor; measure its footprint and sensing-face offset. |
+| Decision required | Remove/relocate the four future-muscle-board bosses when using the ULN2003 module | A 35 mm-wide ULN2003 can collide with the y=±19 mm bosses in the outer-box electronics pocket. | Measure the actual ULN2003 board and choose prototype driver versus future muscle PCB. |
+
+**Do not alter the 68 × 68 mm shell, docking windows, magnet pockets, or 4 mm walls as part of
+this repair.** Those features are independent of the motor and have already been physically
+fit-tested. The next safe sequence is: measure hardware → update the dependent base/mid/cam/
+outer-box dimensions together → render the full assembly → print a cheap proving part.
 
 ---
 
@@ -525,9 +546,7 @@ Blocking failures that are certain from the source, independent of any measureme
 5. The **ESP32 board overruns the pod cavity by 1.75 mm** (§6a).
 6. The **USB cutout is ~2 mm above the port** (§6c).
 7. The **jack cradle overruns the pod cavity by 1.5 mm**, with placeholder dimensions (§7a).
-8. The **nav-cap shaft is 1 mm short of crossing its own wall**, and the switch is a further ~1.7 mm
-   behind that — the buttons cannot actuate (table, §1).
-9. The **cam z-stack does not close**: hub 2 mm too long, shaft ~6 mm too long for the open bore,
+8. The **cam z-stack does not close**: hub 2 mm too long, shaft ~6 mm too long for the open bore,
    putting all six dots permanently proud and the shaft into the dot-cluster risers (§4c).
 
 What actually passes: the **dot insert / top plate** interface (§9), the **docking magnets** (§8),

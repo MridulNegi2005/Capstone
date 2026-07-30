@@ -85,13 +85,13 @@ tie_post_hole    = 2;
 // --- NAVIGATION BUTTONS (front face, -Y wall) ---
 // 3× PS-style flanged caps: Previous (<), Select (O), Next (>)
 // 6×6×5mm tactile switches held in printed snap pockets behind wall
-nav_shaft_dia    = 4.0;
+nav_shaft_dia    = 3.8;    // resin stem; 0.4mm diametral clearance in the Ø4.2 PETG hole
 nav_hole_dia     = 4.2;    // 0.2mm sliding clearance
 nav_flange_dia   = 8.0;
 nav_flange_h     = 1.5;
 nav_cap_body_dia = 7.5;
 nav_cap_body_h   = 3.5;
-nav_shaft_len    = 4.5;    // 4mm through wall + 0.5mm inside
+nav_shaft_len    = 4.5;    // measured from flange INNER face: 4mm wall + 0.5mm to switch plunger
 nav_z            = pod_height * 0.42;  // ~24.4mm — comfortable thumb height
 nav_x_positions  = [-20, 0, 20];
 
