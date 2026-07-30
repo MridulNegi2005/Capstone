@@ -13,7 +13,12 @@
 // =========================================================
 
 // --- POD SHELL DIMENSIONS ---
-pod_length       = 64;     // X — depth (USB end to dock end); fits 51.5mm board + walls
+// v7.5: 64 -> 68. The 51.5mm board offset +4mm in X spanned x = -21.75..+29.75
+// inside a cavity that ended at +28 — a 1.75mm interference, so the DevKit
+// physically would not go in. 68 makes the internal cavity 60 (+/-30) and, as a
+// bonus, makes the pod a 68x68x58 cube exactly matching a cell, so the docked
+// chain really is a uniform row of bricks. The +X dock face is unchanged.
+pod_length       = 68;     // X — depth (USB end to dock end)
 pod_width        = 68;     // Y — matches cell shell_width for uniform chain look
 pod_height       = 58;     // Z — matches cell shell_height
 pod_wall         = 4;      // Wall thickness
@@ -30,30 +35,55 @@ pod_int_width    = pod_width  - 2 * pod_wall;  // 60mm
 // Board: ~51.5 × 28mm, 15 pins/side, pin-row pitch ~25.4mm (MEASURE AND CONFIRM)
 // Two 1×15 female header strips sit in printed channels on the floor.
 // DevKit's male pins plug straight down — zero soldering, fully removable.
-devkit_length    = 51.5;   // Board X extent
-devkit_width     = 28.0;   // Board Y extent
-hdr_row_pitch    = 25.4;   // Pin-row centre-to-centre (measure your board!)
+devkit_length    = 51.5;   // MEASURE (M20) — Board X extent
+devkit_width     = 28.0;   // MEASURE (M21) — Board Y extent
+
+// >>> THE SINGLE MOST IMPORTANT UNMEASURED NUMBER IN THIS PROJECT <<<
+// 25.4mm row pitch describes the 38-PIN DevKit. Every document in this repo says
+// the board is the 30-PIN DOIT V1, which is ~22.86mm (0.9") pitch. If the board is
+// the 30-pin one, these printed channels are ~2.5mm too far apart and the ESP32
+// will not plug in AT ALL. Count the pins on one side before printing the pod:
+//   15 pins per side = 30-pin  -> hdr_row_pitch is probably 22.86
+//   19 pins per side = 38-pin  -> 25.4 is correct
+hdr_row_pitch    = 25.4;   // MEASURE (M22) — pin-row centre-to-centre
 hdr_strip_w      = 2.7;    // Female header strip body width
 hdr_strip_h      = 8.5;    // Female header strip body height (board sits at floor+8.5)
 hdr_strip_len    = 40.0;   // 15-pin strip length (~15×2.54=38.1, round up)
 hdr_channel_depth = 1.0;   // Floor recess to locate strips
 
-// Board position: centred in Y, offset toward dock (+X) end for USB clearance
-devkit_x_offset  = 4;      // +X shift from pod centre (USB at -X end wall)
+// Board position: centred in Y, biased toward the -X/USB wall.
+// v7.5: +4 -> -2. Pushing the board TOWARD the USB wall shortens how far the plug
+// has to reach inboard to seat (was 6.25mm, now 2.25mm), and still leaves 6.25mm
+// at the +X end for the pogo/dock wiring.
+//   board spans x = -2 +/- 25.75 = -27.75 .. +23.75, inside a +/-30 cavity.
+devkit_x_offset  = -2;
 
 // --- BARREL JACK (on the LID) ---
 // v6.1b FIX: was centered at x=-30 — the Ø11.5 hole overflowed the lid edge (±32)
 // and printed as an open NOTCH (confirmed on the fit-test print). A panel-mount
 // jack can't clamp in a notch. Moved fully onto the lid, offset in Y away from
 // the DevKit so the jack body hangs over open floor.
-barrel_jack_dia  = 11.5;   // 5.5/2.1mm panel-mount jack
-barrel_jack_x    = -22;    // near the -X/USB end, hole fully inside the lid
+barrel_jack_dia  = 11.5;   // MEASURE (M17) — 5.5/2.1mm panel-mount jack
+// v7.5: -22 -> -20. The support cradle under this hole reached
+// x = barrel_jack_x - jack_body_l/2 - cradle_t = -29.5 against a cavity that ended
+// at -28, so the lid could not close. Lengthening the pod to 68 moved the cavity
+// wall to -30, and moving the jack to -20 puts the cradle at -27.5: 2.5mm clear,
+// with room left over for a real jack that measures bigger than the placeholder.
+barrel_jack_x    = -20;
 barrel_jack_y    = 18;     // off the DevKit (board spans y±14)
 
 // --- USB CUTOUT (-X end wall) ---
-usb_w            = 10;
-usb_h            = 7;
-usb_z            = pod_floor + hdr_strip_h + 1;  // At PCB USB port height
+// v7.5: the old usb_z had an arithmetic bug — it ignored hdr_channel_depth. The
+// header strips are RECESSED 1mm into the floor, so the board underside sits at
+// pod_floor + hdr_strip_h - hdr_channel_depth = 10.5, not 11.5. The cutout was
+// therefore ~2mm too high and only ~0.5mm of it overlapped the actual socket;
+// the port was effectively behind solid wall.
+// Size also raised: a 10x7 hole passes a bare connector shell but not the moulded
+// body of a real cable, and the plug has to reach 2.25mm inboard past the wall.
+usb_w            = 13;     // MEASURE (M25) — your cable's moulded body width
+usb_h            = 9;      // MEASURE (M25) — your cable's moulded body height
+board_under_z    = pod_floor + hdr_strip_h - hdr_channel_depth;   // 10.5
+usb_z            = board_under_z - 1.0;   // 9.5 — starts just under the board
 
 // --- POGO INTERFACE (+X dock wall) ---
 // Matches cell ±X pogo window exactly
@@ -104,7 +134,13 @@ sw_snap_nib      = 0.8;    // retention nib overhang (v6.1: 0.4→0.8, was sub-l
 // v6.1b: 25→27.5. At x=25 the Ø5 bosses FLOATED 0.5mm off the inner wall (x=28) —
 // disconnected bodies in the STL, printed as loose/spaghetti towers. At 27.5 the
 // boss embeds 2mm into the wall. Lid holes follow automatically (same param).
-lid_screw_x      = 27.5;   // ±27.5mm along X
+// v7.5: HARD-CODED 27.5 IS NOW A FORMULA — and that is not cosmetic.
+// 27.5 was correct only while pod_int_length was 56 (inner wall at x=28, so a Ø5
+// boss at 27.5 spanned 25..30 and embedded 2mm into the wall). Lengthening the pod
+// moved the inner wall to x=30, which would have left the boss exactly TOUCHING it
+// — the precise floating-boss bug this comment block was written about the first
+// time. Tie it to the wall so it can never drift again.
+lid_screw_x      = pod_int_length/2 - 0.5;   // 29.5 — boss still embeds 2mm
 lid_screw_d      = 2.8;    // v6.2: 2.4→2.8 M2 clearance in lid (print tolerance)
 lid_boss_d       = 5.0;    // Boss OD in shell
 lid_boss_tap     = 2.0;    // M2 self-tap pilot (v6.1: 1.7→2.0, FDM prints undersize; drill if tight)

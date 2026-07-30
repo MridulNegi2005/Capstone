@@ -52,9 +52,11 @@ union() {
     // Motor Retaining Collar (Centered at X=-8)
     // Audit 2 fix (2026-05-15): added boss relief notches — collar at x=-8 with r=17.25mm
     // was crashing into corner bosses at (-15, +-15), distance=16.55mm < 17.25mm
+    // >>> collar ID is BLOCKED ON MEASUREMENT (M1) — 29.5 assumes a Ø28 can. <<<
+    // If the real can is bigger the motor will not drop into this collar at all.
     translate([motor_x_offset, 0, plate_h]) difference() {
         cylinder(d=34.5, h=8); // 8mm tall collar
-        translate([0,0,-1]) cylinder(d=29.5, h=10); // 29.5mm ID for motor body
+        translate([0,0,-1]) cylinder(d=29.5, h=10); // MEASURE (M1): can Ø + 1.5mm
         // Boss relief notches for the two -X corner bosses
         for(sy = [-1, 1])
             translate([-26 - motor_x_offset, sy * 21, -1])

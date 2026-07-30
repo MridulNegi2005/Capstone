@@ -20,22 +20,32 @@ shell_h = pod_height - lid_h;
 // Lid is now an over-cap: X flush with pod outer (64, ±32 — NO skirt on ±X so the
 // +X dock face stays flat), Y 70 (±35 = 1mm overhang each side) with a downward
 // skirt on ±Y only. Underside at z=0, top at z=lid_h(4).
-lid_cap_x        = pod_length;        // 64 — flush, no overhang on dock faces
-lid_cap_y        = 70;                // 1mm overhang each side (±35) front/back
+// v7.5: every one of these was a hard-coded number that happened to match
+// pod_length=64 / pod_width=68. Lengthening the pod to 68 would have left them
+// silently wrong. They are now derived, so the lid tracks the shell automatically.
+lid_cap_x        = pod_length;            // 68 — flush, no overhang on dock faces
+lid_cap_y        = pod_width + 2;         // 70 — 1mm overhang each side, front/back
 skirt_depth      = 4.0;
-skirt_y_outer    = 35.0;             // flush with cap edge
-skirt_y_inner    = 34.4;             // 0.4mm off pod wall outer (pod_width=68 → ±34)
-skirt_x_half     = 28.0;             // skirt spans x within ±28 (clear of corners & dock)
+skirt_y_outer    = lid_cap_y / 2;         // 35 — flush with cap edge
+skirt_y_inner    = pod_width / 2 + 0.4;   // 34.4 — 0.4mm off the pod wall outer
+skirt_x_half     = pod_length / 2 - 6;    // 28 — stays clear of the rounded corners
 
 // --- JACK SUPPORT CRADLE (v6.2) ---
 // PLACEHOLDER — MEASURE REAL JACK. The user's barrel jack is a BARE socket (no nut),
 // so plug-in force would push it down/in. This U-pocket hangs under the lid around the
 // jack hole at (-22,18); the bottom shelf takes the downward push. Front (toward -X/USB)
 // left open for the wire/solder lugs.
-jack_body_w      = 9.5;   // PLACEHOLDER — MEASURE REAL JACK — Y dimension of jack body
-jack_body_l      = 12;    // PLACEHOLDER — MEASURE REAL JACK — X dimension of jack body
-jack_body_h      = 11;    // PLACEHOLDER — MEASURE REAL JACK — Z depth below lid
+jack_body_w      = 9.5;   // MEASURE (M15) — Y width of the jack body
+jack_body_l      = 12;    // MEASURE (M14) — X length of the jack body
+jack_body_h      = 11;    // MEASURE (M16) — Z depth hanging below the lid
 cradle_t         = 1.5;   // cradle wall thickness
+
+// v7.5 guard: the cradle used to overrun the pod cavity by 1.5mm, so the lid
+// simply could not close, and nobody noticed because all three dims are guesses.
+// This now fails loudly the moment a measured jack is too big for its position.
+assert(barrel_jack_x - jack_body_l/2 - cradle_t > -pod_int_length/2,
+       "Jack cradle overruns the -X pod wall. Move barrel_jack_x inboard (toward 0) \
+or shrink the cradle.");
 
 // --- MODULES ---
 

@@ -13,7 +13,13 @@ floor_thickness   = 4;
 internal_length   = 60;
 internal_width    = 60;
 elec_pocket_h     = 16;
-base_plate_z      = 41;    // 4(floor) + 16(elec) + 2(midplate) + 19(motor)
+// >>> BLOCKED ON MEASUREMENT (M2) — see docs/MEASUREMENTS_NEEDED.md <<<
+// The "19" here is the 28BYJ-48 can height taken from a datasheet, never measured.
+// It sets how high the base plate sits, which sets the cam height, which sets the
+// linkage length. If the real motor is taller or shorter than 19mm, EVERY dot ends
+// up proud or sunken by that difference. Nothing downstream is trustworthy until
+// this is a measured number. Re-derive cam_flat_z in mech_layout.scad at the same time.
+base_plate_z      = 41;    // 4(floor) + 16(elec) + 2(midplate) + 19(motor, ASSUMED)
 boss_height       = 37;    // boss top = z41 = base_plate bottom
 
 // Magnetic snap — NeFeB disc glue-in pockets
@@ -34,6 +40,16 @@ pogo_carrier_d    = 2;     // pocket depth into wall interior
 pogo_carrier_lip  = 0.5;   // retention lip overhang
 
 // Muscle board mounting (34×44mm board in 36×46mm pocket)
+//
+// v7.5: DISABLED BY DEFAULT. The pocket was being designed for two different boards
+// at once, and only one of them can physically be in there. What actually goes in
+// now — for the demo AND for the first assembled cell — is the off-the-shelf
+// ULN2003 module. That board is ~35x32mm, so these Ø4 bosses at x=±14 fall INSIDE
+// its footprint: the board would sit on top of them, 4mm up, in a 16mm pocket that
+// already needs ~12mm for the board itself. Zero margin, for a PCB that does not
+// exist and that the docs say to order assembled or not build at all.
+// Flip this to true if the muscle board is ever actually made.
+use_muscle_board_bosses = false;
 // Mounting-hole coords from KiCad (MEASURE from kicad_pcb; placeholder ±14,±19)
 mb_boss_positions = [[-14, -19], [-14, 19], [14, -19], [14, 19]];
 mb_boss_d         = 4;
@@ -141,6 +157,7 @@ module front_chevron_groove() {
 
 module muscle_board_bosses() {
     // 4× M2 self-tap bosses on pocket floor for the muscle board PCB
+    if (use_muscle_board_bosses)
     for(pos = mb_boss_positions) {
         translate([pos[0], pos[1], floor_thickness - 0.1])
             difference() {

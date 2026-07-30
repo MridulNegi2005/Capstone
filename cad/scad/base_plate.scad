@@ -14,10 +14,22 @@
 //     56mm plate + 2mm clearance each side. ✓
 // =========================================================
 
+include <mech_layout.scad>   // homing_mag_r / homing_mag_angle — the hall sensor
+                             // MUST sit under the cam magnet, so both come from
+                             // the one shared file. They used to be declared in
+                             // two places and had drifted (cam r=17.35 vs plate y=20).
+
 // --- 1. PARAMETERS ---
 
 // Plate body — centred over motor shaft (box centre x=0)
-base_length     = 56;      // X — widened from 50 to fit offset motor left ear at x=-25.5mm
+// v7.5: 56 -> 58. Two defects, one change:
+//   1. The left motor ear hole (x=-25.5, dia 4.3) reached x=-27.65 against a plate
+//      edge at -28. A 0.35mm wall on a 0.4mm nozzle is not a wall — the screw
+//      breaks out. At base_length 58 the edge is -29, giving a 1.35mm wall.
+//   2. The corner standoffs (x=+/-26, dia 6) spanned to x=29 and hung 1mm off a
+//      plate that ended at 28. Now flush.
+// 58 still clears the box: internal_length is 60, so 1.0mm per side.
+base_length     = 58;      // X
 base_width      = 50;      // Y — unchanged
 base_thickness  = 5;       // Z
 
@@ -27,7 +39,17 @@ shaft_clearance      = 10;     // Ø9mm cam hub + 0.5mm clearance each side
 motor_body_diameter  = 29;     // 28mm + 1mm tolerance (was 28.3mm — wrong)
 motor_seat_depth     = 1.5;    // Shallow pocket to locate motor body centrally
 motor_mount_spacing  = 35;     // Hole-to-hole distance (was 31mm — wrong)
-motor_mount_hole     = 4.3;    // 4mm hole + 0.3mm clearance (was 3.4mm — wrong)
+
+// v7.5: was a 4.3mm CLEARANCE hole, which needs a nut on the far side. There is
+// nowhere to put that nut. The right-hand ear is at x = -8 + 35/2 = +9.5, which is
+// inside the cam pocket (r=23), so a nut or bolt head there sits directly under the
+// spinning cam disc. Changed to a thread-forming PILOT: the M4 screw goes UP from
+// below, through the motor's own ear, and forms its own thread in the plate. No nut,
+// nothing protruding above the plate at all.
+// Thread depth available: left ear (x=-25.5) is outside the cam pocket -> full 5mm.
+//                         right ear (x=+9.5) is inside it -> 2mm (plate below pocket).
+// 2mm of formed M4 thread in PETG holds far more than a 35g motor needs.
+motor_mount_pilot    = 3.3;    // M4 thread-forming pilot (drill to 3.4 if it binds)
 
 // Cam Interface (unchanged — matches braille_cam.scad)
 cam_pocket_diameter = 46;   // 44.4mm cam OD + 0.8mm clearance/side (v5.1: inner_radius 8→12)
@@ -41,25 +63,50 @@ standoff_height   = 8;     // Was 3.5mm — FAR too short for cam + linkage + to
 standoff_x = 26;
 standoff_y = 21;
 
-// Spring Cavity — through-hole window for service access (unchanged)
-spring_cavity_width  = 22;
-spring_cavity_depth  = 16;
+// --- SPRING CAVITY: DELETED IN v7.5. DO NOT ADD IT BACK. ---
+// It was a 22 x 16mm through-window at the plate centre, left over from the v6.x
+// design where the return springs pushed on the middle of each linkage arm.
+// Since v7.1 the springs live coaxially with each dot, in the TOP PLATE. Nothing
+// passes through the centre of the base plate any more.
+// Meanwhile the window was actively harmful: it spanned x = -11..+11, and the right
+// motor mounting hole is at x = +9.5. The screw opened into thin air, so the motor
+// could only ever be held by ONE ear. A single-screw stepper rocks and loses steps.
+// Deleting the window restores that material, stiffens the plate, and costs nothing.
 
-// Hall Effect Sensor pocket — REPOSITIONED
-// Previous: x=19mm → pocket exceeded 42mm plate width (21.5mm > 21mm edge)
-// New: at x=0, y=+20mm (along +Y axis, well within 25mm plate edge)
-// Magnet angle in braille_cam.scad changed from 0° to 90° to match
-hall_pocket_x   = 0;
-hall_pocket_y   = 20;      // +Y axis. Magnet path on cam = r17.35mm → 2.65mm radial offset.
-                           // (v6.0: corrected stale "18.2mm/1.8mm" note. Cam OD is now 44.4mm so
-                           // y=20 sits UNDER the disc. For tightest coupling the sensor could move
-                           // to y~17.35 to sit directly under the magnet path; left at 20 —
-                           // validated on breadboard, hall saturates within a few mm.)
-hall_pocket_w   = 5.3;     // SS49E / A3144 body footprint (v6.1: +0.3 FDM clearance)
-hall_pocket_d   = 4.3;     // (v6.1: +0.3 FDM clearance — pockets print undersize)
-hall_pocket_h   = 3;       // 2mm floor remaining below sensor
-// Wire channel runs from sensor pocket to +Y plate edge (25mm)
-hall_wire_w     = 2;
+// --- HALL EFFECT SENSOR — REBUILT FROM SCRATCH IN v7.5 ---
+// The old pocket DID NOT EXIST on the printed part. It was cut from
+// z = base_thickness - 3 = 2 upward, at (0, 20). The cam pocket is also cut from
+// z = 2 upward, with radius 23 — and the hall pocket's farthest corner was at
+// radius 22.31. It sat entirely inside the cam pocket, at exactly the same depth,
+// so subtracting it removed nothing at all. There was also zero vertical space
+// above it: the cam disc's underside rests on that same floor.
+//
+// NEW DESIGN: the pocket is cut into the plate's UNDERSIDE instead, directly
+// beneath the magnet path, leaving a thin membrane between sensor and cam.
+//   - sensor sits at (0, homing_mag_r) = directly under the magnet, not 2.65mm
+//     off to one side as before. Better coupling, not worse.
+//   - clear of the motor: the can (dia 29 at x=-8) reaches only y = +/-12.1 at x=0.
+//   - clear of the plate edge: y max ~19 against a 25mm edge.
+//   - the leads route out through an underside channel to the +Y edge, and drop
+//     through the mid_plate's existing +Y notch. That notch is already there and
+//     already labelled "hall sensor wires from base plate".
+//
+// >>> THIS IS FOR THE BARE TO-92 SENSOR, NOT THE BLUE MH-SERIES MODULE. <<<
+// The module's PCB is ~15 x 11mm plus an 8-11mm header. Nothing that size fits in
+// a 5mm plate underneath a cam. Desolder the 3-legged black sensor off the module
+// and run three wires back to it (or straight to the ESP32). See docs.
+hall_body_w     = 4.1;     // MEASURE (M11) — sensor body width, across the flat face
+hall_body_d     = 3.1;     // MEASURE (M11) — sensor body depth, flat face to round back
+hall_body_t     = 1.6;     // MEASURE (M11) — sensor body thickness
+hall_fit        = 0.4;     // print/glue clearance added to width and depth
+hall_floor_t    = 0.4;     // plate left between the sensor and the cam pocket floor
+
+hall_pocket_x   = homing_mag_r * cos(homing_mag_angle);   // 0
+hall_pocket_y   = homing_mag_r * sin(homing_mag_angle);   // 17.35
+hall_pocket_h   = base_thickness - cam_pocket_depth - hall_floor_t;   // 1.6
+
+// Lead channel, also on the underside, running out to the +Y plate edge
+hall_wire_w     = 4;       // three leads at 1.27mm pitch = ~2.6mm, plus room
 hall_wire_d     = 1;
 
 // v6.1b: underside ribs REMOVED. Two reasons (both confirmed on the fit-test print):
@@ -90,12 +137,16 @@ module motor_features() {
     translate([motor_body_x_offset, 0, -0.1])
         cylinder(d=motor_body_diameter, h=motor_seat_depth + 0.1);
 
-    // 3. Motor mounting ear screw holes — SAME -8mm offset (ears fixed to body)
-    //    Left ear:  x = -8 - 17.5 = -25.5mm
-    //    Right ear: x = -8 + 17.5 = +9.5mm
+    // 3. Motor mounting ear pilots — SAME -8mm offset (ears fixed to body)
+    //    Left ear:  x = -8 - 17.5 = -25.5mm  (outside cam pocket → 5mm of thread)
+    //    Right ear: x = -8 + 17.5 = +9.5mm   (inside cam pocket  → 2mm of thread)
+    // Blind from BELOW so nothing breaks the cam-pocket floor at the left ear and
+    // nothing protrudes above the plate at the right ear. The right pilot does open
+    // into the cam pocket (only 2mm of material there) — harmless, because the
+    // tracks start at r=12 and no linkage foot ever travels over r=9.5.
     for(sx = [-1, 1]) {
-        translate([sx * (motor_mount_spacing / 2) + motor_body_x_offset, 0, 0])
-            cylinder(d=motor_mount_hole, h=20, center=true);
+        translate([sx * (motor_mount_spacing / 2) + motor_body_x_offset, 0, -0.1])
+            cylinder(d=motor_mount_pilot, h=base_thickness - cam_pocket_depth + 0.1);
     }
 }
 
@@ -106,27 +157,24 @@ module cam_features() {
         cylinder(d=cam_pocket_diameter, h=cam_pocket_depth + 1);
 }
 
+// Sanity guard — if a measured sensor turns out thicker than the space under the
+// cam pocket, the design has to change rather than silently print a useless pocket.
+assert(hall_pocket_h >= hall_body_t,
+       "Hall sensor is thicker than the base plate can recess it. Either reduce \
+hall_floor_t, or move the sensor outboard of the cam pocket and re-site the magnet.");
+
 module hall_sensor_pocket() {
-    // Rectangular recess on top face for Hall effect sensor (SS49E / A3144)
-    // Sensor detects magnet on cam disc underside as it passes at r=17.35mm
-    // Sensor at y=20mm → 2.65mm radial offset from the magnet path (under the Ø44.4 disc)
-    translate([hall_pocket_x - hall_pocket_w/2,
-               hall_pocket_y - hall_pocket_d/2,
-               base_thickness - hall_pocket_h])
-        cube([hall_pocket_w, hall_pocket_d, hall_pocket_h + 1]);
+    // Cut UP from the plate UNDERSIDE (z=0), not down from the top face.
+    pw = hall_body_w + hall_fit;
+    pd = hall_body_d + hall_fit;
+    translate([hall_pocket_x - pw/2, hall_pocket_y - pd/2, -0.1])
+        cube([pw, pd, hall_pocket_h + 0.1]);
 
-    // Wire channel from pocket to +Y plate edge (for routing hall sensor wires)
-    translate([hall_pocket_x - hall_wire_w/2,
-               hall_pocket_y + hall_pocket_d/2,
-               base_thickness - hall_wire_d])
+    // Lead channel, underside, from the pocket out to the +Y plate edge
+    translate([hall_pocket_x - hall_wire_w/2, hall_pocket_y - pd/2, -0.1])
         cube([hall_wire_w,
-              base_width/2 - hall_pocket_y - hall_pocket_d/2 + 1,
-              hall_wire_d + 1]);
-}
-
-module spring_cavity() {
-    // Through-hole window — service access and weight reduction
-    cube([spring_cavity_width, spring_cavity_depth, 20], center=true);
+              base_width/2 - hall_pocket_y + pd/2 + 1,
+              hall_wire_d + 0.1]);
 }
 
 module standoffs() {
@@ -151,8 +199,7 @@ union() {
         main_body();
         motor_features();
         cam_features();
-        spring_cavity();
-        hall_sensor_pocket();
+        hall_sensor_pocket();   // v7.5: spring_cavity() deleted — see note in params
     }
     standoffs();
 }

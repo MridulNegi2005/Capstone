@@ -86,17 +86,39 @@ subdivisions_per_slice = 4; // Smoothness (Higher = smoother, slower)
 preview_mode = false;       // Set FALSE for final high-quality render!
 
 // Homing magnet pocket (on disc underside, triggers Hall sensor on base plate)
-magnet_dia    = 3.0;   // 3mm dia neodymium disc magnet
-magnet_depth  = 2.0;   // 2mm deep (leaves 0mm floor — magnet flush with bottom)
-magnet_radius = 17.35; // Radius from centre (centre of outermost track, just inside disc edge)
-magnet_angle  = 90;    // Changed from 0° → 90° to match hall sensor repositioned at
-                       // base_plate y=+20mm (+Y axis). Was x=+19mm (+X axis, now outside plate).
+// v7.5: all four numbers now come from mech_layout.scad — see the long note there.
+// The old local copies had magnet_depth = 2.0 into a 2.0mm floor, i.e. a THROUGH
+// HOLE that cratered tracks 2, 3 and 4. Blind pocket now: 1.2 deep, 0.8mm floor left.
+magnet_dia    = homing_mag_dia;
+magnet_depth  = homing_mag_thk + homing_mag_fit;   // 1.2
+magnet_radius = homing_mag_r;
+magnet_angle  = homing_mag_angle;
 
-// Hub extends below disc; Double-D bore continues into disc floor
-// Shaft is 10mm long — hub + bore must accommodate most of it
-// Hub 4mm below disc + bore 4mm into disc floor = 8mm total engagement
-// Remaining 2mm of shaft sits below hub (in base_plate shaft clearance hole)
-hub_h = 4;
+// Guard: the pocket must never eat the whole disc floor again.
+assert(magnet_depth < disk_base_thickness - 0.5,
+       "Homing magnet pocket leaves <0.5mm of disc floor — it will crater the cam tracks.");
+
+// Hub extends below disc; Double-D bore continues into disc floor.
+//
+// >>> BLOCKED ON MEASUREMENT — see docs/MEASUREMENTS_NEEDED.md items M4-M7 <<<
+// The old comment here claimed "hub 4 + bore 4 into disc floor = 8mm engagement".
+// That was stale: the disc floor is 2mm, not 4mm, so real engagement is
+// hub_h(4) + disk_base_thickness(2) = 6mm, and the bore is a THROUGH hole with
+// no axial stop — nothing decides how far the cam pushes onto the shaft.
+//
+// Worse, the z-stack does not close. In outer-box world coordinates:
+//     motor bracket face / base-plate underside   z = 41   (base_plate_z, ASSUMED)
+//     cam pocket floor (base_thickness-cam_pocket_depth = 5-3 = 2 above that)  z = 43
+//     so the space beneath the disc for the hub is only  43 - 41 = 2mm
+//     but hub_h = 4  ->  the hub bottoms out on the motor and the disc sits 2mm
+//     proud, which puts ALL SIX DOTS permanently 2mm above the reading surface.
+// Both 41 and the 10mm shaft length are datasheet guesses, never measured.
+//
+// DO NOT guess a new hub_h. Once the motor is measured, set:
+//     hub_h = (cam pocket floor z) - (measured shaft-boss top z)  - 0.3 clearance
+// and re-derive cam_flat_z in mech_layout.scad in the SAME pass, because
+// link_total_h is computed from it.
+hub_h = 4;             // <-- MEASURE (M6/M7). Provisional.
 shaft_bore_depth = 8;  // total Double-D bore depth from hub bottom through disc floor
 
 // Calculated Variables
