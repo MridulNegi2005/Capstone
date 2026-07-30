@@ -96,6 +96,18 @@ module pogo_window_bridges() {
             cube([6, 10, 0.6], center=true);
 }
 
+module wire_exit_bridge() {
+    // v7.4: the +Y wire-exit hole is 15mm wide and its top edge was a completely
+    // unsupported horizontal span — the ONLY hole in this part without a bridge.
+    // On the first real print this is exactly the sort of overhang that either sags
+    // into the opening or forces the slicer to generate interior support that then
+    // cannot be reached with pliers.
+    // Hole = cube([15, wall+2, 6]) centred at (0, shell_width/2, floor+3),
+    // so its top face is at z = floor_thickness + 3 + 3 = 10.
+    translate([0, shell_width/2, 10 - 0.3])
+        cube([15, wall_thickness + 2, 0.6], center=true);
+}
+
 module teardrop_magnet_pocket() {
     // Horizontal-axis magnet pocket with a 45° "roof" — round side-wall holes fused
     // closed on the fit-test print; the teardrop top is self-supporting on FDM.
@@ -217,8 +229,10 @@ union() {
         }
     }
 
-    // Sacrificial bridges over the pogo windows (PETG print aid)
+    // Sacrificial bridges over every wall opening (PETG print aid).
+    // SNAP/CUT THESE OUT after printing — they are meant to be removed.
     pogo_window_bridges();
+    wire_exit_bridge();
 
     // Muscle board mounting bosses
     muscle_board_bosses();
