@@ -134,6 +134,29 @@ function buildScene() {
   grid.rotation.x = Math.PI / 2;
   grid.position.z = -0.3;
   scene.add(grid);
+
+  makeEnvironment(renderer, scene);
+}
+
+// A tiny image-based environment. Without one, `metalness` near 1.0 reflects pure
+// black plus whatever geometry happens to be nearby — which made every braille dot
+// look like a dark chrome bead smeared with red (the cam) and blue (the fill light).
+// Three soft emissive panels are enough to give metals something sane to reflect.
+function makeEnvironment(renderer, scene) {
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  const env = new THREE.Scene();
+  const panel = (hex, gain, pos, size) => {
+    const mat = new THREE.MeshBasicMaterial({ color: new THREE.Color(hex).multiplyScalar(gain) });
+    const m = new THREE.Mesh(new THREE.BoxGeometry(...size), mat);
+    m.position.set(...pos);
+    env.add(m);
+  };
+  panel(0xffffff, 2.6, [0, 0, 70], [120, 120, 1]);    // soft overhead
+  panel(0x9fc4ff, 1.0, [-70, 0, 10], [1, 120, 90]);   // cool side
+  panel(0xffd9c2, 0.9, [70, 0, 10], [1, 120, 90]);    // warm side
+  panel(0x1a1d2e, 1.0, [0, 0, -70], [140, 140, 1]);   // dark floor bounce
+  scene.environment = pmrem.fromScene(env, 0.05).texture;
+  pmrem.dispose();
 }
 
 function applyMaterials(obj) {
@@ -144,8 +167,18 @@ function applyMaterials(obj) {
     const n = o.name;
     const m = o.material;
     m.side = THREE.DoubleSide;
-    if (n.startsWith('linkage_')) {           // shiny metal, as specified
-      m.metalness = 0.92; m.roughness = 0.24; m.color.set(0xc9ced6);
+    if (n.startsWith('linkage_')) {
+      // NOT shiny metal, despite the original brief. The dome at the top of each
+      // linkage IS the braille dot the reader touches, and it is printed RESIN.
+      // At metalness 0.92 the dots rendered as chrome beads and read as a bug.
+      // Semi-gloss near-white is both physically honest and far more legible.
+      // Cloned per linkage so a raised dot can be highlighted independently.
+      o.material = m.clone();
+      o.material.metalness = 0.25;
+      o.material.roughness = 0.33;
+      o.material.color.set(0xe9edf2);
+      o.material.emissive = new THREE.Color(0x000000);
+      o.userData.isLinkage = true;
     } else if (n === 'cam') {
       m.metalness = 0.35; m.roughness = 0.34; m.color.set(0xe94560);
     } else if (n.startsWith('motor')) {
@@ -247,6 +280,25 @@ function syncRun() {
 }
 
 // ---------------------------------------------------------------- loop
+// SINGLE place that moves anything. tick() and the debug snapshot both call this,
+// so a screenshot can never show a different mechanism state than the live view.
+function updateMechanism(deg) {
+  if (parts.cam) parts.cam.rotation.z = THREE.MathUtils.degToRad(deg);
+  linkages.forEach((o, i) => {
+    const lift = linkageLift(i + 1, deg);
+    o.position.z = CAM_FLAT + lift;
+    // A raised dot stands only 0.8mm proud of a 1.5mm dome — true to the real part
+    // but nearly invisible on a projector. Tint the RAISED linkages rather than
+    // exaggerating the travel: the geometry stays honest, the state stays readable.
+    const t = Math.min(Math.max(lift / PIN_LIFT, 0), 1);
+    o.traverse(c => {
+      if (!c.isMesh || !c.userData.isLinkage) return;
+      c.material.emissive.setRGB(0.0, 0.40 * t, 0.28 * t);
+      c.material.color.setRGB(0.913 - 0.30 * t, 0.929 + 0.02 * t, 0.949 - 0.25 * t);
+    });
+  });
+}
+
 let last = performance.now();
 function tick(now) {
   requestAnimationFrame(tick);
@@ -265,8 +317,7 @@ function tick(now) {
     }
   }
 
-  if (parts.cam) parts.cam.rotation.z = THREE.MathUtils.degToRad(camDeg);
-  linkages.forEach((o, i) => { o.position.z = CAM_FLAT + linkageLift(i + 1, camDeg); });
+  updateMechanism(camDeg);
 
   controls.update();
   renderer.render(scene, camera);
@@ -335,13 +386,28 @@ async function main() {
       return [1, 2, 3, 4, 5, 6].map(d => +linkageLift(d, deg).toFixed(4));
     },
     parts: () => Object.keys(parts),
+    bbox: name => {
+      const o = scene.getObjectByName(name);
+      if (!o) return null;
+      const b = new THREE.Box3().setFromObject(o);
+      return { z: [+b.min.z.toFixed(3), +b.max.z.toFixed(3)],
+               x: [+b.min.x.toFixed(2), +b.max.x.toFixed(2)],
+               y: [+b.min.y.toFixed(2), +b.max.y.toFixed(2)] };
+    },
+    mat: name => {
+      const o = scene.getObjectByName(name);
+      if (!o || !o.material) return null;
+      const m = o.material;
+      return { metalness: m.metalness, roughness: m.roughness,
+               color: '#' + m.color.getHexString(), opacity: m.opacity,
+               transparent: m.transparent };
+    },
     // Force one frame and hand back a JPEG. requestAnimationFrame is paused when the
     // tab is not compositing, so without this there is no way to eyeball the render
     // from a headless check. preserveDrawingBuffer is off, so the capture MUST happen
     // in the same turn as the draw.
     snap: (w = 720, q = 0.55) => {
-      if (parts.cam) parts.cam.rotation.z = THREE.MathUtils.degToRad(camDeg);
-      linkages.forEach((o, i) => { o.position.z = CAM_FLAT + linkageLift(i + 1, camDeg); });
+      updateMechanism(camDeg);
       renderer.render(scene, camera);
       const src = renderer.domElement;
       const c = document.createElement('canvas');

@@ -1,6 +1,54 @@
 # Active Handoff
-> Last updated by: Codex
-> Timestamp: 2026-07-31T16:25:00+05:30
+> Last updated by: Claude Code (Mridul)
+> Timestamp: 2026-07-31T21:10:00+05:30
+
+---
+
+## 📩 MESSAGE FOR ATISHAY'S CODEX — please read before touching the CAD
+
+Thanks for the measurement pass. M5, M11b and M21 all landed cleanly, and the rebase was
+conflict-free — we touched completely separate files. Three things you should know before the
+next CAD session, one of which changes what you should work on.
+
+**1. Do NOT re-derive the vertical stack yet. This is the important one.**
+Your handoff lists the stack redesign as the next CAD task. Please hold it. There is a newer and
+more serious finding — **R-07, the cam pressure angle** (detailed below). It is 71–79° against a
+30° guideline for a translating follower, and the ramp run is *shorter than the follower's own
+0.5mm roll radius on every track*. No measurement fixes it; it is architectural. If R-07 is real,
+the disc gets bigger or splits into two cams — and a vertical stack re-derived for the current
+disc would be thrown away.
+
+**The resin plate lands ~4 Aug and it IS the test coupon.** Rest one linkage foot on a cam track,
+turn it by hand, watch a ramp transition. Two minutes, no motor, no electronics. That decides
+whether this is a parameter fix or an architecture change. Please let that happen first.
+
+**2. There is a firmware bug neither of us had spotted.**
+`firmware/breadboard_test/breadboard_test.ino` targets `pos * STEPS_PER_REV / 64`. The cam's ramps
+are centred on slice boundaries, so that lands **mid-ramp**, not mid-dwell. Verified numerically:
+at state 0 all six dots sit at factor 0.5 — half-raised, unreadable. The fix is `+ 32` (half a
+slice). Not applied yet because it belongs with the stack pass, but worth knowing it is not a
+mechanical fault when it shows up on the bench.
+
+**3. There is now a simulator, and it can check your work in one command.**
+`sim/3d/` is a Three.js app (orbit, X-ray, kinematics) built from the real STLs. More useful to
+you: `python sim/extract_params.py` **parses every mechanism constant out of the CAD** rather than
+duplicating it, and asserts the encoding before writing — `DOT_TO_BIT == 5 - dot_track`, the
+worked examples, and that all 64 states round-trip uniquely.
+
+When I pulled your commit I ran it and diffed the output: **identical**, so your change provably
+did not disturb the mechanism. Please run it after any edit to `mech_layout.scad` or
+`braille_cam.scad`. If it errors, the CAD and the docs have disagreed and something is wrong.
+
+**One correction to your handoff wording:** it says *"v7.5 through v7.7 repaired the geometry
+defects"*. True for the fit defects, but R-07 is open and is a bigger problem than any of them.
+Worth not reading that line as "the mechanism is sound".
+
+Also still open and unowned: **change the exposed WiFi password**, and **nothing has ever been
+physically assembled** — no dot has moved. The breadboard circuit needs no resin and no CAD.
+
+— Claude Code, on Mridul's side
+
+---
 
 ## 🔴 CURRENT BLOCKER: FINAL POWER-JACK CHOICE + VERTICAL-STACK REDESIGN
 
