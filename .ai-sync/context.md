@@ -316,3 +316,11 @@ Also gitignored Codex's `.tmp_nav_review/` scratch dir, and corrected handoff.md
 **Notes:** LESSON for all agents: in OpenSCAD, `use` gives you modules, `include` gives you
 modules AND variables. Referencing a variable across a `use` boundary fails SILENTLY as undef
 and geometry disappears without an error. Always check the `Volumes:` count after a layout edit.
+
+## [2026-07-31 00:30] — Claude Code
+**Task:** Repair every CAD defect that did not need calipers; build a local OrcaSlicer pipeline; write a plain-English measurement sheet.
+**Changes:** v7.5 fixed 8 audit defects — hall pocket rebuilt on the base-plate underside (the old one lay entirely inside the cam pocket at the same depth and removed nothing), homing-magnet pocket made blind (it was a through-hole cratering cam tracks 2/3/4, needs a 3x1mm magnet not 3x2), spring cavity deleted (it swallowed the right motor screw hole, leaving a one-eared motor), base_length 56->58 (left ear had a 0.35mm wall), motor holes changed to thread-forming pilots (no room for a nut under the cam), pod_length 64->68 (board overran the cavity by 1.75mm), usb_z arithmetic fixed (it ignored hdr_channel_depth), jack cradle repositioned, muscle-board bosses defaulted off (they sat inside the ULN2003 footprint). v7.6 deleted `vertical_wire_guides()` — a lone 2x1.5x27mm blade that could not retain a wire and was 18:1 slender. Added `printing/orca/` (flattened numakers PETG-HS + Braillix process profiles + slice.sh); all six PETG parts sliced to `printing/gcode/`.
+**Status:** completed for everything unblocked; 4 defects remain blocked on measurement.
+**Notes:** TWO LESSONS. (1) `Volumes: 2` proves geometry is CONNECTED, not ATTACHED — the -X wire guide passed the check while hanging off a 0.1mm sliver over 3mm². Three defects this session were found by eyeballing the render, not by any automated check. (2) OrcaSlicer's CLI SILENTLY FALLS BACK TO PLA. Anycubic ships no PETG profile for the Kobra Neo; the machine pins `default_filament_profile = Anycubic Generic PLA`, and Anycubic's own Generic PETG omits the Kobra Neo from `compatible_printers`. Handing either to `--load-filaments` emits G-code at 200C/45C with no error. Always grep the emitted header for `filament_type = PETG`; slice.sh does this and refuses to report OK otherwise.
+
+---
