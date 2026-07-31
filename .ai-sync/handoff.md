@@ -1,47 +1,35 @@
 # Active Handoff
 > Last updated by: Codex
-> Timestamp: 2026-07-31T13:45:00+05:30
+> Timestamp: 2026-07-31T13:50:00+05:30
 
-## 🔴 THE BLOCKER: FINISH THE REMAINING FIT-CRITICAL MEASUREMENTS
+## 🔴 CURRENT BLOCKER: FOUR OWNED-PART CHECKS
 
-**Several measurements are now known, but the remaining fit-critical values still block a safe full assembly.**
+The online pass has filled or bounded every M1-M28 item that public specifications can support.
+See `docs/MEASUREMENT_RESEARCH.md` for sources and evidence labels, and
+`docs/MEASUREMENTS_NEEDED.pdf` for the prefilled handout.
 
-### 👉 READ `docs/MEASUREMENTS_NEEDED.pdf` (or the `.md`) — IT IS THE WHOLE TASK
+Only these fit-critical owned-part checks remain:
 
-That document is written for Mridul, not for an engineer. Every measurement appears **twice**:
-
-> 🟢 **In plain words** — what to physically do, zero jargon
-> 🔧 **Technical name** — the proper term, and which CAD parameter it feeds
-
-It has a **copy-paste answer sheet at the bottom**. He fills it in and sends it back.
-His digital calipers arrived 2026-07-30.
-
-**Four CAD defects cannot be repaired without those numbers**, and they are all links in ONE
-dependency chain (motor height → base plate → cam → linkage length):
-
-| Blocked on | Defect |
+| Check | Why it still matters |
 |---|---|
-| M2, M6, M7 | Cam z-stack doesn't close: `hub_h=4` into a 2mm gap → all six dots permanently ~2mm proud, every dot reads "on" |
-| M2 | **Second, separate 2mm error** — `base_plate_z=41` is commented `4+16+2+19` but never counts the 2mm ledge. The mid-plate can't sit level with the ledge (its edge is 29.75, the opening is 28.5), so it rests ON TOP: real seating z 22..24, motor face at 43 not 41 |
-| M11b | Whether the rebuilt hall pocket is deep enough (an `assert` will fail loudly if not) |
-| M12–M16 | Barrel-jack cradle — every dimension is still invented |
-| M21 | **Header-row pitch remains unverified.** M18 is now known: 15 pins per row / 30-pin USB-C board. Clone footprints vary, so physically measure M21 before printing. |
+| M5 motor shaft across-flats | The common value is 3.0 mm, but the cam is a press fit. |
+| M11b plus Hall package marking | 49E-family thickness is 1.6 mm nominal / 1.68 mm max; the current pocket is exactly 1.6 mm. |
+| M21 ESP32 header-row centre spacing | 30-pin boards exist at 22.86, 25.4, and 27.94 mm. |
+| Exact final power-jack identity | The owned yellow/black adapter is inline; the lid CAD assumes a panel-mount jack. |
 
-**DO NOT patch these individually.** Re-derive the whole vertical stack in ONE pass once the
-numbers land. Fixing one link in this chain only relocates the error somewhere else. Both 2mm
-errors are documented in-source at `outer_box.scad:base_plate_z`.
+M25 (ULN2003 installed height with its cable dressed) is a later assembly check, not a blocker for
+the present CAD research pass. Motor measurements M2=19.0, M6=9.5 and derived M7b=2.0 now allow
+the vertical stack to be re-derived, but that chain must be repaired in one coordinated CAD pass.
+Do not patch its individual heights independently.
 
-⚠️ **Naive fix trap:** setting `base_plate_z` 41→43 raises the base plate to 48, the standoffs
-carry the top plate to 56..60, and the box is only 58 tall. The two candidate repairs are
-(a) drop the ledge to z 18..20, costing 2mm of electronics pocket, or (b) shorten
-`standoff_height` 8→6, which changes `link_total_h`. Which is correct depends on the real motor.
+Recommended connector decision: use a specified panel-mount 5.5 x 2.1 mm centre-positive jack
+with a retaining nut in the final pod; keep the inline adapter for breadboard testing.
 
 ---
-
 ## Current State: CAD is CLEAN except for the above
 
-v7.5 + v7.6 repaired **9 defects** — everything that did not require a caliper. Every part
-re-renders as one connected solid. All pushed to `origin/main` (`8e9178b`).
+v7.5 through v7.7 repaired the geometry defects that did not require owned-part measurements. Every part
+re-rendered as one connected solid in those verified passes; this v7.8 research update changes documentation and parameter comments only.
 
 | Fixed | Was |
 |---|---|
@@ -76,27 +64,20 @@ report OK otherwise. **Never remove that check.**
 ---
 
 ## In Progress
-USB-C recovery-access change is complete and verified in the current change set: pod opening is now
-**14×9mm**, with regenerated STL, all six corrected/verified PETG G-code files, and a refreshed measurement PDF.
+The M1-M28 online measurement fill is complete in the current change set. Public specifications,
+owned-part readings, derived values, clone-dependent estimates, and remaining checks are separated
+explicitly. No production geometry changed in this pass.
 
 ## Next Steps
-1. **Finish only the remaining high-value measurements.** M18 is known: **15 pins per row /
-   30-pin USB-C ESP32 WiFi+BT board**. Next priorities are **M17** (jack polarity), **M21**
-   (physical header-row centre spacing; clone boards vary), **M11b** (bare Hall-sensor thickness),
-   then **M12-M16** (actual barrel-jack geometry).
-2. **Do not rebuild the motor vertical stack from the current numbers yet.** User-reported:
-   M1=28.1, M2=19, M3=7.5, M4=5, M6=9.5 mounting-face-to-tip, M8=34.7, M9=4mm. M5, M7a,
-   M10a and M10b remain guesses; M8 still needs confirmation that it was measured
-   centre-to-centre. Re-derive the entire stack together after those values are confirmed.
-3. **Print mid_plate first** — `bash printing/orca/slice.sh mid_plate`, 38 min, ~8g. Proves
-   whether 230°C fixed the stringing before committing to the box.
-4. **Dry the filament** — numakers PETG-HS, 65°C for 6 hours. No setting beats wet PETG.
-5. **Mridul must still change his actual WiFi password.** Treat the exposed password as burned.
-6. **Build the Stage-1 breadboard circuit** and flash `breadboard_test.ino`; nothing has been
-   physically assembled yet.
-7. **The resin plate-1 batch already ordered contains the old nav caps.** Expect to reprint them.
-8. **Desolder the bare Hall sensor** off the blue module before assembling a real cell; the module
-   cannot fit in a 5mm plate.
+1. Obtain only the four remaining owned-part checks: M5, M11b/marking, M21, and the exact final
+   power-jack part or purchase link.
+2. Re-derive the motor/base/cam/linkage vertical stack in one coordinated CAD pass using the now
+   measured M2=19.0 mm, M6=9.5 mm, and derived M7b=2.0 mm.
+3. Replace the guessed jack cradle with the chosen panel-mount jack dimensions.
+4. Print `mid_plate` first to confirm PETG behavior before committing to the box.
+5. Change the exposed WiFi password and build the Stage-1 breadboard circuit.
+6. Verify M25 after final ULN2003 cable dressing during assembly.
+
 ## Print / slice pipeline (NEW)
 ```
 bash printing/orca/slice.sh              # all six PETG parts

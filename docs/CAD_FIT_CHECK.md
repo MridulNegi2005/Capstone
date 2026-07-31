@@ -20,8 +20,20 @@
 >
 > **Still open, blocked on measurement** (see `MEASUREMENTS_NEEDED.md`):
 > §4c cam z-stack · §2b hall sensor thickness · §7b real jack dimensions ·
-> §6b **30-pin vs 38-pin row pitch — the one that decides whether the ESP32 fits at all**.
+> §6b **M21 header-row pitch — 30-pin clones still vary, and this decides whether the ESP32 fits**.
 
+> ## 2026-07-31 measurement-research update
+>
+> The online and owned-part pass is recorded in `MEASUREMENT_RESEARCH.md`.
+>
+> - Motor M1, M2, M3, M4, M6, M8, and M9 are now physically measured; M7b is derived.
+> - The 49E/SS49E package envelope is published, but its 1.68 mm worst-case thickness exceeds
+>   the current 1.6 mm pocket, so M11b and the package marking remain assembly checks.
+> - M18 is resolved as a 30-pin USB-C ESP32. M21 remains open because 30-pin boards are sold
+>   with 22.86, 25.4, and 27.94 mm header-row spacing.
+> - The owned yellow/black barrel adapter is inline, not panel-mount. Final CAD should use a
+>   specified panel-mount 5.5 x 2.1 mm jack or be redesigned to capture the entire inline body.
+>
 **Date:** 2026-07-29
 **Scope:** physical fit of purchased/owned components inside the v7.2 printed parts.
 **Status of the build:** nothing has ever been assembled. This is the last check before spending.
@@ -37,8 +49,8 @@ Every statement is tagged:
 - **[ASSUMED]** — a number somebody typed into the CAD about a physical object that has never
   been measured. Treat as fiction until a caliper says otherwise.
 
-**Nothing in the "Real part needs" column below is a measured fact about Mridul's actual parts.**
-Only the 8x1mm docking magnets have ever been physically measured (`docs/SOURCING.md`, v6.1).
+**Historical note:** when this v7.2/v7.3 audit was written, the "Real part needs" column was unmeasured.
+Several owned-part dimensions have since been measured; use `MEASUREMENT_RESEARCH.md` as the current evidence table.
 
 ---
 
@@ -343,18 +355,17 @@ grille recess in that wall only starts at z=23, far above the board at z≈10.5,
 lengthen the pod. Realistically `pod_length` needs to go from 64 to ~68, which conveniently also
 matches the cell footprint. **Measure the board first.**
 
-### 6b. Width and header pitch — the CAD describes the wrong board
+### 6b. Width and header pitch — M21 is clone-specific
 
-**[SCAD]** `devkit_width = 28.0`, `hdr_row_pitch = 25.4`. The file header says
-"ESP32 DOIT DevKit V1 (30-pin)".
+**[SCAD]** `devkit_width = 28.0`, `hdr_row_pitch = 25.4`. The owned board is now confirmed as
+15 pins per row / 30 total, USB-C.
 
-**[SPEC-ish, verify]** The commonly cited dimensions are: **30-pin** DOIT V1 ≈ 25.4 mm wide with
-0.9" (22.86 mm) row pitch; **38-pin** DOIT ≈ 28 mm wide with 1.0" (25.4 mm) row pitch. The CAD
-numbers match the **38-pin** board, while the documentation everywhere in this repo says 30-pin.
+**[SPEC, still verify owned board]** Pin count does not identify the transverse footprint.
+Commercial 30-pin carriers explicitly support 0.9, 1.0, and 1.1 inch row spacing — 22.86,
+25.4, and 27.94 mm. Matching USB-C CH340C listings are approximately 51.5 x 28.5 mm overall.
 
-If the real board is the 30-pin, the printed header channels are **~2.5 mm too far apart** and the
-DevKit will not plug in at all. **This is the single most important pod measurement.**
-
+Therefore the current 25.4 mm channel spacing is plausible, but not proven. Physically measure
+M21 before printing; a wrong value prevents the DevKit from plugging in at all.
 ### 6c. USB cutout — ~2 mm too high
 
 **[SCAD]** `usb_z = pod_floor + hdr_strip_h + 1 = 3 + 8.5 + 1 = 12.5`, cutout 10 wide x 7 tall

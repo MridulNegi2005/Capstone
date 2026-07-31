@@ -2,19 +2,23 @@
 
 **Updated 2026-07-31. For Mridul.**
 
-Every number here is something the CAD is currently **guessing** — typed from a datasheet or a
-forum post, never taken off your actual parts. Where a guess is wrong, the printed part won't fit
-the real one, and you only find out after paying for the print.
+This began as a blank measurement list. It now combines your readings with datasheet values and published component envelopes. Values marked **VERIFY** are the only ones that still need the owned part.
 
-**26 measurements. About 45 minutes.**
+An online/specification pass has now prefilled most of the original list. The evidence and source
+links are in [`MEASUREMENT_RESEARCH.md`](MEASUREMENT_RESEARCH.md). Do not re-measure catalogue
+dimensions unless the item is marked **VERIFY** below.
+
+**Only four checks remain important now:** M5, M11b/marking, M21, and identifying the exact power
+adapter body. M25 is checked later after the driver wires are installed.
+
+**Motor identification:** `28BYJ-48`, 5 V. The red `2601213328` marking is a production/traceability code, not a different motor model.
 
 Each one is written twice:
 
 > 🟢 **In plain words** — what to actually do, no jargon
 > 🔧 **Technical name** — the proper term, so you recognise it in datasheets, shops and my messages
 
-**Copy-paste answer sheet at the very bottom.** Fill it in, send it back. Write `?` for anything
-you can't measure — a `?` is far more useful to me than a guess.
+The prefilled answer sheet at the bottom shows what is known, where it came from, and what remains.
 
 ---
 
@@ -243,8 +247,8 @@ Multimeter on **DC volts**, adapter plugged into the wall, **nothing else connec
 3. Screen shows **−5V** (with a minus) → it's the other way round.
 4. Mark the positive one with nail polish or a marker.
 
-**Answer: is positive the terminal nearer the round socket, or further from it?**
-Do not skip this. Do not guess from wire colours.
+Use the terminal embossed `+`; standard adapters connect it to the centre pin. Before first power,
+confirm that mapping with continuity mode because the owned adapter is an unidentified clone.
 
 ---
 
@@ -252,7 +256,7 @@ Do not skip this. Do not guess from wire colours.
 
 The black board with the silver square shield and USB-C.
 
-### M18 ⭐⭐ FREE. TEN SECONDS. DO IT NOW.
+### M18 — RESOLVED: 15 pins per side / 30 total
 
 > 🟢 **Count the metal pins along ONE long edge.** Just count them.
 > 🔧 Pin count per row
@@ -260,10 +264,9 @@ The black board with the silver square shield and USB-C.
 - **15 per side** (30 total) → you have the "30-pin" board
 - **19 per side** (38 total) → the "38-pin" board
 
-**Why this matters:** the pod has two printed slots the board's pins drop into. The two versions
-have their pin rows **2.5mm further apart**. Every document in this project says you have the
-30-pin board, but the CAD was built for the 38-pin one. **One of them is wrong — and if it's the
-CAD, your ESP32 will not go into the pod at all.**
+**Why this matters:** the pod has two printed slots the board's pins drop into. M18 confirms a
+30-pin board, but that does not determine the spacing: 30-pin clones are sold with 22.86, 25.4,
+and 27.94mm between rows. **M21 still has to come from this exact board.**
 
 > 🟢 **M19 — How long is the board?** The long way.
 > 🔧 Board length *(guessed: 51.5mm)*
@@ -340,59 +343,50 @@ Already ordered 3×2mm? They'll be useful elsewhere. Just buy 3×1mm too. ~₹12
 Copy all of this, fill in the numbers, send it back. `?` is fine and useful.
 
 ```
-=== MOTOR (the silver can) ===
-M1  width across the silver can            = ____ mm
-M2  height, table to the flat tab face     = ____ mm   *** MOST IMPORTANT ***
-M3  how far the rod is off-centre          = ____ mm
-M4  rod thickness, the fat way             = ____ mm
-M5  rod thickness, across the flats        = ____ mm
-M6  how far the rod sticks up              = ____ mm
-M7a width of the raised ring round the rod = ____ mm   (or "none")
-M7b height of that ring                    = ____ mm   (or "none")
-M8  gap between the 2 screw holes, mid-mid = ____ mm
-M9  width of one screw hole                = ____ mm
-M10a width of the flat tab                 = ____ mm
-M10b thickness of the tab metal            = ____ mm
+=== MOTOR (owned 28BYJ-48, 5V; red number is a lot/traceability code) ===
+M1  can diameter                              = 28.1 mm   [MEASURED]
+M2  mounting-face height                     = 19.0 mm   [MEASURED]
+M3  shaft offset from can centre             = 7.5 mm    [MEASURED]
+M4  shaft diameter                           = 5.0 mm    [MEASURED + SPEC]
+M5  shaft across flats                       = 3.0 mm    [SPEC — VERIFY PRESS FIT]
+M6  mounting face to shaft tip               = 9.5 mm    [MEASURED]
+M7a raised collar diameter                   = ~9.0 mm   [SPEC]
+M7b raised collar height                     = 2.0 mm    [DERIVED: 9.5 - 7.5]
+M8  mounting-hole pitch                      = 34.7 mm   [MEASURED]
+M9  mounting-hole bore                       = 4.0 mm    [MEASURED]
+M10a mounting-ear width                      = ~7.0 mm   [SPEC]
+M10b mounting-ear metal thickness            = ~0.8 mm   [SPEC]
 
-=== POSITION SENSOR (the black 3-legged part) ===
-M11a width across its flat face            = ____ mm
-M11b thickness front-to-back               = ____ mm   *** can break the design ***
-M11c height of the black block only        = ____ mm
-M11d gap between legs, middle to middle    = ____ mm
+=== POSITION SENSOR (KY-024 family, bare 49E/SS49E package) ===
+M11a body width                              = 4.1 nominal / 4.2 max mm [SPEC]
+M11b body thickness                          = 1.6 nominal / 1.68 max mm [VERIFY CLONE]
+M11c body height                             = 3.1-3.2 mm [SPEC]
+M11d straight-lead pitch                     = 1.27-1.30 mm [VERIFY LEAD FORM]
 
-=== POWER SOCKET (yellow block) ===
-M12 length end to end                      = ____ mm
-M13 height                                 = ____ mm
-M14 width                                  = ____ mm
-M15 width of the round tube at the front   = ____ mm
-M16 screw thread + ring nut?               = YES / NO   (thread width if yes: ____ mm)
-M17 POSITIVE terminal is                   = NEARER the round socket / FURTHER from it
-                                             *** do this before powering anything ***
+=== POWER SOCKET (likely inline 5.5x2.1 screw-terminal adapter) ===
+M12 body length                              = likely 35-37.3 mm [VARIANT — IDENTIFY]
+M13 body height                              = likely 12-13.5 mm [VARIANT — IDENTIFY]
+M14 body width                               = likely 14-14.2 mm [VARIANT — IDENTIFY]
+M15 mating barrel                            = 5.5 OD / 2.1 centre mm [SPEC]
+M16 panel thread + ring nut                  = NO for the inline adapter [LIKELY]
+M17 polarity                                 = terminal marked + -> centre pin [VERIFY CONTINUITY]
 
-=== ESP32 BOARD ===
-M18 pins along ONE long edge               = ____ pins  *** just count them ***
-M19 board length                           = ____ mm
-M20 board width                            = ____ mm
-M21 gap between the 2 pin rows, mid-mid    = ____ mm
-    (or outer-edge to outer-edge:            ____ mm)
-M22a USB socket width                      = ____ mm
-M22b USB socket height                     = ____ mm
-M22c how far it stands off the board        = ____ mm
-M23a cable plug plastic body width         = ____ mm
-M23b cable plug plastic body height        = ____ mm
+=== ESP32 BOARD (USB-C, CH340C-family, 15 pins per row) ===
+M18 pin count                                = 15 per row / 30 total [MEASURED]
+M19 board length                             = likely 51.5-52.0 mm [MATCHING LISTINGS]
+M20 board width                              = likely 28.0-28.5 mm [MATCHING LISTINGS]
+M21 header-row centre spacing                = ____ mm [REQUIRED: 22.86/25.4/27.94 all exist]
+M22 USB-C interface / shell                  = ~8.3x2.5 / ~9x3.2 mm [SPEC/LIKELY]
+M23 cable body                               = NOT NEEDED unless larger than 14x9 mm
 
-=== MOTOR DRIVER (blue board) ===
-M24a board length                          = ____ mm
-M24b board width                           = ____ mm
-M25  height with wires soldered FLAT       = ____ mm
-M26a tallest part on it is                 = ____________
-M26b its height above the board            = ____ mm
+=== MOTOR DRIVER (common blue four-LED ULN2003 board) ===
+M24 PCB size                                 = likely 35x32 mm [COMMON VARIANT]
+M25 installed height, cable bent flat        = likely ~12 mm [VERIFY AFTER WIRING]
+M26 tallest item                             = JST-XH motor plug, ~10-12 mm installed [LIKELY]
 
 === QUICK CONFIRMATIONS ===
-M27a magnet width                          = ____ mm   (expect 8)
-M27b magnet thickness                      = ____ mm   (expect 1)
-M28a push-button square body               = ____ mm   (expect 6)
-M28b push-button total height              = ____ mm   (expect 5)
+M27 docking magnets                          = 8x1 mm [OWNED / ALREADY IN CAD]
+M28 tactile switches                         = 6x6x5 mm [PURCHASE SPEC / ALREADY IN CAD]
 ```
 
 ---
@@ -403,15 +397,14 @@ I re-derive the **whole vertical stack in one pass** — motor height → base p
 length — rather than patching one number at a time. That's deliberate: these all depend on each
 other, so fixing them individually just moves the error somewhere else.
 
-**Four CAD problems are waiting on these numbers and cannot be fixed without them:**
+**The remaining blockers after the online pass are:**
 
-| Waiting on | What it fixes |
+| Waiting on | Why online data is not enough |
 |---|---|
-| M2, M6, M7 | The cam sits 2mm too high, so every dot is permanently raised and unreadable |
-| M2 | A second, separate 2mm error — the mid-plate rests *on top of* its ledge, not level with it, so the motor face lands 2mm higher than the box expects |
-| M11b | Whether the sensor actually fits the pocket I built for it |
-| M12–M16 | The power-socket holder, which is currently 100% invented |
-| M18, M21 | Whether your ESP32 can physically plug into the pod at all |
+| M5 | The cam is a press fit; the owned shaft across-flats controls whether it grips or cracks. |
+| M11b / sensor marking | 49E-family thickness reaches 1.68mm while the current pocket is exactly 1.6mm. |
+| Exact power-adapter identity | Similar inline adapters vary by several millimetres, and the current CAD incorrectly assumes a panel-mount jack. A purchase link or clear top/side photo is more useful than five separate readings. |
+| M21 | 30-pin ESP32 boards are sold at 22.86, 25.4, and 27.94mm row spacing. Only the owned board decides the socket-channel position. |
+| M25 later | Final height depends on how the motor cable and soldered wires are dressed during assembly. |
 
-**If you're short on time, do these four:** M18 (free, ten seconds), M17 (protects your ESP32),
-then M2 and M6.
+Everything else is now measured, derived, standardized, safely enveloped, or non-critical.

@@ -5,6 +5,15 @@
 
 ---
 
+## v7.8 — 2026-07-31 (component measurement research)
+
+- Researched the full M1-M28 list and labelled every value as measured, derived, published spec,
+  likely clone match, or still requiring the owned part.
+- Prefilled the measurement handout and added `docs/MEASUREMENT_RESEARCH.md` with source links.
+- Corrected ESP32 and barrel-jack M-number comments in the live parameter file; no geometry changed.
+- Identified that the owned yellow/black power adapter is inline, while the CAD assumes a
+  panel-mount jack; final hardware should standardize on a specified panel-mount part.
+
 ## v7.7 — 2026-07-31 (USB-C recovery access)
 
 - Widened the ESP32 pod USB-C service opening from **13 × 9 mm** to **14 × 9 mm**.

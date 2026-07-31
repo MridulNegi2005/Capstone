@@ -35,17 +35,15 @@ pod_int_width    = pod_width  - 2 * pod_wall;  // 60mm
 // Board: ~51.5 × 28mm, 15 pins/side, pin-row pitch ~25.4mm (MEASURE AND CONFIRM)
 // Two 1×15 female header strips sit in printed channels on the floor.
 // DevKit's male pins plug straight down — zero soldering, fully removable.
-devkit_length    = 51.5;   // MEASURE (M20) — Board X extent
-devkit_width     = 28.0;   // MEASURE (M21) — Board Y extent
+devkit_length    = 51.5;   // LIKELY (M19) — matching USB-C CH340C 30-pin listings
+devkit_width     = 28.0;   // LIKELY (M20) — matching board family; listings reach 28.5
 
 // >>> THE SINGLE MOST IMPORTANT UNMEASURED NUMBER IN THIS PROJECT <<<
-// 25.4mm row pitch describes the 38-PIN DevKit. Every document in this repo says
-// the board is the 30-PIN DOIT V1, which is ~22.86mm (0.9") pitch. If the board is
-// the 30-pin one, these printed channels are ~2.5mm too far apart and the ESP32
-// will not plug in AT ALL. Count the pins on one side before printing the pod:
-//   15 pins per side = 30-pin  -> hdr_row_pitch is probably 22.86
-//   19 pins per side = 38-pin  -> 25.4 is correct
-hdr_row_pitch    = 25.4;   // MEASURE (M22) — pin-row centre-to-centre
+// M18 is resolved: the owned board has 15 pins per side / 30 total. That still
+// does NOT determine row pitch. Commercial 30-pin carriers explicitly support
+// 0.9", 1.0", and 1.1" boards (22.86 / 25.4 / 27.94mm). M21 must be measured on
+// the owned USB-C clone before printing; keep the existing placeholder meanwhile.
+hdr_row_pitch    = 25.4;   // VERIFY (M21) — pin-row centre-to-centre
 hdr_strip_w      = 2.7;    // Female header strip body width
 hdr_strip_h      = 8.5;    // Female header strip body height (board sits at floor+8.5)
 hdr_strip_len    = 40.0;   // 15-pin strip length (~15×2.54=38.1, round up)
@@ -63,7 +61,7 @@ devkit_x_offset  = -2;
 // and printed as an open NOTCH (confirmed on the fit-test print). A panel-mount
 // jack can't clamp in a notch. Moved fully onto the lid, offset in Y away from
 // the DevKit so the jack body hangs over open floor.
-barrel_jack_dia  = 11.5;   // MEASURE (M17) — 5.5/2.1mm panel-mount jack
+barrel_jack_dia  = 11.5;   // PLACEHOLDER (M15/M16) — CAD assumes panel mount; owned adapter is inline
 // v7.5: -22 -> -20. The support cradle under this hole reached
 // x = barrel_jack_x - jack_body_l/2 - cradle_t = -29.5 against a cavity that ended
 // at -28, so the lid could not close. Lengthening the pod to 68 moved the cavity

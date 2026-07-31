@@ -331,3 +331,10 @@ and geometry disappears without an error. Always check the `Volumes:` count afte
 **Notes:** OpenSCAD reported simple geometry and the expected Volumes: 2; an independent STL comparison found exactly 36.0mm³ removed, matching 1mm × 9mm × 4mm of added opening. Orca initially emitted a 60°C bed while reporting the unused 80°C hot-plate field; the custom profile now sets Orca CLI's selected plate to 80°C, and `slice.sh` validates the actual emitted bed temperature and exits nonzero on failure. Final slice verified PETG at 235/80°C first layer and 230°C thereafter (52.23cm³, 4h04m51s). This does not resolve the measurement-gated motor vertical stack, Hall pocket depth, jack geometry/polarity, or ESP32 header pitch.
 
 ---
+
+---
+## [2026-07-31 13:31] — Codex
+**Task:** Fill the M1-M28 component measurements from online sources before requesting more physical readings.
+**Changes:** Added `docs/MEASUREMENT_RESEARCH.md` with measured/derived/spec/likely/verify evidence labels and source links; prefilled `docs/MEASUREMENTS_NEEDED.md`; corrected M-number comments in `esp32_pod_params.scad`; updated fit-check and handoff guidance. No production geometry changed.
+**Status:** online research pass completed; four owned-part checks remain.
+**Notes:** `2601213328` is a motor traceability/lot code, not a different model. A 30-pin ESP32 does not settle M21 because 22.86/25.4/27.94 mm row spacings are sold. The owned yellow/black screw-terminal adapter is inline rather than panel-mount, so it should remain a breadboard part; final CAD should use a specified nut-mounted 5.5 x 2.1 mm jack. Remaining immediate inputs are M5, M11b plus Hall marking, M21, and the final jack identity. M25 is deferred until cable dressing.
