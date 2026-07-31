@@ -6,7 +6,7 @@
 // Pod now shares the cell's docking face (68 wide × 58 tall)
 // so the chain looks like a uniform row of bricks.
 //
-// ESP32 DOIT DevKit V1 (30-pin, ~51.5×28mm) mounts HORIZONTALLY
+// Owned ESP32 USB-C DevKit (30-pin, ~51.5×28mm family) mounts HORIZONTALLY
 // on two 1×15 female header strips — plug-and-play, no soldering.
 //
 // include <esp32_pod_params.scad>
@@ -32,18 +32,16 @@ pod_int_length   = pod_length - 2 * pod_wall;  // 56mm
 pod_int_width    = pod_width  - 2 * pod_wall;  // 60mm
 
 // --- ESP32 DEVKIT V1 MOUNTING (horizontal on female header sockets) ---
-// Board: ~51.5 × 28mm, 15 pins/side, pin-row pitch ~25.4mm (MEASURE AND CONFIRM)
+// Board: ~51.5 × 28mm, 15 pins/side, measured pin-row pitch 25.6mm (M21)
 // Two 1×15 female header strips sit in printed channels on the floor.
 // DevKit's male pins plug straight down — zero soldering, fully removable.
 devkit_length    = 51.5;   // LIKELY (M19) — matching USB-C CH340C 30-pin listings
 devkit_width     = 28.0;   // LIKELY (M20) — matching board family; listings reach 28.5
 
-// >>> THE SINGLE MOST IMPORTANT UNMEASURED NUMBER IN THIS PROJECT <<<
-// M18 is resolved: the owned board has 15 pins per side / 30 total. That still
-// does NOT determine row pitch. Commercial 30-pin carriers explicitly support
-// 0.9", 1.0", and 1.1" boards (22.86 / 25.4 / 27.94mm). M21 must be measured on
-// the owned USB-C clone before printing; keep the existing placeholder meanwhile.
-hdr_row_pitch    = 25.4;   // VERIFY (M21) — pin-row centre-to-centre
+// M18: 15 pins per side / 30 total. M21: 25.6mm centre-to-centre on the owned
+// USB-C board. This is close to the nominal 1.0" (25.4mm) family, but the owned
+// reading controls the printed socket-channel locations.
+hdr_row_pitch    = 25.6;   // MEASURED (M21) — pin-row centre-to-centre
 hdr_strip_w      = 2.7;    // Female header strip body width
 hdr_strip_h      = 8.5;    // Female header strip body height (board sits at floor+8.5)
 hdr_strip_len    = 40.0;   // 15-pin strip length (~15×2.54=38.1, round up)

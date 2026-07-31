@@ -27,10 +27,11 @@
 |---|---|---|
 | ESP32 DevKit V1 (30-pin, USB-C) | ✅ HAVE IT | — |
 | 5V/3A power adapter | ✅ HAVE IT | — |
-| Barrel jack (yellow screw-terminal) | ⚠️ **HAVE BUT UNVERIFIED** | 🔴 **Polarity has NEVER been checked.** Verify with a multimeter BEFORE powering anything. See ASSEMBLY_BIBLE Step 1. Wrong polarity kills the ESP32 instantly. |
-| 28BYJ-48 stepper motor (5V) | ✅ HAVE IT | ⚠️ **Never measured with calipers.** 8 measurements needed before the cam/base_plate can be trusted — see CAD_FIT_CHECK. |
+| Inline female DC pigtail jack | ✅ **HAVE FOR TESTING** | Photo-identified; no thread/nut, so it cannot mount in the pod wall. Verify centre-pin polarity by continuity before power. |
+| Threaded 5.5×2.1mm female panel-mount jack | ❌ **NEED TO BUY / SELECT** | Final enclosure part. Must have retaining nut and ≥5V/3A rating; record exact drawing/link before finalizing lid CAD. |
+| 28BYJ-48 stepper motor (5V) | ✅ HAVE IT / MEASURED | Fit-critical caliper readings recorded, including M5=3.0mm. Vertical stack still needs one coordinated CAD pass. |
 | ULN2003 driver module | ✅ HAVE IT | Fits the 16mm pocket **only** with wires soldered flat (~12mm). With vertical Dupont headers it is ~20mm and will NOT fit. |
-| Hall sensor — MH-Sensor-Series (blue module) | ⚠️ **HAVE BUT WRONG FORM FACTOR** | The base_plate pocket is **5.3 × 4.3 × 3mm**, sized for a bare TO-92 (SS49E/A3144). The blue module PCB is far larger and will not fit. **Fix: desolder the TO-92 off the module (free), or buy 3× bare SS49E (~₹90).** Must use the **analog AO** output — firmware does `analogRead()` with 500/3500 thresholds, so a digital-only board breaks homing. |
+| Hall sensor — MH-Sensor-Series (blue module) | ⚠️ **HAVE BUT WRONG FORM FACTOR** | The whole blue PCB will not fit. v7.5 provides a **4.5 × 3.5 × 1.6mm underside pocket** for its bare TO-92 sensor. M11b is exactly 1.6mm, so dry-fit before gluing. Desolder the sensor and run three wires back; use analog AO behavior for homing. |
 | Neodymium magnets 8×1mm (docking) | ✅ HAVE IT | 10 purchased. 4 needed per cell (2 per ±X face). |
 | Homing magnet **3×2mm** (for the cam) | ❌ NEED TO BUY | 1 per cell. An 8×1mm will **not** fit the cam's 3.2mm pocket. Search "3x2mm neodymium magnet" — ~₹120 for 10–20 pcs. |
 | Tactile switches 6×6×5mm | ✅ HAVE IT | 3 needed (pod nav buttons). Not required for a Tier-0 demo. |
@@ -71,7 +72,7 @@
 |---|---|---|
 | Soldering iron | ✅ **HAVE IT** | You stated basic experience and an iron. 25–60W with a conical/chisel tip is right. |
 | **Digital multimeter** | ❌ **NEED TO BUY — MANDATORY** | 🔴 The single most important purchase. Barrel-jack polarity is unverified and getting it wrong destroys the ESP32 on first power-up. Also your only way to debug a dead rail. ~₹500 |
-| **Digital calipers** | ❌ **NEED TO BUY — HIGH PRIORITY** | Both open project blockers are *measurements* (motor ×8, barrel jack body). Without these the cam and base_plate cannot be trusted. ~₹600 |
+| **Digital calipers** | ✅ **IN HAND / USED** | Motor, Hall thickness, and ESP32 row-pitch readings recorded on 2026-07-31. |
 | Wire stripper / cutter | ❌ NEED TO BUY | ~₹200 |
 | Desoldering pump or wick | ❌ OPTIONAL | Useful if you need to lift the TO-92 off the hall module, or fix a bridge. ~₹120 |
 | Tweezers | ❌ OPTIONAL | Strongly recommended for 2mm springs and 1mm linkages. ~₹80 |
@@ -107,10 +108,9 @@ or stay on the ULN2003 module. It is not needed for the demo either way.
 
 1. **Multimeter** (~₹500) — unblocks safe power-up. Nothing else can happen safely without it.
 2. **Breadboard + USB-C data cable + solder wire** (~₹400) — everything needed for the Tier-0 demo.
-3. **Calipers** (~₹600) — unblocks the motor measurements, which unblock the cam and base plate.
+3. **Threaded 5.5×2.1mm panel-mount jack** (~₹15–₹100) — replaces the testing-only inline pigtail in the final pod.
 
-That is **~₹1,500** and it gets you a demonstrable motor + hall + live dashboard, plus the
-measurements that unblock everything else.
+Calipers are now in hand and the motor, Hall thickness, and ESP32 row-pitch measurements are recorded.
 
 ---
 
@@ -118,9 +118,9 @@ measurements that unblock everything else.
 
 | # | What | Feeds |
 |---|---|---|
-| 1 | 28BYJ-48: body dia, can height, shaft→body-centre offset, shaft dia, flat-to-flat, shaft length, mount-hole spacing, mount-hole dia | `base_plate`, `mid_plate`, cam bore |
-| 2 | Barrel jack body W×L×H + barrel bore | pod lid jack cradle (currently PLACEHOLDER) |
+| 1 | Motor vertical stack re-derivation from the completed owned-part readings | `base_plate`, `mid_plate`, cam bore |
+| 2 | Exact selected threaded panel-mount jack drawing/link | pod lid jack cradle (currently PLACEHOLDER) |
 | 3 | Hall module PCB dimensions (or switch to bare TO-92) | `base_plate` hall pocket |
 | 4 | Actual magnet diameter/thickness from the bill | dock magnet pockets (CAD assumes 8×1mm) |
-| 5 | ESP32 board length/width + pin-row pitch | pod header channels |
+| 5 | ESP32 board length/width if the catalogue envelope proves tight; pin-row pitch is measured 25.6mm | pod board envelope |
 | 6 | Pogo connector, once chosen | `outer_box` pogo carrier pocket |

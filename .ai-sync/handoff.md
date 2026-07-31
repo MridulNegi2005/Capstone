@@ -1,29 +1,27 @@
 # Active Handoff
 > Last updated by: Codex
-> Timestamp: 2026-07-31T13:50:00+05:30
+> Timestamp: 2026-07-31T16:25:00+05:30
 
-## 🔴 CURRENT BLOCKER: FOUR OWNED-PART CHECKS
+## 🔴 CURRENT BLOCKER: FINAL POWER-JACK CHOICE + VERTICAL-STACK REDESIGN
 
-The online pass has filled or bounded every M1-M28 item that public specifications can support.
-See `docs/MEASUREMENT_RESEARCH.md` for sources and evidence labels, and
-`docs/MEASUREMENTS_NEEDED.pdf` for the prefilled handout.
+The fit-critical owned readings are now received:
 
-Only these fit-critical owned-part checks remain:
+- M5 motor shaft across-flats = **3.0mm**. The existing 3.2mm cam bore gives 0.2mm total clearance.
+- M11b bare Hall body thickness = **1.6mm**. The recess is also 1.6mm, so it requires a dry-fit
+  because there is zero print margin.
+- M21 ESP32 header-row centre spacing = **25.6mm**. `hdr_row_pitch` now uses the owned reading.
 
-| Check | Why it still matters |
-|---|---|
-| M5 motor shaft across-flats | The common value is 3.0 mm, but the cam is a press fit. |
-| M11b plus Hall package marking | 49E-family thickness is 1.6 mm nominal / 1.68 mm max; the current pocket is exactly 1.6 mm. |
-| M21 ESP32 header-row centre spacing | 30-pin boards exist at 22.86, 25.4, and 27.94 mm. |
-| Exact final power-jack identity | The owned yellow/black adapter is inline; the lid CAD assumes a panel-mount jack. |
+The 2026-07-31 photo identifies the owned power connector as an **inline female DC pigtail jack**
+with red/black wires. It has no threaded neck or nut. It is electrically useful for testing, but
+it cannot mount securely in the pod's round lid hole.
 
-M25 (ULN2003 installed height with its cable dressed) is a later assembly check, not a blocker for
-the present CAD research pass. Motor measurements M2=19.0, M6=9.5 and derived M7b=2.0 now allow
-the vertical stack to be re-derived, but that chain must be repaired in one coordinated CAD pass.
-Do not patch its individual heights independently.
+**Final connector decision:** buy/select a 5.5×2.1mm female panel-mount DC jack with a retaining
+nut, rated at least 5V/3A, then record its exact link or drawing before finalizing the lid cradle.
+Keep the photographed pigtail for breadboard testing.
 
-Recommended connector decision: use a specified panel-mount 5.5 x 2.1 mm centre-positive jack
-with a retaining nut in the final pod; keep the inline adapter for breadboard testing.
+The motor measurements now allow the vertical stack to be re-derived, but it must be repaired in
+one coordinated motor/base/cam/linkage pass. Do not patch individual heights independently. M25
+remains a later assembly check after ULN2003 cable dressing.
 
 ---
 
@@ -86,10 +84,11 @@ same pass as the vertical stack.
 reading surface, not the lift). The cam will be reprinted. The nav caps are the known pre-fix version.
 
 ---
-## Current State: CAD is CLEAN except for the above
+## Current State: measurements resolved; coordinated CAD work remains
 
 v7.5 through v7.7 repaired the geometry defects that did not require owned-part measurements. Every part
-re-rendered as one connected solid in those verified passes; this v7.8 research update changes documentation and parameter comments only.
+re-rendered as one connected solid in those verified passes. v7.9 updates the ESP32 socket pitch
+from 25.4 to the measured 25.6mm; affected output artifacts have been regenerated and verified.
 
 | Fixed | Was |
 |---|---|
@@ -124,19 +123,19 @@ report OK otherwise. **Never remove that check.**
 ---
 
 ## In Progress
-The M1-M28 online measurement fill is complete in the current change set. Public specifications,
-owned-part readings, derived values, clone-dependent estimates, and remaining checks are separated
-explicitly. No production geometry changed in this pass.
+M5, M11b, and M21 are recorded. The owned power connector is photo-identified as an inline pigtail.
+The v7.9 change updates the ESP32 header-channel geometry and measurement documentation. The pod
+shell STL and PETG G-code have been regenerated and verified; affected PDFs have been regenerated
+and visually reviewed.
 
 ## Next Steps
-1. Obtain only the four remaining owned-part checks: M5, M11b/marking, M21, and the exact final
-   power-jack part or purchase link.
-2. Re-derive the motor/base/cam/linkage vertical stack in one coordinated CAD pass using the now
+1. Select/buy the final threaded 5.5×2.1mm panel-mount jack and record its exact link/drawing.
+2. Re-derive the motor/base/cam/linkage vertical stack in one coordinated CAD pass using the
    measured M2=19.0 mm, M6=9.5 mm, and derived M7b=2.0 mm.
-3. Replace the guessed jack cradle with the chosen panel-mount jack dimensions.
-4. Print `mid_plate` first to confirm PETG behavior before committing to the box.
-5. Change the exposed WiFi password and build the Stage-1 breadboard circuit.
-6. Verify M25 after final ULN2003 cable dressing during assembly.
+3. Replace the guessed jack hole/cradle values with the selected panel-mount part dimensions.
+4. Dry-fit the 1.6mm Hall sensor in the printed pocket before gluing.
+5. Print `mid_plate` first to confirm PETG behavior before committing to the box.
+6. Change the exposed WiFi password and verify M25 after final ULN2003 cable dressing.
 
 ## Print / slice pipeline (NEW)
 ```

@@ -63,8 +63,8 @@ DAY 2 — Small parts:
 | `nav_cap.stl` | Raised symbols must be smooth for blind user's fingertips |
 
 ## Pre-Print Measurements Needed
-- [ ] 28BYJ-48 shaft: usable length + D-flat profile (one-flat or double?)
-- [ ] ESP32 DevKit V1 pin-row pitch: 22.9mm or 25.4mm? (update `hdr_row_pitch` in `esp32_pod_params.scad`)
+- [x] 28BYJ-48 shaft across-flats: 3.0mm measured; cam bore provides 3.2mm
+- [x] ESP32 DevKit pin-row pitch: 25.6mm measured; `hdr_row_pitch` updated
 - [ ] Chosen 4-pin pogo connector: L x W x H (update `pogo_carrier_*` in `outer_box.scad`)
 - [ ] Muscle board mounting holes: read coords from KiCad (update `mb_boss_positions` in `outer_box.scad`)
 

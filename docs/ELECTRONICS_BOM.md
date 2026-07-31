@@ -5,7 +5,7 @@
 
 ---
 
-## ⚡ The headline: you need NO chips, NO resistors, NO capacitors
+## The headline: you need NO chips, NO resistors, NO capacitors
 
 Every discrete component the circuit would normally need is **already built into the modules
 you own**:
@@ -34,25 +34,26 @@ you actually have the right thing.*
 | 3 | **ULN2003 driver board** | Small **blue** PCB, 4 red LEDs, white 5-pin socket, black 16-pin chip, IN1–IN4 + `+`/`-` pins | 1 | ✅ HAVE — **this is your motor driver, no chip to buy** |
 | 4 | **Hall sensor module (MH-Sensor-Series)** | Small **blue** PCB, tiny black 3-pin sensor on one edge, blue trimmer pot, 1–2 LEDs, pins marked **AO DO GND VCC** | 1 | ✅ HAVE (₹50) — ⚠️ **must use AO (analog)**, and the pocket won't fit it (see note) |
 | 5 | **5V / 3A power adapter** | Wall plug, barrel connector on the lead, "5V 3A" on the label | 1 | ✅ HAVE (₹160 w/ jack) |
-| 6 | **Barrel jack (screw terminal)** | Small yellow/black block, barrel socket one end, two screw terminals the other | 1 | 🔴 HAVE but **polarity NEVER verified** — see below |
+| 6 | **Inline female DC pigtail jack** | Black cylindrical barrel socket with red/black wires; no thread or nut | 1 | ✅ HAVE for testing; 🔴 polarity still requires a multimeter check |
+| 6b | **5.5×2.1mm female panel-mount jack** | Threaded neck plus retaining nut, rated ≥5V/3A | 1 | ❌ SELECT/BUY for the final pod; record exact drawing/link before lid CAD |
 | 7 | **Connecting wire (2m)** | Loose hookup wire | 2m | ✅ HAVE (₹20) |
 | 8 | **Dupont jumper wires** | Ribbon of coloured wires with plastic pin housings | some | ✅ HAVE — need ~8× M-F and ~5× M-M |
 | 9 | **Neodymium magnets 8×1mm** | Small silver discs, strongly attract each other | 10 | ✅ HAVE (₹135) — for docking, **not** for cam homing |
 | 10 | **Tactile switches 6×6×5mm** | Tiny square black buttons, 4 legs | 3 | ✅ HAVE — not needed for the demo |
 | 11 | **Soldering iron** | — | 1 | ✅ HAVE |
 
-### 🔴 Two warnings about things you already have
+### Two warnings about things you already have
 
-**#6 — the barrel jack polarity is still unverified.** There is no reverse-polarity protection
-anywhere in this circuit. If the centre pin is negative and you wire it as positive, the ESP32
+**#6 — the pigtail polarity is still unverified.** There is no reverse-polarity protection
+anywhere in this circuit. If the centre pin reaches the wrong wire and you connect it as positive, the ESP32
 dies instantly and silently. **This is the single most likely way to lose ₹350 in this project.**
 Check it with a multimeter before anything is powered. Procedure is in `ASSEMBLY_BIBLE.md` Step 1.
 
-**#4 — your hall module does not fit its pocket.** The base plate pocket is 5.3 × 4.3 × 3mm,
-designed for a *bare* TO-92 sensor, not a PCB module. (It also turns out that pocket is entirely
-swallowed by the cam pocket, so it doesn't exist on the printed part at all — see
-`CAD_FIT_CHECK.md`.) **For the demo this does not matter** — the module sits on the breadboard.
-For assembly later you either desolder the bare 3-pin sensor off the module, or redesign the pocket.
+**#4 — your whole Hall module does not fit the base plate.** v7.5 rebuilt an underside pocket for
+the *bare* TO-92 sensor only; the blue PCB is still far too large. M11b measures 1.6mm and the
+current recess is exactly 1.6mm, so dry-fit it before gluing. **For the demo this does not matter**
+— the module sits on the breadboard. For final assembly, desolder the bare 3-pin sensor from the
+module and run three wires back to it.
 
 ---
 
@@ -80,7 +81,7 @@ For assembly later you either desolder the bare 3-pin sensor off the module, or 
 | 9 | **M4 × 10mm screws** | Motor mounting ears. **v7.5: nuts no longer needed** — the right-hand ear sits under the spinning cam with nowhere to put a nut, so the screws now thread directly into Ø3.3 pilot holes in the base plate. Self-tapping/thread-forming M4 preferred. | 2 | ~30 |
 | 10 | **M2 × 8mm self-tap** | Pod lid. **NOT M2×6** — through a 4mm lid that leaves only 2mm of thread. | 2 | ~40 |
 | 11 | **Superglue or 5-min epoxy** | Glues the resin dot insert into the PETG plate. Epoxy preferred — you get time to seat it square. | 1 | ~80 |
-| 12 | **Digital calipers** | 150mm digital | 🔴 Both open project blockers are *measurements* (motor ×8, jack body). | 1 | ~600 |
+| 12 | **Digital calipers** | 150mm digital | Already in hand; M5, M11b, and M21 recorded on 2026-07-31. | 1 | already owned |
 
 **Mechanism subtotal: ~₹1,430**
 
@@ -97,7 +98,7 @@ For assembly later you either desolder the bare 3-pin sensor off the module, or 
 
 ---
 
-## 💰 Totals
+## Totals
 
 | | ₹ |
 |---|---|
@@ -127,7 +128,7 @@ For assembly later you either desolder the bare 3-pin sensor off the module, or 
 
 ---
 
-## 📌 If you ever DO build the custom muscle board
+## If you ever DO build the custom muscle board
 
 Not needed now, but for the record — it's `pcb/braillix_muscle_board.kicad_pcb`, 34×44mm:
 

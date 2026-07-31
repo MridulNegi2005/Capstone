@@ -1,25 +1,25 @@
-# 📖 Braillix — Assembly Bible & Wiring Guide
+# Braillix - Assembly Bible & Wiring Guide
 
 Follow this guide sequentially to build your first single-cell prototype.
 
 ---
 
-## 🛑 SECTION 1: CRITICAL SAFETY CHECKS (DO THIS FIRST)
+## SECTION 1: CRITICAL SAFETY CHECKS (DO THIS FIRST)
 
 > [!CAUTION]
 > **BARREL JACK POLARITY CHECK**
-> The yellow screw-terminal adapter has no visible markings. If you wire 5V backwards, the ULN2003 chip will violently burn out.
+> The photographed inline female pigtail has red/black wires, but colour is not proof. If you wire 5V backwards, the ULN2003 chip can burn out.
 > 1. Plug the 5V adapter into the wall.
-> 2. Plug the barrel jack into the yellow screw terminal.
+> 2. Plug the adapter's round male plug into the black inline female pigtail. Keep both stripped wires disconnected from the circuit.
 > 3. Turn on your Multimeter and set it to **DC Voltage (V DC)**.
-> 4. Touch the RED probe to one screw terminal and the BLACK probe to the other.
-> 5. If the screen reads **`5.0V`**, the terminal the RED probe is touching is the **POSITIVE (+)** side.
-> 6. If the screen reads **`-5.0V`** (negative), the terminal the BLACK probe is touching is the **POSITIVE (+)** side.
-> 7. MARK the positive side with a sharpie or tape immediately.
+> 4. Touch the RED probe to the exposed red wire and the BLACK probe to the exposed black wire.
+> 5. If the screen reads approximately **`+5.0V`**, red is **POSITIVE (+)** and black is **GND (-)**.
+> 6. If it reads approximately **`-5.0V`**, the pigtail colours are reversed. Do not connect it until the wires are relabelled.
+> 7. Disconnect wall power before attaching either wire to the breadboard.
 
 ---
 
-## ⚡ SECTION 2: WIRING DIAGRAM
+## SECTION 2: WIRING DIAGRAM
 
 We are wiring the **ESP32**, **ULN2003**, and **Hall Sensor** together.
 
@@ -50,7 +50,7 @@ We are wiring the **ESP32**, **ULN2003**, and **Hall Sensor** together.
 
 ---
 
-## 🛠️ SECTION 3: STEP-BY-STEP ASSEMBLY SEQUENCE
+## SECTION 3: STEP-BY-STEP ASSEMBLY SEQUENCE
 
 ### Phase A: Motor Prep
 1. Take the **28BYJ-48 motor** and mount it to the `base_plate` using two M4x10mm bolts. 
@@ -81,7 +81,7 @@ We are wiring the **ESP32**, **ULN2003**, and **Hall Sensor** together.
 
 ---
 
-## 🚫 SECTION 4: BEGINNER SOLDERING MISTAKES
+## SECTION 4: BEGINNER SOLDERING MISTAKES
 If you are doing the flat-soldering for the ULN2003:
 - **Cold Joint:** Looks like a dull, grey blob that doesn't stick to the pad. *Fix: Apply a tiny bit of flux, heat the pin and wire simultaneously for 2 seconds, and reapply a dab of solder.*
 - **Bridging:** Solder spills over and connects two pins (e.g., IN1 and IN2). This will break the motor steps. *Fix: Heat the bridge and swipe your iron away quickly, or use desoldering wick to soak up the excess.*

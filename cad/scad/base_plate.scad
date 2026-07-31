@@ -97,7 +97,7 @@ standoff_y = 21;
 // and run three wires back to it (or straight to the ESP32). See docs.
 hall_body_w     = 4.1;     // MEASURE (M11) — sensor body width, across the flat face
 hall_body_d     = 3.1;     // MEASURE (M11) — sensor body depth, flat face to round back
-hall_body_t     = 1.6;     // MEASURE (M11) — sensor body thickness
+hall_body_t     = 1.6;     // MEASURED (M11b) — owned sensor body thickness
 hall_fit        = 0.4;     // print/glue clearance added to width and depth
 hall_floor_t    = 0.4;     // plate left between the sensor and the cam pocket floor
 
@@ -157,8 +157,9 @@ module cam_features() {
         cylinder(d=cam_pocket_diameter, h=cam_pocket_depth + 1);
 }
 
-// Sanity guard — if a measured sensor turns out thicker than the space under the
-// cam pocket, the design has to change rather than silently print a useless pocket.
+// M11b equals the available 1.6mm recess exactly. This passes the geometric guard,
+// but leaves zero print tolerance: dry-fit and lightly clean/sand the pocket before
+// gluing. Do not deepen it without re-checking the remaining hall_floor_t.
 assert(hall_pocket_h >= hall_body_t,
        "Hall sensor is thicker than the base plate can recess it. Either reduce \
 hall_floor_t, or move the sensor outboard of the cam pocket and re-site the magnet.");

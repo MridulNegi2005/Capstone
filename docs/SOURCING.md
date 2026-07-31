@@ -9,10 +9,17 @@
 | NeFeB disc magnets **8mm dia × 1mm thick** | plenty — CAD v6.1 pockets sized for these |
 | Hall sensor (SS49E-class) | validated (saturates 0/4095, fine for edge homing) |
 | 6×6mm tactile switches ×3 | in hand |
-| 5.5/2.1mm barrel jack + 5V/3A adapter | in hand |
+| Inline female DC pigtail jack + 5V/3A adapter | in hand; testing only, likely 5.5/2.1mm |
 | Jumper wires (Dupont) | in hand (housings get cut off for in-cell wiring) |
 
 ## 🛒 TO BUY
+
+### 0. Final enclosure power jack — threaded panel mount
+
+Buy one **5.5×2.1mm female panel-mount DC jack with a retaining nut**, rated for at least 5V/3A.
+The photographed inline pigtail jack has no thread or nut, so it cannot lock into the pod wall.
+Keep it for breadboard testing. Record the selected panel jack's purchase link/drawing before
+finalizing the lid hole and internal cradle.
 
 ### 1. Return springs x6 (+ spares) — 2mm OD MICRO springs
 **Spec: 2.0mm OD, ~0.3mm stainless wire, ~4mm free length.** One per braille dot.

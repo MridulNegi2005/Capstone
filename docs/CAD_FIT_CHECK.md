@@ -18,21 +18,21 @@
 > | §6d | USB cutout too small for a real plug | ✅ 10×7 → 13×9 |
 > | §7a | Jack cradle overruns the cavity | ✅ fixed, plus an assert so it can't recur silently |
 >
-> **Still open, blocked on measurement** (see `MEASUREMENTS_NEEDED.md`):
-> §4c cam z-stack · §2b hall sensor thickness · §7b real jack dimensions ·
-> §6b **M21 header-row pitch — 30-pin clones still vary, and this decides whether the ESP32 fits**.
+> **Still open after the completed measurements** (see `MEASUREMENTS_NEEDED.md`):
+> §4c motor/cam vertical-stack re-derivation · §2b physical Hall-pocket dry-fit ·
+> §7b selecting the actual threaded panel-mount jack.
 
 > ## 2026-07-31 measurement-research update
 >
 > The online and owned-part pass is recorded in `MEASUREMENT_RESEARCH.md`.
 >
-> - Motor M1, M2, M3, M4, M6, M8, and M9 are now physically measured; M7b is derived.
-> - The 49E/SS49E package envelope is published, but its 1.68 mm worst-case thickness exceeds
->   the current 1.6 mm pocket, so M11b and the package marking remain assembly checks.
-> - M18 is resolved as a 30-pin USB-C ESP32. M21 remains open because 30-pin boards are sold
->   with 22.86, 25.4, and 27.94 mm header-row spacing.
-> - The owned yellow/black barrel adapter is inline, not panel-mount. Final CAD should use a
->   specified panel-mount 5.5 x 2.1 mm jack or be redesigned to capture the entire inline body.
+> - Motor M1–M9 now include the fit-critical owned readings; M5 is 3.0mm across flats.
+> - M11b is measured at 1.6mm. The recess is also 1.6mm, so geometry passes but a printed
+>   dry-fit is still required because there is no manufacturing margin.
+> - M18 is a 30-pin USB-C ESP32 and M21 is measured at 25.6mm. The live socket channels now use it.
+> - The owned power part is photo-identified as an inline female DC pigtail jack with red/black
+>   wires. It has no thread/nut; keep it for testing and select a nut-mounted 5.5×2.1mm jack for
+>   the final pod.
 >
 **Date:** 2026-07-29
 **Scope:** physical fit of purchased/owned components inside the v7.2 printed parts.
@@ -75,7 +75,7 @@ Several owned-part dimensions have since been measured; use `MEASUREMENT_RESEARC
 | **USB cutout alignment** | cutout z 12.5 .. 19.5; board top sits at z=10.5 (8.5 strip − 1.0 channel recess) | port body ~10.5 .. 13.0 | **FAILS** | Hole sits ~2 mm too high; only ~0.5 mm overlaps the port |
 | **USB cutout size** | 10 x 7 mm | micro-USB overmould commonly ~12 x 8 [SPEC-ish] | **UNVERIFIED** | Plug may not enter |
 | **Headroom under pod lid** | board top z≈10.5, cavity top z=54 | a few mm | **FITS** | 43 mm spare — grossly over-tall, but no clash |
-| **Barrel jack hole** | Ø11.5 at (-22, +18) on the lid | 5.5/2.1 panel jack, ~Ø11 thread [SPEC] | **UNVERIFIED** | User's jack is a yellow screw-terminal type, not the modelled panel jack |
+| **Barrel jack hole** | Ø11.5 at (-22, +18) on the lid | 5.5/2.1 panel jack, ~Ø11 thread [SPEC] | **UNVERIFIED** | Owned part is an inline pigtail, not the modelled panel jack |
 | **Barrel jack cradle** | inner 12 x 9.5 x 11, walls 1.5 → outer reaches **x = -29.5** | must fit inside cavity x ≥ -28 | **FAILS** | 1.5 mm interference — the lid will not close. And all three dims are PLACEHOLDERS |
 | **Docking magnets** | Ø8.4 x 1.2 pockets, 2 per face at y=±14, 4 mm wall | 8 x 1 mm NdFeB discs — **measured, in hand** | **FITS** | Only re-confirm the newly bought batch is the same 8x1 |
 | **Nav buttons — cap stem** | Ø3.8 stem projects **4.5 mm behind** the flange through a Ø4.2 hole | must cross a 4 mm wall | **FITS (nominal)** | Stem reaches 0.5 mm inside; 0.4 mm diametral clearance allows resin-in-PETG sliding |
@@ -355,17 +355,18 @@ grille recess in that wall only starts at z=23, far above the board at z≈10.5,
 lengthen the pod. Realistically `pod_length` needs to go from 64 to ~68, which conveniently also
 matches the cell footprint. **Measure the board first.**
 
-### 6b. Width and header pitch — M21 is clone-specific
+### 6b. Width and header pitch — M21 resolved at 25.6mm
 
-**[SCAD]** `devkit_width = 28.0`, `hdr_row_pitch = 25.4`. The owned board is now confirmed as
-15 pins per row / 30 total, USB-C.
+**[SCAD/current]** `devkit_width = 28.0`, `hdr_row_pitch = 25.6`. The owned board is confirmed as
+15 pins per row / 30 total, USB-C, with 25.6mm measured between the row centres.
 
 **[SPEC, still verify owned board]** Pin count does not identify the transverse footprint.
 Commercial 30-pin carriers explicitly support 0.9, 1.0, and 1.1 inch row spacing — 22.86,
 25.4, and 27.94 mm. Matching USB-C CH340C listings are approximately 51.5 x 28.5 mm overall.
 
-Therefore the current 25.4 mm channel spacing is plausible, but not proven. Physically measure
-M21 before printing; a wrong value prevents the DevKit from plugging in at all.
+The live 25.6mm channel spacing now follows the owned board rather than the nominal 25.4mm family.
+This resolves the header-location blocker; board insertion still needs a first-print dry-fit.
+
 ### 6c. USB cutout — ~2 mm too high
 
 **[SCAD]** `usb_z = pod_floor + hdr_strip_h + 1 = 3 + 8.5 + 1 = 12.5`, cutout 10 wide x 7 tall
@@ -424,15 +425,16 @@ Since a real screw-terminal jack is almost certainly *bigger* than the 12 mm pla
 worse, not better. Either move `barrel_jack_x` inboard (to about −20) or shrink the cradle.
 
 **7b. The modelled jack is the wrong type.**
-Ø11.5 is sized for a **threaded panel-mount 5.5/2.1 jack with a nut** [SPEC]. Mridul's part is a
-**yellow screw-terminal barrel socket** — typically a moulded block with two screw terminals and no
-panel thread, so a round hole gives it nothing to clamp to. That is exactly why the cradle exists,
-and exactly why the cradle must be built to the real part.
+Ø11.5 is sized for a **threaded panel-mount 5.5/2.1 jack with a nut** [SPEC]. The owned part is now
+photo-identified as an **inline female DC pigtail socket** with red/black wires and no panel thread.
+A round hole gives it nothing to clamp to. Keep it for testing and choose a real nut-mounted jack
+for the final pod rather than building a bulky cable-body cradle.
 
 Also still open from the 2026-06-03 breadboard review: **the jack's polarity has never been proven.**
 Check it with a multimeter before applying adapter power.
 
-**Measure before touching this file:** see checklist items 14-18 in §10.
+**Before finalizing this feature:** select the exact threaded panel-mount jack and use its drawing
+or measured thread/body dimensions. Do not dimension the final lid around the testing pigtail.
 
 ---
 
@@ -538,7 +540,7 @@ or a product listing. The right-hand column is the CAD symbol it feeds.
 |---|---|---|
 | 20 | Board length | `devkit_length` = 51.5 |
 | 21 | Board width | `devkit_width` = 28.0 |
-| 22 | Pin-row centre-to-centre pitch (**critical — 30-pin vs 38-pin**) | `hdr_row_pitch` = 25.4 |
+| 22 | Pin-row centre-to-centre pitch | **M21 measured 25.6mm; `hdr_row_pitch` updated** |
 | 23 | Pin count per row | `hdr_strip_len` = 40 |
 | 24 | USB socket: width, height, and height of its underside above the board | `usb_w` = 10, `usb_h` = 7, `usb_z` = 12.5 |
 | 25 | Your USB cable's overmould width x height | `usb_w`, `usb_h` |

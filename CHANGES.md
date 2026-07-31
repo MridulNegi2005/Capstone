@@ -5,6 +5,15 @@
 
 ---
 
+## v7.9 — 2026-07-31 (owned-part measurements resolved)
+
+- Recorded M5 = 3.0mm, M11b = 1.6mm, and M21 = 25.6mm as owned-part measurements.
+- Updated the ESP32 socket-channel pitch from the 25.4mm placeholder to the measured 25.6mm.
+- Confirmed the existing 3.2mm cam bore provides 0.2mm total clearance across the measured shaft flats.
+- Kept the Hall recess at 1.6mm; it is an exact geometric fit with zero print margin and requires a dry-fit.
+- Photo-identified the owned power part as an inline female DC pigtail jack, not a panel-mount part.
+  It remains useful for testing; the final pod still needs a selected threaded 5.5×2.1mm jack.
+
 ## v7.8 — 2026-07-31 (component measurement research)
 
 - Researched the full M1-M28 list and labelled every value as measured, derived, published spec,

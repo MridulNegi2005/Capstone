@@ -100,7 +100,7 @@ assert(magnet_depth < disk_base_thickness - 0.5,
 
 // Hub extends below disc; Double-D bore continues into disc floor.
 //
-// >>> BLOCKED ON MEASUREMENT — see docs/MEASUREMENTS_NEEDED.md items M4-M7 <<<
+// >>> OWNED MOTOR MEASUREMENTS RECEIVED — vertical stack redesign still pending <<<
 // The old comment here claimed "hub 4 + bore 4 into disc floor = 8mm engagement".
 // That was stale: the disc floor is 2mm, not 4mm, so real engagement is
 // hub_h(4) + disk_base_thickness(2) = 6mm, and the bore is a THROUGH hole with
@@ -112,7 +112,9 @@ assert(magnet_depth < disk_base_thickness - 0.5,
 //     so the space beneath the disc for the hub is only  43 - 41 = 2mm
 //     but hub_h = 4  ->  the hub bottoms out on the motor and the disc sits 2mm
 //     proud, which puts ALL SIX DOTS permanently 2mm above the reading surface.
-// Both 41 and the 10mm shaft length are datasheet guesses, never measured.
+// The owned motor readings are now M2=19.0, M5=3.0, M6=9.5 and M7b=2.0mm.
+// The 41mm assembly datum is still a CAD assumption and must be re-derived with
+// the whole motor/base/cam/linkage stack rather than patched here in isolation.
 //
 // DO NOT guess a new hub_h. Once the motor is measured, set:
 //     hub_h = (cam pocket floor z) - (measured shaft-boss top z)  - 0.3 clearance
@@ -247,11 +249,11 @@ union() {
         cylinder(h=hub_h, r=4.5, $fn=50);
 
         // Double-D shaft hole — through entire hub height
-        // Two opposite flats: cylinder clipped to 3.2mm across flats
+        // M5 measured 3.0mm across flats; 3.2mm gives 0.2mm total resin clearance.
         translate([0, 0, -1])
         intersection() {
             cylinder(h=hub_h + 2, r=2.6, $fn=50);     // 5.2mm clearance hole
-            cube([10, 3.2, hub_h + 2], center=true);   // Clip to 3.2mm across Y flats
+            cube([10, 3.2, hub_h + 2], center=true);   // 3.0mm measured + 0.2mm clearance
         }
     }
 
@@ -275,7 +277,7 @@ union() {
 translate([0, 0, -hub_h - 1])
 intersection() {
     cylinder(h=shaft_bore_depth + 1, r=2.6, $fn=50);
-    cube([10, 3.2, shaft_bore_depth + 1], center=true);  // Double-D: clip Y axis
+    cube([10, 3.2, shaft_bore_depth + 1], center=true);  // M5 3.0 + 0.2mm clearance
 }
 
 // Homing magnet pocket (subtracted from disc underside)
@@ -313,7 +315,7 @@ module braille_cam() {
         translate([0, 0, -hub_h - 1])
         intersection() {
             cylinder(h=shaft_bore_depth + 1, r=2.6, $fn=50);
-            cube([10, 3.2, shaft_bore_depth + 1], center=true);  // Double-D
+            cube([10, 3.2, shaft_bore_depth + 1], center=true);  // M5 3.0 + 0.2mm clearance
         }
         // Homing magnet pocket
         translate([magnet_radius*cos(magnet_angle),

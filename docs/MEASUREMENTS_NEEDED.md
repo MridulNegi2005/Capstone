@@ -8,8 +8,9 @@ An online/specification pass has now prefilled most of the original list. The ev
 links are in [`MEASUREMENT_RESEARCH.md`](MEASUREMENT_RESEARCH.md). Do not re-measure catalogue
 dimensions unless the item is marked **VERIFY** below.
 
-**Only four checks remain important now:** M5, M11b/marking, M21, and identifying the exact power
-adapter body. M25 is checked later after the driver wires are installed.
+**M5, M11b, and M21 are now measured.** No additional immediate caliper reading is required.
+The remaining hardware decision is selecting the final threaded panel-mount power jack. M25 is
+checked later after the driver wires are installed.
 
 **Motor identification:** `28BYJ-48`, 5 V. The red `2601213328` marking is a production/traceability code, not a different motor model.
 
@@ -111,7 +112,7 @@ The CAD says 19mm tall. Nobody has ever checked.
 
 ### M5
 > 🟢 **Now measure the rod the narrow way — across the two flat sides.** Smaller number.
-> 🔧 **Shaft flat-to-flat / across-flats** *(guessed: 3.0mm)*
+> 🔧 **Shaft flat-to-flat / across-flats:** **3.0mm measured**
 >
 > *That shape is called a **double-D**. It's what stops the cam spinning loose on the rod. Both
 > M4 and M5 must be right or the cam either won't go on, or will wobble.*
@@ -182,10 +183,10 @@ You can measure it while it's still soldered on.
 > 🟢 **M11a — How wide is the black part across its flat face?**
 > 🔧 Sensor body width *(guessed: 4.1mm)*
 
-> 🟢 **M11b — How thick is it front-to-back?** One side is flat, the other bulges. ⚠️ **This is
-> the one that can break the design** — I've allowed 1.6mm. If yours is fatter, the CAD will
-> refuse to build and say so. Send me the number and I'll rework it.
-> 🔧 Sensor body thickness *(guessed: 1.6mm)*
+> 🟢 **M11b — How thick is it front-to-back?** **1.6mm measured.** The CAD recess is also
+> exactly 1.6mm, so it passes geometrically but has zero print tolerance. Dry-fit and clean or
+> lightly sand the pocket before gluing; do not force the sensor.
+> 🔧 Sensor body thickness: **1.6mm measured**
 
 > 🟢 **M11c — How tall is just the black block?** Not counting the legs.
 > 🔧 Sensor body height *(guessed: 3.1mm)*
@@ -197,58 +198,26 @@ You can measure it while it's still soldered on.
 
 # PART 3 — THE POWER SOCKET
 
-The small **yellow/black block** with a round socket at one end and two screw terminals at the
-other. Where the 5V adapter plugs in.
+The 2026-07-31 photo shows a **female inline DC barrel pigtail jack**: the black cylindrical socket
+with red and black wires. The adapter's round male plug goes into its front.
 
-**Every single dimension for this is a placeholder I invented.** The printed holder meant to
-support it is entirely fictional until you measure this.
+This part is electrically usable for testing, but it has **no threaded neck and no retaining nut**.
+That means it cannot lock into the pod's round wall hole; the wires would carry the mechanical load.
+Do not measure its body for final CAD.
 
-```
-        screw terminals              round socket
-              ║                          ║
-        ┌─────╨──────────────────────────╨─────┐  ▲
-        │              yellow body             │  │ HEIGHT (M13)
-        └──────────────────────────────────────┘  ▼
-        ◄────────────  LENGTH (M12)  ───────────►
+For the finished pod, buy a **5.5×2.1mm female panel-mount DC jack with a retaining nut**, rated
+for at least 5V/3A. Its threaded neck passes through the lid and the nut tightens from outside.
+The current lid CAD is intended for that type, but its hole/cradle stays provisional until the
+exact purchased jack drawing or link is recorded.
 
-        from the front:  ◄─ WIDTH (M14) ─►
-```
+### 🔴 M17 — POLARITY. Verify before connecting the ESP32.
 
-> 🟢 **M12 — How long is the block end to end?** Terminals to socket face.
-> 🔧 Jack body length *(placeholder: 12mm)*
+Red is normally positive and black normally ground, but wire colour is not proof on an unidentified
+pigtail. With power disconnected, use continuity mode to identify which wire reaches the centre pin.
+When using a centre-positive adapter:
 
-> 🟢 **M13 — How tall is it?**
-> 🔧 Jack body height *(placeholder: 11mm)*
-
-> 🟢 **M14 — How wide is it?**
-> 🔧 Jack body width *(placeholder: 9.5mm)*
-
-> 🟢 **M15 — How wide is the round metal tube the plug pushes into?** Measure across the tube at
-> the front face.
-> 🔧 Barrel outer diameter *(placeholder: 11.5mm)*
-
-> 🟢 **M16 — Does it have a screw thread and a ring nut** for clamping it to a panel? Yours
-> probably doesn't. **Just answer YES or NO.** If yes, how wide is the threaded part?
-> 🔧 Panel-mount thread present? Thread diameter?
-
-### 🔴 M17 — POLARITY. Do this one FIRST. It is not a measurement.
-
-**This is the single most likely way to destroy your ₹350 ESP32.** There is no protection against
-getting it backwards anywhere in this circuit — plug it in wrong and the board dies instantly and
-silently.
-
-> 🟢 **Which of the two screw terminals is the positive one?**
-> 🔧 Supply polarity
-
-Multimeter on **DC volts**, adapter plugged into the wall, **nothing else connected**:
-
-1. Black probe on one screw terminal, red probe on the other.
-2. Screen shows **+5V** → the terminal under the **red** probe is **positive**.
-3. Screen shows **−5V** (with a minus) → it's the other way round.
-4. Mark the positive one with nail polish or a marker.
-
-Use the terminal embossed `+`; standard adapters connect it to the centre pin. Before first power,
-confirm that mapping with continuity mode because the owned adapter is an unidentified clone.
+- centre-pin wire → `+5V` / ESP32 `VIN`
+- outer-sleeve wire → `GND`
 
 ---
 
@@ -265,8 +234,7 @@ The black board with the silver square shield and USB-C.
 - **19 per side** (38 total) → the "38-pin" board
 
 **Why this matters:** the pod has two printed slots the board's pins drop into. M18 confirms a
-30-pin board, but that does not determine the spacing: 30-pin clones are sold with 22.86, 25.4,
-and 27.94mm between rows. **M21 still has to come from this exact board.**
+30-pin board. M21 is now measured directly from this exact board at **25.6mm**.
 
 > 🟢 **M19 — How long is the board?** The long way.
 > 🔧 Board length *(guessed: 51.5mm)*
@@ -276,7 +244,7 @@ and 27.94mm between rows. **M21 still has to come from this exact board.**
 
 > 🟢 **M21 — How far apart are the two rows of pins?** Middle of the left row to middle of the
 > right row.
-> 🔧 Header row pitch *(guessed: 25.4mm)*
+> 🔧 Header row pitch: **25.6mm measured; CAD updated**
 >
 > *Easier: measure from the **outer edge** of the left pins to the **outer edge** of the right
 > pins and tell me that instead.*
@@ -338,9 +306,10 @@ Already ordered 3×2mm? They'll be useful elsewhere. Just buy 3×1mm too. ~₹12
 
 ---
 
-# 📋 COPY-PASTE ANSWER SHEET
+# 📋 CURRENT MEASUREMENT RECORD
 
-Copy all of this, fill in the numbers, send it back. `?` is fine and useful.
+This is the consolidated owned-part/specification record. Blank catalogue-only items are no longer
+immediate blockers unless a first-print dry-fit shows a conflict.
 
 ```
 === MOTOR (owned 28BYJ-48, 5V; red number is a lot/traceability code) ===
@@ -348,7 +317,7 @@ M1  can diameter                              = 28.1 mm   [MEASURED]
 M2  mounting-face height                     = 19.0 mm   [MEASURED]
 M3  shaft offset from can centre             = 7.5 mm    [MEASURED]
 M4  shaft diameter                           = 5.0 mm    [MEASURED + SPEC]
-M5  shaft across flats                       = 3.0 mm    [SPEC — VERIFY PRESS FIT]
+M5  shaft across flats                       = 3.0 mm    [MEASURED]
 M6  mounting face to shaft tip               = 9.5 mm    [MEASURED]
 M7a raised collar diameter                   = ~9.0 mm   [SPEC]
 M7b raised collar height                     = 2.0 mm    [DERIVED: 9.5 - 7.5]
@@ -359,23 +328,21 @@ M10b mounting-ear metal thickness            = ~0.8 mm   [SPEC]
 
 === POSITION SENSOR (KY-024 family, bare 49E/SS49E package) ===
 M11a body width                              = 4.1 nominal / 4.2 max mm [SPEC]
-M11b body thickness                          = 1.6 nominal / 1.68 max mm [VERIFY CLONE]
+M11b body thickness                          = 1.6 mm [MEASURED — EXACT-FIT POCKET]
 M11c body height                             = 3.1-3.2 mm [SPEC]
 M11d straight-lead pitch                     = 1.27-1.30 mm [VERIFY LEAD FORM]
 
-=== POWER SOCKET (likely inline 5.5x2.1 screw-terminal adapter) ===
-M12 body length                              = likely 35-37.3 mm [VARIANT — IDENTIFY]
-M13 body height                              = likely 12-13.5 mm [VARIANT — IDENTIFY]
-M14 body width                               = likely 14-14.2 mm [VARIANT — IDENTIFY]
-M15 mating barrel                            = 5.5 OD / 2.1 centre mm [SPEC]
-M16 panel thread + ring nut                  = NO for the inline adapter [LIKELY]
-M17 polarity                                 = terminal marked + -> centre pin [VERIFY CONTINUITY]
+=== POWER SOCKET (photo identified) ===
+M12-M14 owned part                           = inline female DC pigtail [TESTING ONLY]
+M15 mating barrel                            = likely 5.5 OD / 2.1 centre mm [CONFIRM WITH PLUG]
+M16 panel thread + ring nut                  = NO [PHOTO CONFIRMED]
+M17 polarity                                 = centre pin -> +5V; verify which wire by continuity
 
 === ESP32 BOARD (USB-C, CH340C-family, 15 pins per row) ===
 M18 pin count                                = 15 per row / 30 total [MEASURED]
 M19 board length                             = likely 51.5-52.0 mm [MATCHING LISTINGS]
 M20 board width                              = likely 28.0-28.5 mm [MATCHING LISTINGS]
-M21 header-row centre spacing                = ____ mm [REQUIRED: 22.86/25.4/27.94 all exist]
+M21 header-row centre spacing                = 25.6 mm [MEASURED — CAD UPDATED]
 M22 USB-C interface / shell                  = ~8.3x2.5 / ~9x3.2 mm [SPEC/LIKELY]
 M23 cable body                               = NOT NEEDED unless larger than 14x9 mm
 
@@ -397,14 +364,12 @@ I re-derive the **whole vertical stack in one pass** — motor height → base p
 length — rather than patching one number at a time. That's deliberate: these all depend on each
 other, so fixing them individually just moves the error somewhere else.
 
-**The remaining blockers after the online pass are:**
+**The remaining hardware decisions/checks are:**
 
 | Waiting on | Why online data is not enough |
 |---|---|
-| M5 | The cam is a press fit; the owned shaft across-flats controls whether it grips or cracks. |
-| M11b / sensor marking | 49E-family thickness reaches 1.68mm while the current pocket is exactly 1.6mm. |
-| Exact power-adapter identity | Similar inline adapters vary by several millimetres, and the current CAD incorrectly assumes a panel-mount jack. A purchase link or clear top/side photo is more useful than five separate readings. |
-| M21 | 30-pin ESP32 boards are sold at 22.86, 25.4, and 27.94mm row spacing. Only the owned board decides the socket-channel position. |
+| Hall pocket dry-fit | M11b is 1.6mm and the recess is exactly 1.6mm, so real printed tolerance must be checked before gluing. |
+| Final panel-mount jack | Buy/select a threaded 5.5×2.1mm female jack and record its link/drawing before finalizing the lid cradle. The photographed pigtail remains a testing part. |
 | M25 later | Final height depends on how the motor cable and soldered wires are dressed during assembly. |
 
 Everything else is now measured, derived, standardized, safely enveloped, or non-critical.

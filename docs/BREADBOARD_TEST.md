@@ -9,7 +9,7 @@ ESP32 drives 28BYJ-48 via ULN2003, reads hall sensor for homing. No buttons this
 - ESP32 DevKit (USB-C, ~30-pin)
 - ULN2003 driver module (green) + 28BYJ-48 stepper (plugs in via JST — no solder)
 - Hall sensor module (blue PCB) — **TYPE TO BE CONFIRMED** (see warning below)
-- 5V/3A adapter + yellow screw-terminal barrel jack
+- 5V/3A adapter + black inline female DC pigtail jack (red/black wires)
 - Breadboard + dupont jumper wires
 - Resistors (only if hall module is a 5V type — see warning)
 
@@ -19,7 +19,7 @@ ESP32 drives 28BYJ-48 via ULN2003, reads hall sensor for homing. No buttons this
 
 1. **ESP32 GPIO pins are NOT 5V tolerant.** If the hall module runs on 5V and outputs 5V,
    connecting it straight to a GPIO can damage the ESP32. Confirm the module's voltage first.
-2. **Verify barrel-jack polarity** (multimeter or the +/- marking on the yellow jack).
+2. **Verify pigtail polarity with a multimeter.** Do not trust red/black wire colour alone.
    Reverse polarity will kill the ULN2003 and possibly the ESP32.
 3. **Common ground:** ESP32 GND must connect to the adapter GND rail. Without it, nothing works.
 4. **Do NOT connect the 5V rail to ESP32 VIN while USB is plugged in** (back-feed). USB powers
@@ -30,8 +30,8 @@ ESP32 drives 28BYJ-48 via ULN2003, reads hall sensor for homing. No buttons this
 ## Power wiring (solderless)
 
 ```
-Wall → 5V/3A adapter → yellow screw-terminal jack
-                          │  (screw 2 stripped wires in)
+Wall → 5V/3A adapter → black inline female pigtail
+                          │  (two stripped wires)
                   ┌───────┴────────┐
               +5V wire          GND wire
                   │                 │
