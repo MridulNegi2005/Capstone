@@ -46,6 +46,11 @@ Worth not reading that line as "the mechanism is sound".
 Also still open and unowned: **change the exposed WiFi password**, and **nothing has ever been
 physically assembled** — no dot has moved. The breadboard circuit needs no resin and no CAD.
 
+**4. One shared-CAD change:** `link_thickness = 1.0` moved into `mech_layout.scad`, and
+`linkage.scad` now reads `thickness = link_thickness`. Geometrically a no-op — the rebuilt
+`linkage.stl` is vertex-identical (62,352 verts) — but the assembly transform needs that number,
+and duplicating it is how the simulator put all six dots 0.5mm off their holes.
+
 — Claude Code, on Mridul's side
 
 ---

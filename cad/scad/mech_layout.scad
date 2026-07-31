@@ -152,6 +152,14 @@ spring_id     = spring_od - 2 * spring_wire;   // 1.4mm bore
 spring_free_l = 4.0;   // free length to order (~5 coils; 1.5mm solid)
 
 // --- DOT / NUB / FLANGE (shared by linkage.scad and top_plate.scad) ---
+// Linkage sheet thickness. Lives here because the ASSEMBLY transform needs it:
+// linkage_3d_v4() is extruded from local z=0 to z=link_thickness, so the dot dome
+// sits on the plane z = link_thickness/2. Anything placing a linkage in its real
+// position must shift by -link_thickness/2 first or every dot lands half a
+// thickness off its hole. (That is exactly what happened in the first version of
+// export_linkage_assembly.scad — all six dots were 0.500mm out.)
+link_thickness = 1.0;
+
 dot_dome_dia  = 1.5;   // the braille dot itself = braille standard size
 nub_width     = 1.0;   // slides inside spring_id (1.4) with 0.2mm/side
 plate_hole_dia = 1.7;  // passes the 1.5mm dome with 0.1mm/side

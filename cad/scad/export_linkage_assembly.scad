@@ -36,12 +36,21 @@ dot = 1;   // override on the command line with -D dot=N
 // Z=0 in the exported STL is the CAM SURFACE with the dot DOWN. Blender then
 // animates Z from 0 (down) to pin_lift (up), which is exactly what the real
 // linkage does — it rides the cam and translates vertically, nothing else.
+// v2 FIX — every dot used to land 0.500mm off its hole, measured on all six.
+// linkage_3d_v4() is extruded from local z=0 to z=link_thickness, and the dome is
+// built at translate([0, total_h - dot_r, thickness/2]). So the DOT AXIS in the
+// part's own frame is x=0, z=link_thickness/2 — NOT z=0. Placing local z=0 on the
+// dot centre therefore pushed the whole linkage half a thickness sideways once
+// rotate([90,0,0]) mapped local +Z onto world -Y.
+// Centre the part on its own thickness first, and the dome lands exactly on
+// dot_pos(d) for all six.
 module linkage_assembled(d) {
     p = dot_pos(d);
     translate([p[0], p[1], 0])
         rotate([0, 0, asm_ang(d)])
             rotate([90, 0, 0])
-                linkage_3d_v4(d);
+                translate([0, 0, -link_thickness / 2])
+                    linkage_3d_v4(d);
 }
 
 linkage_assembled(dot);

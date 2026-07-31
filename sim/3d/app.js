@@ -168,17 +168,19 @@ function applyMaterials(obj) {
     const m = o.material;
     m.side = THREE.DoubleSide;
     if (n.startsWith('linkage_')) {
-      // NOT shiny metal, despite the original brief. The dome at the top of each
-      // linkage IS the braille dot the reader touches, and it is printed RESIN.
-      // At metalness 0.92 the dots rendered as chrome beads and read as a bug.
-      // Semi-gloss near-white is both physically honest and far more legible.
-      // Cloned per linkage so a raised dot can be highlighted independently.
+      // Shiny chrome, as requested. This only looks right BECAUSE makeEnvironment()
+      // gives it something to reflect — at metalness 0.92 with no environment map
+      // the dots reflected pure black plus the red cam and blue fill light, which
+      // is what made them read as dark smeared beads. Do not remove the env map.
+      // Cloned per linkage so a raised dot can be tinted independently.
       o.material = m.clone();
-      o.material.metalness = 0.25;
-      o.material.roughness = 0.33;
-      o.material.color.set(0xe9edf2);
+      o.material.metalness = 0.92;
+      o.material.roughness = 0.18;
+      o.material.color.set(0xc9ced6);
+      o.material.envMapIntensity = 1.5;
       o.material.emissive = new THREE.Color(0x000000);
       o.userData.isLinkage = true;
+      o.userData.baseColor = new THREE.Color(0xc9ced6);
     } else if (n === 'cam') {
       m.metalness = 0.35; m.roughness = 0.34; m.color.set(0xe94560);
     } else if (n.startsWith('motor')) {
@@ -293,8 +295,10 @@ function updateMechanism(deg) {
     const t = Math.min(Math.max(lift / PIN_LIFT, 0), 1);
     o.traverse(c => {
       if (!c.isMesh || !c.userData.isLinkage) return;
-      c.material.emissive.setRGB(0.0, 0.40 * t, 0.28 * t);
-      c.material.color.setRGB(0.913 - 0.30 * t, 0.929 + 0.02 * t, 0.949 - 0.25 * t);
+      // keep the chrome, just warm a RAISED one green so the state is readable
+      c.material.emissive.setRGB(0.0, 0.30 * t, 0.20 * t);
+      c.material.color.copy(c.userData.baseColor || o.userData.baseColor)
+        .lerp(new THREE.Color(0x7fffd0), 0.35 * t);
     });
   });
 }

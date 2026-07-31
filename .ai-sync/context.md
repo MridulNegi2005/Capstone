@@ -359,3 +359,11 @@ and geometry disappears without an error. Always check the `Volumes:` count afte
 **Notes:** Mridul asked whether the dots looked wrong because of a DESIGN error. They were not — verified in the running scene that the dome top sits at 57.198 against a reading surface of 57.200 (flush when down) and 58.00 when up, exactly 0.8mm proud. It was a rendering fault: the linkages had been given metalness 0.92 per the original "shiny metallic" brief, but the dome at the top of each linkage IS the braille dot, and it is printed resin. At near-1.0 metalness with no environment map it reflected pure black plus the red cam and blue fill light, so every dot rendered as a dark chrome bead with red/blue crescents. Physically honest materials fixed it. Raised dots are now tinted rather than exaggerated in travel — 0.8mm on a 1.5mm dome is nearly invisible on a projector, but faking the travel would misrepresent the mechanism.
 
 ---
+
+## [2026-07-31 21:45] — Claude Code
+**Task:** Fix braille dot / hole misalignment spotted by Mridul; restore the chrome finish.
+**Changes:** `cad/scad/export_linkage_assembly.scad` — centre the linkage on its own thickness before rotating. `mech_layout.scad` — new shared `link_thickness`. `linkage.scad` — `thickness` now reads it. `sim/3d/app.js` — chrome restored (metalness 0.92) with the env map kept. Re-exported all six linkage_asm STLs and the GLB.
+**Status:** completed and verified.
+**Notes:** Mridul was right and it was a real misalignment — all six dots sat exactly 0.500mm off their holes, measured from the STLs. NOT a design error: production linkage.scad is correct and its rebuilt geometry is vertex-identical. The bug was in the simulator's assembly transform. linkage_3d_v4() extrudes from local z=0 to z=thickness and builds the dome at z=thickness/2, so the DOT AXIS in the part's own frame is z=thickness/2, not z=0. Placing local z=0 on dot_pos pushed every linkage half a thickness sideways once rotate([90,0,0]) mapped local +Z to world -Y. Offset now 0.0000mm on all six. Also worth recording: the earlier "chrome bead" appearance was never the material's fault on its own — metalness 0.92 with no environment map has nothing to reflect. With makeEnvironment() in place the requested chrome finish looks correct, so the material was reverted to 0.92 as originally specified.
+
+---
