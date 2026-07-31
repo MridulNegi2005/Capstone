@@ -33,3 +33,6 @@ secrets.h
 
 # --- Agent scratch (Codex nav-cap review artifacts) ---
 .tmp_nav_review/
+
+# Blender frame output — regenerable via renders/braillix_anim.py
+renders/out/

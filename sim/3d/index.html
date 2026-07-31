@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Braillix — Mechanism Simulator</title>
+
+<!-- Import map so the vendored Three.js addons can say `from 'three'`.
+     Everything is local: this runs with no internet, which is the point. -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three.module.min.js",
+    "three/addons/": "./vendor/"
+  }
+}
+</script>
+
+<style>
+  :root{
+    --bg:#12131f; --panel:#181a2b; --panel2:#1e2138; --line:#2b2f4d;
+    --ink:#e8eaf2; --dim:#8d93b0; --accent:#e94560; --ok:#4ecca3; --blue:#4a9eff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--ink);
+    font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif}
+  canvas{display:block}
+
+  #stage{position:fixed;inset:0}
+
+  #loading{position:fixed;inset:0;display:grid;place-content:center;gap:14px;
+    justify-items:center;background:var(--bg);z-index:50;transition:opacity .4s}
+  #loading.gone{opacity:0;pointer-events:none}
+  .spin{width:38px;height:38px;border:3px solid var(--line);
+    border-top-color:var(--accent);border-radius:50%;animation:s 1s linear infinite}
+  @keyframes s{to{transform:rotate(360deg)}}
+
+  .card{background:color-mix(in srgb,var(--panel) 88%,transparent);
+    border:1px solid var(--line);border-radius:12px;
+    backdrop-filter:blur(10px);box-shadow:0 8px 32px #0008}
+
+  /* ---- top-left: identity ---- */
+  #brand{position:fixed;top:16px;left:16px;padding:12px 16px;z-index:10}
+  #brand h1{font-size:17px;letter-spacing:.14em;font-weight:700}
+  #brand h1 span{color:var(--accent)}
+  #brand p{font-size:11px;color:var(--dim);margin-top:3px;letter-spacing:.04em}
+
+  /* ---- top-right: the live cell ---- */
+  #cell{position:fixed;top:16px;right:16px;padding:14px 16px;z-index:10;
+    display:flex;gap:16px;align-items:center}
+  #glyph{font-size:52px;font-weight:700;line-height:1;min-width:52px;
+    text-align:center;color:var(--accent);font-variant-numeric:tabular-nums}
+  #glyph.space{font-size:20px;color:var(--dim)}
+  #dots{display:grid;grid-template-columns:repeat(2,20px);gap:7px 14px}
+  .d{width:20px;height:20px;border-radius:50%;background:#272b45;
+    border:1px solid var(--line);transition:all .18s ease}
+  .d.up{background:var(--ok);border-color:var(--ok);
+    box-shadow:0 0 12px color-mix(in srgb,var(--ok) 55%,transparent);
+    transform:scale(1.1)}
+  #cellmeta{font-size:10px;color:var(--dim);letter-spacing:.06em;margin-top:8px}
+
+  /* ---- bottom-left: controls ---- */
+  #ui{position:fixed;bottom:16px;left:16px;padding:14px;z-index:10;width:290px}
+  label{display:block;font-size:10px;letter-spacing:.12em;color:var(--dim);
+    text-transform:uppercase;margin-bottom:6px}
+  input[type=text]{width:100%;background:#0e1020;border:1px solid var(--line);
+    color:var(--ink);padding:9px 11px;border-radius:8px;font-size:14px;
+    letter-spacing:.16em;text-transform:uppercase;font-family:ui-monospace,monospace}
+  input[type=text]:focus{outline:none;border-color:var(--accent)}
+  .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  button{background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+    padding:9px 8px;border-radius:8px;font-size:11.5px;cursor:pointer;
+    letter-spacing:.03em;transition:.15s;font-weight:500}
+  button:hover{border-color:var(--dim);background:#252945}
+  button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  button.on.ok{background:var(--ok);border-color:var(--ok);color:#08231a}
+  button.wide{grid-column:1/-1}
+  .rowspeed{display:flex;align-items:center;gap:9px;margin-top:10px}
+  .rowspeed input{flex:1;accent-color:var(--accent)}
+  .rowspeed span{font-size:10px;color:var(--dim);min-width:30px;text-align:right;
+    font-variant-numeric:tabular-nums}
+
+  /* ---- bottom-right: the encoding, the actual clever bit ---- */
+  #decode{position:fixed;bottom:16px;right:16px;padding:13px 15px;z-index:10;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;width:290px}
+  #decode h2{font-size:10px;letter-spacing:.12em;color:var(--dim);
+    text-transform:uppercase;margin-bottom:9px;font-family:inherit}
+  .dl{display:flex;justify-content:space-between;padding:3px 0;gap:10px}
+  .dl b{color:var(--dim);font-weight:400}
+  .dl s{text-decoration:none;color:var(--ink)}
+  .dl s.hl{color:var(--ok)}
+  #bits{letter-spacing:.34em;font-size:15px;color:var(--blue);margin:7px 0 3px}
+  #bitlabel{font-size:8.5px;color:var(--dim);letter-spacing:.09em}
+
+  #hint{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);
+    font-size:10.5px;color:var(--dim);letter-spacing:.05em;z-index:10;
+    pointer-events:none;text-align:center}
+
+  @media (max-width:900px){
+    #decode{display:none}
+    #ui{width:calc(100vw - 32px)}
+    #cell{padding:10px 12px}#glyph{font-size:38px;min-width:38px}
+  }
+</style>
+</head>
+<body>
+
+<div id="stage"></div>
+
+<div id="loading">
+  <div class="spin"></div>
+  <div style="font-size:12px;color:var(--dim);letter-spacing:.1em">LOADING MECHANISM…</div>
+  <div id="loaderr" style="font-size:11px;color:var(--accent);max-width:420px;
+       text-align:center;line-height:1.6"></div>
+</div>
+
+<div id="brand" class="card">
+  <h1>BRAIL<span>LIX</span></h1>
+  <p>Refreshable Braille Cell — Mechanism Simulator</p>
+</div>
+
+<div id="cell" class="card">
+  <div>
+    <div id="glyph">—</div>
+    <div id="cellmeta">CELL</div>
+  </div>
+  <div id="dots">
+    <div class="d" id="d1"></div><div class="d" id="d4"></div>
+    <div class="d" id="d2"></div><div class="d" id="d5"></div>
+    <div class="d" id="d3"></div><div class="d" id="d6"></div>
+  </div>
+</div>
+
+<div id="ui" class="card">
+  <label for="word">Text to display</label>
+  <input id="word" type="text" value="BRAILLE" autocomplete="off" spellcheck="false">
+  <div class="btns">
+    <button id="btnXray">X-Ray Vision</button>
+    <button id="btnRun" class="ok">Simulate</button>
+    <button id="btnStep">Step ▸</button>
+    <button id="btnView">Reset View</button>
+  </div>
+  <div class="rowspeed">
+    <label style="margin:0">Speed</label>
+    <input id="speed" type="range" min="0.25" max="3" step="0.25" value="1">
+    <span id="speedv">1.0×</span>
+  </div>
+</div>
+
+<div id="decode" class="card">
+  <h2>How this letter is encoded</h2>
+  <div class="dl"><b>character</b><s id="e_char">—</s></div>
+  <div class="dl"><b>braille dots</b><s id="e_dots">—</s></div>
+  <div id="bits">------</div>
+  <div id="bitlabel">bit 5→0 drives dot 5,4,1,2,3,6 (DOT_TO_BIT)</div>
+  <div class="dl" style="margin-top:8px"><b>cam position</b><s id="e_pos" class="hl">—</s></div>
+  <div class="dl"><b>motor step</b><s id="e_step">—</s></div>
+  <div class="dl"><b>disc angle</b><s id="e_ang">—</s></div>
+</div>
+
+<div id="hint">drag to orbit · scroll to zoom · right-drag to pan</div>
+
+<script type="module" src="./app.js"></script>
+</body>
+</html>
