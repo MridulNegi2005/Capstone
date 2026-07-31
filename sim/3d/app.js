@@ -172,15 +172,13 @@ function applyMaterials(obj) {
       // gives it something to reflect — at metalness 0.92 with no environment map
       // the dots reflected pure black plus the red cam and blue fill light, which
       // is what made them read as dark smeared beads. Do not remove the env map.
-      // Cloned per linkage so a raised dot can be tinted independently.
-      o.material = m.clone();
-      o.material.metalness = 0.92;
-      o.material.roughness = 0.18;
-      o.material.color.set(0xc9ced6);
-      o.material.envMapIntensity = 1.5;
-      o.material.emissive = new THREE.Color(0x000000);
-      o.userData.isLinkage = true;
-      o.userData.baseColor = new THREE.Color(0xc9ced6);
+      // No state tinting: a raised dot looks exactly like a lowered one, because
+      // that is what the real part does. The braille cell in the corner is where
+      // you read the state.
+      m.metalness = 0.92;
+      m.roughness = 0.18;
+      m.color.set(0xc9ced6);
+      m.envMapIntensity = 1.5;
     } else if (n === 'cam') {
       m.metalness = 0.35; m.roughness = 0.34; m.color.set(0xe94560);
     } else if (n.startsWith('motor')) {
@@ -286,20 +284,11 @@ function syncRun() {
 // so a screenshot can never show a different mechanism state than the live view.
 function updateMechanism(deg) {
   if (parts.cam) parts.cam.rotation.z = THREE.MathUtils.degToRad(deg);
+  // Position only. Nothing about a linkage's appearance changes with its state —
+  // a raised dot looks exactly like a lowered one, just 0.8mm higher, because that
+  // is what the real part does. Read the state off the braille cell in the corner.
   linkages.forEach((o, i) => {
-    const lift = linkageLift(i + 1, deg);
-    o.position.z = CAM_FLAT + lift;
-    // A raised dot stands only 0.8mm proud of a 1.5mm dome — true to the real part
-    // but nearly invisible on a projector. Tint the RAISED linkages rather than
-    // exaggerating the travel: the geometry stays honest, the state stays readable.
-    const t = Math.min(Math.max(lift / PIN_LIFT, 0), 1);
-    o.traverse(c => {
-      if (!c.isMesh || !c.userData.isLinkage) return;
-      // keep the chrome, just warm a RAISED one green so the state is readable
-      c.material.emissive.setRGB(0.0, 0.30 * t, 0.20 * t);
-      c.material.color.copy(c.userData.baseColor || o.userData.baseColor)
-        .lerp(new THREE.Color(0x7fffd0), 0.35 * t);
-    });
+    o.position.z = CAM_FLAT + linkageLift(i + 1, deg);
   });
 }
 
