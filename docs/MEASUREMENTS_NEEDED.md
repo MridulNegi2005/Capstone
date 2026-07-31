@@ -287,8 +287,8 @@ CAD, your ESP32 will not go into the pod at all.**
 > 🔧 Connector overmould width and height
 >
 > *Why: the socket sits ~2mm inside the pod, so the plug body has to pass through the hole in the
-> wall too. The old hole was 10×7mm and would probably have blocked your cable. I've opened it to
-> 13×9mm, but that's still a guess.*
+> wall too. The old hole was 10×7mm and would probably have blocked your cable. The service
+> opening is now fixed at 14×9mm. M23 is optional unless your cable body is larger than that.*
 
 ---
 

@@ -16,7 +16,7 @@
 # compatible_printers list. The profiles here are fully flattened so nothing has
 # to resolve against the system database.
 #
-# ALWAYS check the printed summary after slicing. filament_type must say PETG.
+# ALWAYS check the printed summary after slicing. It must report PETG and the actual emitted bed temperature must be 80C.
 set -euo pipefail
 
 ORCA="/c/Program Files/OrcaSlicer/orca-slicer.exe"
@@ -38,9 +38,11 @@ PARTS=(outer_box mid_plate base_plate top_plate esp32_pod_shell esp32_pod_lid)
 mkdir -p "$OUTDIR"
 [ -x "$ORCA" ] || { echo "OrcaSlicer not found at $ORCA"; exit 1; }
 
+failed=0
+
 for part in "${PARTS[@]}"; do
     stl="$REPO/cad/stl/$part.stl"
-    [ -f "$stl" ] || { echo "!! missing $stl — skipped"; continue; }
+    [ -f "$stl" ] || { echo "!! missing $stl — skipped"; failed=1; continue; }
     tmp=$(mktemp -d)
     "$ORCA" --load-settings "$MACHINE;$PROCESS" \
             --load-filaments "$FILAMENT" \
@@ -48,20 +50,23 @@ for part in "${PARTS[@]}"; do
             "$(cygpath -w "$stl")" >/dev/null 2>&1 || true
 
     if [ ! -f "$tmp/plate_1.gcode" ]; then
-        echo "FAILED  $part — no G-code produced"; rm -rf "$tmp"; continue
+        echo "FAILED  $part — no G-code produced"; rm -rf "$tmp"; failed=1; continue
     fi
     mv "$tmp/plate_1.gcode" "$OUTDIR/$part.gcode"; rm -rf "$tmp"
 
     g="$OUTDIR/$part.gcode"
     ft=$(grep -am1 '^; filament_type = ' "$g" | cut -d= -f2- | tr -d ' ')
     nt=$(grep -am1 '^; nozzle_temperature = ' "$g" | cut -d= -f2- | tr -d ' ')
-    bt=$(grep -am1 '^; hot_plate_temp = ' "$g" | cut -d= -f2- | tr -d ' ')
+    bt=$(grep -am1 '^; first_layer_bed_temperature = ' "$g" | cut -d= -f2- | tr -d ' ')
     et=$(grep -am1 'estimated printing time (normal mode)' "$g" | sed 's/.*= //')
     vol=$(grep -am1 '^; filament used \[cm3\]' "$g" | cut -d= -f2- | tr -d ' ')
 
-    if [ "$ft" != "PETG" ]; then
-        echo "*** $part: filament_type=$ft — PROFILE DID NOT LOAD. DO NOT PRINT. ***"
+    if [ "$ft" != "PETG" ] || [ "$bt" != "80" ]; then
+        echo "*** $part: filament_type=$ft actual_bed=${bt}C — PROFILE DID NOT LOAD CORRECTLY. DO NOT PRINT. ***"
+        failed=1
     else
         printf "OK  %-18s %s/%sC  %scm3  %s\n" "$part" "$nt" "$bt" "$vol" "$et"
     fi
 done
+
+exit "$failed"

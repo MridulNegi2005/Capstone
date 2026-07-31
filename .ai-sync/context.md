@@ -324,3 +324,10 @@ and geometry disappears without an error. Always check the `Volumes:` count afte
 **Notes:** TWO LESSONS. (1) `Volumes: 2` proves geometry is CONNECTED, not ATTACHED — the -X wire guide passed the check while hanging off a 0.1mm sliver over 3mm². Three defects this session were found by eyeballing the render, not by any automated check. (2) OrcaSlicer's CLI SILENTLY FALLS BACK TO PLA. Anycubic ships no PETG profile for the Kobra Neo; the machine pins `default_filament_profile = Anycubic Generic PLA`, and Anycubic's own Generic PETG omits the Kobra Neo from `compatible_printers`. Handing either to `--load-filaments` emits G-code at 200C/45C with no error. Always grep the emitted header for `filament_type = PETG`; slice.sh does this and refuses to report OK otherwise.
 
 ---
+## [2026-07-31 13:45] — Codex
+**Task:** Preserve ESP32 USB-C programming/recovery access without requiring a post-assembly enclosure teardown.
+**Changes:** Fixed the pod service opening at 14×9mm (13×9 previously), preserving the 9mm cable-overmould height clearance. Updated the CAD source and fit/measurement guidance, regenerated esp32_pod_shell.stl, PETG G-code, and MEASUREMENTS_NEEDED.pdf.
+**Status:** completed and verified.
+**Notes:** OpenSCAD reported simple geometry and the expected Volumes: 2; an independent STL comparison found exactly 36.0mm³ removed, matching 1mm × 9mm × 4mm of added opening. Orca initially emitted a 60°C bed while reporting the unused 80°C hot-plate field; the custom profile now sets Orca CLI's selected plate to 80°C, and `slice.sh` validates the actual emitted bed temperature and exits nonzero on failure. Final slice verified PETG at 235/80°C first layer and 230°C thereafter (52.23cm³, 4h04m51s). This does not resolve the measurement-gated motor vertical stack, Hall pocket depth, jack geometry/polarity, or ESP32 header pitch.
+
+---

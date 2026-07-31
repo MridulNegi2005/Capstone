@@ -1,10 +1,10 @@
 # Active Handoff
-> Last updated by: Claude Code
-> Timestamp: 2026-07-31T00:30:00+05:30
+> Last updated by: Codex
+> Timestamp: 2026-07-31T13:45:00+05:30
 
-## 🔴 THE BLOCKER: MRIDUL MUST TAKE 26 MEASUREMENTS
+## 🔴 THE BLOCKER: FINISH THE REMAINING FIT-CRITICAL MEASUREMENTS
 
-**Everything else is done. This is the only thing standing between the project and assembly.**
+**Several measurements are now known, but the remaining fit-critical values still block a safe full assembly.**
 
 ### 👉 READ `docs/MEASUREMENTS_NEEDED.pdf` (or the `.md`) — IT IS THE WHOLE TASK
 
@@ -25,7 +25,7 @@ dependency chain (motor height → base plate → cam → linkage length):
 | M2 | **Second, separate 2mm error** — `base_plate_z=41` is commented `4+16+2+19` but never counts the 2mm ledge. The mid-plate can't sit level with the ledge (its edge is 29.75, the opening is 28.5), so it rests ON TOP: real seating z 22..24, motor face at 43 not 41 |
 | M11b | Whether the rebuilt hall pocket is deep enough (an `assert` will fail loudly if not) |
 | M12–M16 | Barrel-jack cradle — every dimension is still invented |
-| M18, M21 | **30-pin vs 38-pin row pitch.** CAD says 25.4 (38-pin); every doc says 30-pin. If the docs are right, the ESP32 CANNOT plug into the pod at all. M18 is free — just count the pins |
+| M21 | **Header-row pitch remains unverified.** M18 is now known: 15 pins per row / 30-pin USB-C board. Clone footprints vary, so physically measure M21 before printing. |
 
 **DO NOT patch these individually.** Re-derive the whole vertical stack in ONE pass once the
 numbers land. Fixing one link in this chain only relocates the error somewhere else. Both 2mm
@@ -76,25 +76,27 @@ report OK otherwise. **Never remove that check.**
 ---
 
 ## In Progress
-Nothing is mid-flight. Working tree clean, everything pushed.
+USB-C recovery-access change is complete and verified in the current change set: pod opening is now
+**14×9mm**, with regenerated STL, all six corrected/verified PETG G-code files, and a refreshed measurement PDF.
 
 ## Next Steps
-1. 🔴 **Get the 26 measurements.** `docs/MEASUREMENTS_NEEDED.pdf`. Priority order if short on
-   time: **M18** (free, count the pins), **M17** (polarity — protects the ₹350 ESP32), then
-   **M2** and **M6**.
-2. **Print `mid_plate` first** — `bash printing/orca/slice.sh mid_plate`, 38 min, ~8g. Proves
-   whether 230°C fixed the stringing for ~₹15 before committing 4h30m to the box.
-3. **Dry the filament** — numakers PETG-HS, 65°C for 6 hours. No setting beats wet PETG.
-4. 🔴 **Mridul must still change his actual WiFi password.** History was scrubbed with
-   git-filter-repo and force-pushed and GitHub is clean, but it was public — GitHub caches by
-   SHA and forks retain it. **Treat it as burned.** Still not done.
-5. **Build the Stage-1 breadboard circuit** (13 wires, `docs/ASSEMBLY_BIBLE.md`) and flash
-   `breadboard_test.ino`. Nothing has EVER been physically assembled.
-6. ⚠️ **The resin plate-1 batch already ordered contains the OLD nav caps** (pre-fix). Expect to
-   reprint those.
-7. **Desolder the bare hall sensor** off the blue module before assembling a real cell — the
-   module cannot fit in a 5mm plate. Not needed for the demo.
-
+1. **Finish only the remaining high-value measurements.** M18 is known: **15 pins per row /
+   30-pin USB-C ESP32 WiFi+BT board**. Next priorities are **M17** (jack polarity), **M21**
+   (physical header-row centre spacing; clone boards vary), **M11b** (bare Hall-sensor thickness),
+   then **M12-M16** (actual barrel-jack geometry).
+2. **Do not rebuild the motor vertical stack from the current numbers yet.** User-reported:
+   M1=28.1, M2=19, M3=7.5, M4=5, M6=9.5 mounting-face-to-tip, M8=34.7, M9=4mm. M5, M7a,
+   M10a and M10b remain guesses; M8 still needs confirmation that it was measured
+   centre-to-centre. Re-derive the entire stack together after those values are confirmed.
+3. **Print mid_plate first** — `bash printing/orca/slice.sh mid_plate`, 38 min, ~8g. Proves
+   whether 230°C fixed the stringing before committing to the box.
+4. **Dry the filament** — numakers PETG-HS, 65°C for 6 hours. No setting beats wet PETG.
+5. **Mridul must still change his actual WiFi password.** Treat the exposed password as burned.
+6. **Build the Stage-1 breadboard circuit** and flash `breadboard_test.ino`; nothing has been
+   physically assembled yet.
+7. **The resin plate-1 batch already ordered contains the old nav caps.** Expect to reprint them.
+8. **Desolder the bare Hall sensor** off the blue module before assembling a real cell; the module
+   cannot fit in a 5mm plate.
 ## Print / slice pipeline (NEW)
 ```
 bash printing/orca/slice.sh              # all six PETG parts

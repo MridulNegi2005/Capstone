@@ -78,10 +78,11 @@ barrel_jack_y    = 18;     // off the DevKit (board spans y±14)
 // pod_floor + hdr_strip_h - hdr_channel_depth = 10.5, not 11.5. The cutout was
 // therefore ~2mm too high and only ~0.5mm of it overlapped the actual socket;
 // the port was effectively behind solid wall.
-// Size also raised: a 10x7 hole passes a bare connector shell but not the moulded
-// body of a real cable, and the plug has to reach 2.25mm inboard past the wall.
-usb_w            = 13;     // MEASURE (M25) — your cable's moulded body width
-usb_h            = 9;      // MEASURE (M25) — your cable's moulded body height
+// Service opening is intentionally larger than the USB-C shell so common cable
+// overmoulds can reach the socket 2.25mm inboard. Keep the existing 9mm height:
+// reducing it to 7mm would regress the cable-body clearance fixed in v7.5.
+usb_w            = 14;     // Fixed service envelope; measure only unusually large cables
+usb_h            = 9;      // Preserves clearance for typical USB-C overmould height
 board_under_z    = pod_floor + hdr_strip_h - hdr_channel_depth;   // 10.5
 usb_z            = board_under_z - 1.0;   // 9.5 — starts just under the board
 

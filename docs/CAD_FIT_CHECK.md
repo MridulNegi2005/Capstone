@@ -376,6 +376,11 @@ wall. `usb_z` should be ≈ 10.0.
   reach **6.25 mm inboard** past the wall to seat. Combined with the overmould, this is unlikely to
   work. Enlarge to ~13 x 9 and reduce the standoff distance.
 
+> **Current source (v7.7): resolved provisionally.** The board was moved toward the USB wall,
+> reducing plug reach to 2.25 mm, and the service opening is now **14 x 9 mm**. This deliberately
+> preserves the 9 mm overmould height clearance while adding 1 mm of width. Measure M23 only if
+> the intended cable body exceeds that envelope.
+
 ### 6e. Headroom under the lid — fine
 
 Cavity top at z = 54 (`shell_h = 58 − 4`). Board top ≈ 10.5, tallest DevKit component maybe 5 mm →

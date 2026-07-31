@@ -5,6 +5,15 @@
 
 ---
 
+## v7.7 — 2026-07-31 (USB-C recovery access)
+
+- Widened the ESP32 pod USB-C service opening from **13 × 9 mm** to **14 × 9 mm**.
+- Preserved the existing 9 mm height; the proposed 7 mm height would have reduced cable-overmould clearance.
+- Regenerated the pod STL, all six PETG G-code files, and the measurement PDF.
+- OpenSCAD verification: simple geometry, expected connected-volume count, and exactly 36 mm³ removed.
+- Corrected Orca CLI's selected build-plate temperature from 60°C to 80°C and hardened the slicer guard to validate the actual emitted bed temperature and fail nonzero on unsafe output.
+- OrcaSlicer verification: actual heater commands confirmed at 235/80°C first layer and 230°C thereafter.
+
 ## v7.3 — 2026-07-29 (pre-assembly audit — 5 blocking CAD defects found)
 
 Full pre-assembly audit ahead of a presentation demo, run as five parallel agents and then
