@@ -133,6 +133,20 @@ physically assembled** — no dot has moved. The breadboard circuit needs no res
 `linkage.stl` is vertex-identical (62,352 verts) — but the assembly transform needs that number,
 and duplicating it is how the simulator put all six dots 0.5mm off their holes.
 
+**5. ⚠️ RETRACTION — I was wrong about a "2mm stack error". Please ignore it.**
+On 2026-07-31 I annotated `outer_box.scad:base_plate_z` claiming the tower was 2mm out because
+the mid-plate rests on top of its ledge rather than level with it. **The seating observation is
+right; the conclusion was wrong.** That 2mm had already been absorbed by cutting
+`elec_pocket_h` 16 → 14 (commit a53594c, written up in `docs/PRINT_DAY_MONDAY.md`). Read from
+source, the stack closes exactly: 4 floor + 14 pocket + 2 ledge + 2 mid-plate + 19 motor = 41.
+
+Cause: my analysis script **hard-coded `elec_pocket_h = 16` instead of reading the file** — the
+exact duplicated-constant failure this project keeps hitting, and which I have been lecturing
+about all week. The annotation is now retracted in-source. **`base_plate_z = 41` is correct.**
+
+Still genuinely open on the vertical stack: the **cam hub** (`hub_h = 4` into a 2mm gap, worse
+with the Ø9 shaft boss). That one is real and unchanged.
+
 — Claude Code, on Mridul's side
 
 ---
@@ -331,7 +345,7 @@ commands, and stays inside the 220x220x250mm Kobra Neo volume. Regenerate with
 | `cad/scad/base_plate.scad` | hall pocket rebuilt underside; spring cavity deleted; pilots; 56→58 |
 | `cad/scad/braille_cam.scad` | magnet pocket blind (1.2mm); z-stack failure documented |
 | `cad/scad/mech_layout.scad` | **NEW** shared `homing_mag_*` block (was declared twice, had drifted) |
-| `cad/scad/outer_box.scad` | wire guides deleted; muscle bosses off; both 2mm errors documented |
+| `cad/scad/outer_box.scad` | wire guides deleted; muscle bosses off; false "2mm ledge error" note RETRACTED |
 | `cad/scad/esp32_pod_params.scad` | pod 64→68; usb_z fix; `lid_screw_x` made a formula |
 | `cad/scad/esp32_pod_lid.scad` | dims derived from pod; cradle assert |
 | `cad/scad/mid_plate.scad` | comment only — collar ID tagged MEASURE (M1) |

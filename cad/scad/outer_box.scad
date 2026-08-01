@@ -25,29 +25,23 @@ internal_width    = 60;
 // Cost: 2mm of electronics headroom. ULN2003 with wires soldered flat is ~12mm,
 // so 14mm still clears it, plus the mid-plate relief slot adds 2mm at one corner.
 elec_pocket_h     = 14;
-// >>> BLOCKED ON MEASUREMENT (M2) — see docs/MEASUREMENTS_NEEDED.md <<<
+// THE STACK CLOSES EXACTLY. Verified by reading the live values, not the comments:
+//     floor            0 .. 4     floor_thickness
+//     elec pocket      4 .. 18    elec_pocket_h = 14
+//     ledge           18 .. 20    the 2mm mid-plate ledge
+//     mid-plate       20 .. 22    2mm, resting ON TOP of the ledge
+//     motor           22 .. 41    19mm can, M2 MEASURED
+//     -> motor face = 41 = base_plate_z
 //
-// v7.6: THIS NUMBER IS ALSO ARITHMETICALLY WRONG BY 2mm, independently of the
-// motor. The breakdown below counts floor + pocket + midplate + motor, but the
-// mid-plate does not sit at z=20 — it sits ON TOP of the 2mm ledge, because its
-// edge (29.75) is wider than the ledge opening (28.5) so it cannot drop inside.
-// Real seating is z 22..24, which puts the motor face at 43, not 41.
-//
-// Do NOT just change 41 to 43. That raises the base plate to 48, the standoffs
-// carry the top plate to 56..60, and the box is only 58 tall — the top plate ends
-// up 2mm proud. The two candidate repairs are:
-//   (a) drop the ledge to z 18..20, costing 2mm of electronics pocket, or
-//   (b) shorten base_plate standoff_height 8 -> 6, changing link_total_h
-// Which is correct depends on the measured motor height, so this is deliberately
-// left alone to be re-derived with the cam z-stack in ONE pass. Fixing links in
-// this chain individually only relocates the error.
-//
-// The "19" here is the 28BYJ-48 can height taken from a datasheet, never measured.
-// It sets how high the base plate sits, which sets the cam height, which sets the
-// linkage length. If the real motor is taller or shorter than 19mm, EVERY dot ends
-// up proud or sunken by that difference. Nothing downstream is trustworthy until
-// this is a measured number. Re-derive cam_flat_z in mech_layout.scad at the same time.
-base_plate_z      = 41;    // 4(floor) + 16(elec) + 2(midplate) + 19(motor, ASSUMED)
+// RETRACTED, 2026-07-31: a v7.6 note here claimed this was "arithmetically wrong by
+// 2mm" because the mid-plate sits on top of its ledge rather than level with it.
+// The seating observation is correct, but the conclusion was NOT: that 2mm had
+// already been absorbed by cutting elec_pocket_h from 16 to 14 (see the comment
+// above it — repair option (a) was already applied). The bad claim came from an
+// analysis script that HARD-CODED elec_pocket_h = 16 instead of reading the file.
+// Ironic, given how much of this project's history is duplicated-constant bugs.
+// If you re-derive this stack, read every value from source. Do not trust prose.
+base_plate_z      = 41;    // 4(floor) + 14(elec) + 2(ledge) + 2(midplate) + 19(motor, M2 measured)
 boss_height       = 37;    // boss top = z41 = base_plate bottom
 
 // Magnetic snap — NeFeB disc glue-in pockets
