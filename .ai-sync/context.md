@@ -367,3 +367,11 @@ and geometry disappears without an error. Always check the `Volumes:` count afte
 **Notes:** Mridul was right and it was a real misalignment — all six dots sat exactly 0.500mm off their holes, measured from the STLs. NOT a design error: production linkage.scad is correct and its rebuilt geometry is vertex-identical. The bug was in the simulator's assembly transform. linkage_3d_v4() extrudes from local z=0 to z=thickness and builds the dome at z=thickness/2, so the DOT AXIS in the part's own frame is z=thickness/2, not z=0. Placing local z=0 on dot_pos pushed every linkage half a thickness sideways once rotate([90,0,0]) mapped local +Z to world -Y. Offset now 0.0000mm on all six. Also worth recording: the earlier "chrome bead" appearance was never the material's fault on its own — metalness 0.92 with no environment map has nothing to reflect. With makeEnvironment() in place the requested chrome finish looks correct, so the material was reverted to 0.92 as originally specified.
 
 ---
+
+## [2026-08-01 —] — Claude Code (ELECTRONICS fork)
+**Task:** Establish the electronics workstream separately from CAD; answer whether a custom PCB/ICs are needed.
+**Changes:** New `docs/ELECTRONICS_PLAN.md` (+PDF) as the electronics source of truth. `.ai-sync/handoff.md` now opens with an ELECTRONICS TRACK section. No CAD touched.
+**Status:** completed.
+**Notes:** CUSTOM PCB CANCELLED. The ATmega328P muscle board is TQFP-32 at 0.8mm pitch, not hand-solderable, and contradicts the build-it-ourselves aim; it also solves a multi-cell problem that does not exist with one cell. Multi-cell path is an MCP23017 I2C expander module (DIP, hand-solderable, 3 cells each, 8 per bus) — explicitly NOT PCF8574, whose quasi-bidirectional outputs have a weak high side and cannot reliably source the few mA a ULN2003 input needs; that would half-work, the worst failure mode. FOUND A REAL DEFECT: GPIO21/22 are assigned to BOTH ULN2003 IN3/IN4 and I2C SDA/SCL across the wiring docs and the firmware. Harmless on one cell, breaks the moment a second is added; fix is IN3->23, IN4->5, deliberately deferred until after the demo. Seven docs still reference the cancelled PCB and are marked stale. Electronics blocks nothing — every part for one cell is owned and the real gap is that the breadboard circuit has never been built.
+
+---

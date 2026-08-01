@@ -4,6 +4,46 @@
 
 ---
 
+## ⚡ ELECTRONICS TRACK — separate workstream, separate fork
+
+**Electronics work is now tracked separately from CAD.** The electronics fork flags mechanical
+issues but never changes `cad/scad/*`. Source of truth: **`docs/ELECTRONICS_PLAN.md`**.
+
+**Decisions taken 2026-08-01:**
+
+- **No custom PCB. No custom ICs. The ATmega328P "muscle board" is CANCELLED.** It is TQFP-32 at
+  0.8mm pitch — not hand-solderable — which contradicts the project's own "build it ourselves"
+  aim, and it solves a multi-cell problem that does not exist yet with one cell.
+- **Seven docs still reference it and are STALE:** `DEMO_VS_PRODUCT.md`, `ELECTRONICS_BOM.md`,
+  `MASTER_BOM.md`, `PRINT_CHECKLIST.md`, `SHOPPING_LIST.md`, `SOFTWARE_TEAM_README.md`,
+  `WIRING_AND_ASSEMBLY.md`. `ELECTRONICS_PLAN.md` supersedes them.
+- **Multi-cell, when it comes, uses an MCP23017 I²C expander module** — DIP, hand-solderable,
+  ~₹100, 3 cells each, 8 per bus. **Explicitly NOT the PCF8574**: its outputs are
+  quasi-bidirectional with a weak high side and cannot reliably source the few mA a ULN2003
+  input needs. Zero custom silicon, zero SMD.
+
+**🔴 New electronics defect found 2026-08-01 — GPIO PIN CONFLICT:**
+
+```
+ASSEMBLY_BIBLE / breadboard_test.ino   GPIO21 -> ULN2003 IN3 , GPIO22 -> ULN2003 IN4
+SOFTWARE_TEAM_README                   GPIO21 = I2C SDA      , GPIO22 = I2C SCL
+```
+
+The motor and the I²C bus are assigned the same two pins. Harmless with one cell; breaks the
+instant a second cell is added. Fix is IN3 -> GPIO23 and IN4 -> GPIO5. **Do not change before
+the demo.**
+
+**Electronics status:** nothing is blocked by electronics. Every part for one working cell is
+owned. The blocker is that **the breadboard circuit has never been built** — no soldering
+required, Dupont only. The single soldering job available today is putting header pins on the
+DC pigtail's bare wires so it plugs into a breadboard.
+
+**Still open (electronics):** buy multimeter / breadboard / solder / strippers (~₹1,100);
+🔴 check jack polarity before powering anything; the `+32` mid-dwell firmware fix is deferred
+because it is tied to the mechanical re-derivation.
+
+---
+
 ## 📩 MESSAGE FOR ATISHAY'S CODEX — please read before touching the CAD
 
 Thanks for the measurement pass. M5, M11b and M21 all landed cleanly, and the rebase was
