@@ -12,7 +12,19 @@ wall_thickness    = 4;
 floor_thickness   = 4;
 internal_length   = 60;
 internal_width    = 60;
-elec_pocket_h     = 16;
+// v8.0: 16 -> 14. THE 2mm STACK ERROR, FIXED.
+// The mid-plate cannot sit level with its 2mm ledge — its edge (29.75) is wider
+// than the ledge opening (28.5), so it rests ON TOP of it. The old arithmetic
+// ("4 floor + 16 elec + 2 midplate + 19 motor = 41") silently omitted the ledge,
+// so the real motor face landed at 43, not 41, and every dot with it.
+// Now that the motor is MEASURED at 19.0mm (M2), taking 2mm out of the electronics
+// pocket puts the motor face back on 41 and leaves the ENTIRE upper stack untouched:
+//     cam_flat_z 45, standoffs 8mm, top plate 54..58, link_total_h 12.2
+// which means the already-ordered resin linkages stay valid. The alternative
+// (raising base_plate_z to 43) would have moved all of that and scrapped them.
+// Cost: 2mm of electronics headroom. ULN2003 with wires soldered flat is ~12mm,
+// so 14mm still clears it, plus the mid-plate relief slot adds 2mm at one corner.
+elec_pocket_h     = 14;
 // >>> BLOCKED ON MEASUREMENT (M2) — see docs/MEASUREMENTS_NEEDED.md <<<
 //
 // v7.6: THIS NUMBER IS ALSO ARITHMETICALLY WRONG BY 2mm, independently of the
@@ -74,6 +86,21 @@ mb_boss_tap       = 1.7;   // M2 self-tap pilot
 
 // Wire hook params
 wire_hook_h       = 4.0;   // hook height (along Z)
+
+// --- BRASS HEAT-SET INSERTS (v8.0) ---
+// The M2.5 top-plate bolts used to cut their own thread into PETG. That works a
+// few times and then strips, and this box gets opened repeatedly. Brass inserts
+// are melted in with a soldering iron and give a permanent steel-into-brass thread.
+//
+// The bolt enters from ABOVE (top plate -> standoff -> base plate -> this boss),
+// so the insert goes in the TOP of the boss and the old narrow pilot stays below
+// it to catch the screw tip.
+//
+// SIZES VARY BY BRAND — these are typical M2.5 figures. Measure the ones you buy
+// and change these two numbers if they differ; everything else follows.
+// Rule of thumb: bore = insert OD minus ~0.1mm, so the brass bites as it melts in.
+insert_m25_dia    = 3.5;   // MEASURE the inserts you buy (typical M2.5: 3.5-3.6)
+insert_m25_depth  = 5.5;   // insert length + 0.5mm so it can never bottom out
 
 $fn = 60;
 
@@ -270,6 +297,9 @@ union() {
                 cylinder(d1=13, d2=7.8, h=8);   // gusset cone at base
             }
             translate([0, 0, 3]) cylinder(d=2.3, h=boss_height + 0.1);
+            // brass insert bore, at the TOP where the bolt enters
+            translate([0, 0, boss_height + 0.1 - insert_m25_depth])
+                cylinder(d=insert_m25_dia, h=insert_m25_depth + 1, $fn=30);
         }
     }
 

@@ -139,8 +139,17 @@ sw_snap_nib      = 0.8;    // retention nib overhang (v6.1: 0.4→0.8, was sub-l
 // time. Tie it to the wall so it can never drift again.
 lid_screw_x      = pod_int_length/2 - 0.5;   // 29.5 — boss still embeds 2mm
 lid_screw_d      = 2.8;    // v6.2: 2.4→2.8 M2 clearance in lid (print tolerance)
-lid_boss_d       = 5.0;    // Boss OD in shell
-lid_boss_tap     = 2.0;    // M2 self-tap pilot (v6.1: 1.7→2.0, FDM prints undersize; drill if tight)
+
+// v8.0: BRASS HEAT-SET INSERTS here too, so the lid can be opened repeatedly
+// without stripping the plastic thread.
+// Boss GREW 5.0 -> 6.5: an M2 insert needs a Ø3.2 bore, and Ø3.2 inside a Ø5.0 boss
+// leaves only 0.9mm of wall — it would split when the hot brass goes in. Ø6.5 gives
+// 1.65mm. The boss still embeds ~2.7mm into the pod wall at lid_screw_x, so it is
+// not floating (see the note above about that exact failure).
+lid_boss_d       = 6.5;    // Boss OD in shell
+lid_boss_tap     = 2.0;    // narrow pilot BELOW the insert, catches the screw tip
+insert_m2_dia    = 3.2;    // MEASURE the inserts you buy (typical M2: 3.2)
+insert_m2_depth  = 4.5;    // insert length + 0.5mm
 
 $fn = 60;
 
