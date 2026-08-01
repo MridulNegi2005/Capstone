@@ -36,19 +36,25 @@ June print's cobweb problem was mostly this. **No slicer setting beats dry filam
 ## Copy these to the SD card
 
 ```
-printing/gcode/                 <- USE THIS FOLDER FIRST (230 °C)
+printing/gcode_kobra_neo_checked/            <- USE THIS (230 °C)
     mid_plate.gcode
     top_plate.gcode
     outer_box.gcode
     esp32_pod_shell.gcode
     esp32_pod_lid.gcode
 
-printing/gcode/alt_225C/        <- BACKUP, only if the first test strings
-    (the same five files at 225 °C)
+printing/gcode_kobra_neo_checked/alt_240C/   <- BACKUP (240 °C)
+    (the same files, hotter)
 ```
 
-Copy **both folders**. That is the "one setting difference" you asked for — if 230 strings, you
-switch folders. You never touch the slicer.
+Copy **both folders**. That is the "one setting difference" — you switch folders, never the slicer.
+
+> ### 🔴 The old `printing/gcode/` folder is UNSAFE. Delete it.
+> Codex audited it on 2026-08-02 and found **23,372 G2/G3 arc commands** in `outer_box` alone.
+> The stock Kobra Neo firmware is built with **ARC_SUPPORT disabled**, so it cannot run them
+> reliably — and OrcaSlicer previews them perfectly, so nothing looks wrong until it prints.
+> Those files were also sliced *before* the brass-insert and stack fixes.
+> The folder is now gitignored. Delete your local copy so it cannot be picked up by mistake.
 
 ---
 

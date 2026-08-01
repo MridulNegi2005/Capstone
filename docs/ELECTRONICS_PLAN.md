@@ -68,15 +68,17 @@ That is the entire reason any driver exists. Nothing custom is involved.
    |  3 nav buttons            |         |  Hall sensor (bare TO-92)       |
    |  DC power jack            |         |  ULN2003 driver board           |
    |  (multi-cell only:        |         |                                 |
-   |   2x 4.7k I2C pull-ups)   |         |  (multi-cell only: shares an    |
-   |                           |         |   MCP23017 with its neighbours) |
+   |   2x 4.7k I2C pull-ups,   |         |  (3+ cells: its OWN MCP23017,   |
+   |    at the BRAIN end only) |         |   address set by 3 jumpers)     |
    +---------------------------+         +---------------------------------+
             |                                          ^
             +---- 4 wires: 5V, GND, SDA, SCL ----------+
-                  (today: 6 loose wires instead)
+              (1-2 cells today: 5 direct wires per cell)
 ```
 
 **Brain pod** = decides *what* to show. **Muscle cell** = makes it physically happen.
+**There is only ever one brain.** Cells are identical, interchangeable and addressed — Part 5
+shows how that holds up to 8, 16 or 64 of them without a single custom part.
 
 ---
 
@@ -100,8 +102,12 @@ The motor and the I²C bus are assigned **the same two pins**.
 | IN1 | 18 | 18 | fine |
 | IN2 | 19 | 19 | fine |
 | IN3 | **21** | **23** | frees SDA |
-| IN4 | **22** | **5** | frees SCL |
+| IN4 | **22** | **27** | frees SCL |
 | Hall AO | 34 | 34 | ADC1, input-only, fine |
+
+⚠️ **Not GPIO 5.** An earlier revision of this table said `IN4 -> 5`. GPIO5 is a **strapping
+pin** sampled at boot; a motor coil on it can stop the ESP32 starting. **27** is the correct
+target and is what Part 10's pin map uses.
 
 Requires editing `breadboard_test.ino` and re-flashing. **Do not do this before the demo.**
 
@@ -126,36 +132,116 @@ back. **Not needed for the breadboard demo.**
 
 ---
 
-# PART 5 — MANY cells, without a single custom part
+# PART 5 — Scaling to N cells
 
-> ⚠️ **This part is about 4+ cells.** For **two** cells you need none of it — the ESP32 has
-> enough pins to drive both directly. **See Part 10.** Read this only when you outgrow that.
+**You will build two. The architecture has to claim many more, and the claim has to be
+true.** This part is what makes it true — and the honest answer is that it costs one ₹80
+chip per brick and nothing else.
 
-Recorded so nobody re-invents the PCB.
+## The problem in one line
 
-**The problem:** each cell needs 4 motor lines + 1 sensor = 5 pins. An ESP32 runs out at
-roughly 4 cells, and you cannot route 5 wires per cell between snap-together bricks.
+Each cell needs **4 motor lines + 1 sensor line = 5 wires back to the brain.**
+Five wires per cell is a dead end: the ESP32 runs out of pins at ~4 cells, and no
+snap-together brick can carry a cable that grows every time you add one.
 
-**The solution:** an **I²C I/O expander** — a chip that gives you many pins over two shared
-wires, with a selectable address so several can share one bus.
+## The fix: make the inter-brick cable a fixed width
 
-### Use MCP23017. Do NOT use PCF8574.
+```
+   DEAD END — wires grow with cell count      SCALES — cable never changes
+   +-------+                                 +-------+
+   | BRAIN |=== 5 ===[C1]                    | BRAIN |
+   |       |=== 5 ===[C2]                    +---+---+
+   |       |=== 5 ===[C3]   ...                  | 4 wires: 5V  GND  SDA  SCL
+   +-------+                                     |
+     5N wires, N <= 4                     [C1]--[C2]--[C3]--[C4]-- ... daisy chain
+                                           each brick taps the same 4
+```
+
+Every brick hangs off the **same four wires** and is told apart by an **address**, not by
+its own pins. Cell 9 wires exactly like cell 1. **That is the whole scaling story.**
+
+## 🔑 The decision that makes this real: one expander PER BRICK
+
+An MCP23017 has 16 I/O. A cell needs 5. You *could* share one expander across 3 cells — but
+then a brick is not self-contained, and "add a cell" means rewiring its neighbours.
+
+**Give every brick its own expander instead.** Wasteful on paper (5 of 16 pins used),
+correct in practice:
+
+| | Shared expander (3 cells each) | **One per brick** ✅ |
+|---|---|---|
+| Bricks identical? | No | **Yes — every cell is the same object** |
+| Adding a cell | rewire neighbours | **plug in, set 3 jumpers** |
+| Max cells / bus | 24 | 8 |
+| Cost per cell | ~₹27 | ~₹80 |
+
+₹53 per cell buys a genuinely modular brick. Take it.
+
+**Address = position.** The MCP23017's A2/A1/A0 pins select one of 8 addresses (0x20–0x27).
+Three jumpers or a tiny DIP switch on each brick. Firmware scans the bus at boot and
+**discovers how many cells are attached** — no recompile to change the display length.
+
+## Use MCP23017. Do NOT use PCF8574.
 
 | | MCP23017 | PCF8574 |
 |---|---|---|
 | I/O | 16 | 8 |
 | Output type | **true push-pull** | quasi-bidirectional, **weak high side** |
 | Drives a ULN2003 input? | **Yes** | ⚠️ **Marginal — avoid** |
-| Package | DIP-28 available, hand-solderable | DIP-16 |
+| Package | DIP-28, hand-solderable | DIP-16 |
 | Addresses | 8 (0x20–0x27) | 8 |
 
 **Why this matters:** a ULN2003 input needs a couple of mA *sourced into* it. The PCF8574's
 high state is a weak pull-up of roughly 100µA. It looks like it should work, and it will
-half-work — the worst possible failure. MCP23017 sources properly.
+half-work — the worst possible failure mode. MCP23017 sources properly.
 
-**Per-cell budget on one MCP23017:** 4 lines to the ULN2003, 1 line from the hall sensor's
-**DO** pin (digital, not AO), leaving 11 spare → comfortably **3 cells per expander**, and
-8 expanders per bus.
+## The ceiling, stated honestly
+
+| Cells | What you need | Extra cost |
+|---|---|---|
+| **1–2** | Direct GPIO. No expander at all. *(Part 10)* | ₹0 |
+| **3–8** | 1× MCP23017 per brick, one I²C bus | ~₹80/cell |
+| **9–16** | Second I²C bus — **the ESP32 has two controllers** | ₹0 more |
+| **17–64** | TCA9548A I²C multiplexer, 8 buses | ~₹120 once |
+
+**Nothing custom appears at any tier.** No PCB, no ATmega, no SMD.
+
+## What actually breaks first — and it isn't addressing
+
+⚠️ **Power, at about 11 cells** — but only if you move them all at once:
+
+```
+5V 3A supply  =  3000mA
+  - ESP32                    250mA
+  = 2750mA  /  250mA per energised motor  =  11 motors simultaneously
+```
+
+**Refresh the cells one at a time and this limit disappears entirely** — a cell draws current
+only while it is turning, ~0.4s. A 20-cell line refreshing sequentially never exceeds two
+motors' worth. This is also why *"de-energise the coils when idle"* is an architectural rule,
+not a nicety: hold all 20 energised and you need a 60W supply to display static text.
+
+## Three rules that must be locked in now
+
+These are cheap to honour today and expensive to retrofit:
+
+1. 🔴 **I²C pull-ups live at the BRAIN end only — 2× 4.7kΩ, once, ever.**
+   Putting them in every brick is the classic mistake: 8 bricks × 4.7k in parallel = **590Ω**,
+   which exceeds what an I²C device can sink. The bus stops working and the cause is invisible.
+2. **Hall sensors move from AO to DO.** An expander has **no ADC**. Single-cell uses the analog
+   pin; multi-cell must use the module's digital output and its trimmer pot has to be
+   **calibrated per cell**. Budget for that — it's a knob-turning session, not a redesign.
+3. **Keep the bus short and slow-able.** I²C tolerates ~400pF total. Short jumpers across 8
+   bricks are fine; if a long chain goes flaky, drop the clock to 100kHz before suspecting
+   anything else.
+
+## What this means for the two boards you're building
+
+Build the breadboard demo on **direct GPIO** — it's unblocked today and needs no expander.
+Then build **both muscle boards with the expander architecture anyway.** The two cells you
+physically make are then not a two-cell hack; they are cells 1 and 2 of an N-cell bus, and
+adding cell 3 is a purchase, not a redesign. **That is what makes the claim demonstrable to
+the panel** — you can point at the address jumpers.
 
 **Total custom silicon required: zero. Total SMD soldering: zero.**
 
@@ -338,7 +424,7 @@ vapour. Open a window; don't hunch over it.
 
 ## 🔑 The key decision: no expander, no I²C, no extra parts
 
-Earlier this document said multi-cell needs an MCP23017 expander. **That is true at ~4 cells.
+Part 5 describes an MCP23017 expander per brick. **That earns its place from 3 cells up.
 At two cells it is unnecessary** — the ESP32 has enough pins to drive both directly:
 
 ```

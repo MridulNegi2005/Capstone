@@ -36,3 +36,8 @@ secrets.h
 
 # Blender frame output — regenerable via renders/braillix_anim.py
 renders/out/
+
+# Legacy G-code: contains G2/G3 arcs the stock Kobra Neo firmware cannot run.
+# The good set is printing/gcode_kobra_neo_checked/ (regenerate with
+# printing/orca/slice_kobra_neo_checked.sh). Delete printing/gcode/ locally.
+printing/gcode/

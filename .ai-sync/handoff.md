@@ -267,6 +267,18 @@ and infill 15→25% for the pillowed top surface, walls 2→3 for the screw boss
 `seam_position=back` for the ghost patterns on the walls). **Supports deliberately OFF** — that
 is a print-time decision, not a profile one.
 
+### 2026-08-02 G-code audit — use the checked folder, not `printing/gcode/`
+
+The six legacy files in `printing/gcode/` contain **45,075 `G2`/`G3` arc commands** because
+`enable_arc_fitting` was on. The stock Kobra Neo Marlin source has `ARC_SUPPORT` disabled, so it
+can ignore those moves and corrupt circles/curves. Do **not** print those legacy files.
+
+Use `printing/gcode_kobra_neo_checked/` instead. All six files were re-sliced from the current
+STLs using `printing/orca/braillix_0.20mm_petg_kobra_neo_safe.json`, which sets
+`enable_arc_fitting = 0`; each is PETG, 235/230C nozzle, 80C bed, supports off, has no G2/G3
+commands, and stays inside the 220x220x250mm Kobra Neo volume. Regenerate with
+`bash printing/orca/slice_kobra_neo_checked.sh`.
+
 ## Do NOT regress these
 - **`vertical_wire_guides()` is deleted on purpose.** A single blade cannot guide a wire. If pogo
   wiring ever needs managing, copy `cable_hook()` — an L with a 1.5mm overhang that actually

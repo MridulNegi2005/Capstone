@@ -376,6 +376,14 @@ and geometry disappears without an error. Always check the `Volumes:` count afte
 
 ---
 
+## [2026-08-02 00:49] — Codex
+**Task:** Audit all six existing PETG G-code files for the stock Anycubic Kobra Neo and Numakers PETG-HS, then generate safe replacements without overwriting the legacy files.
+**Changes:** Added `printing/orca/braillix_0.20mm_petg_kobra_neo_safe.json` (arc fitting off) and `printing/orca/slice_kobra_neo_checked.sh`. Re-sliced all six current STLs into `printing/gcode_kobra_neo_checked/`.
+**Status:** completed.
+**Notes:** The old `printing/gcode/*.gcode` set has 45,075 G2/G3 arc commands. The official stock Kobra Neo Marlin source has ARC_SUPPORT disabled, so those arcs are not printable reliably despite rendering normally in Orca. The checked replacements contain zero G2/G3 commands; PETG, 235/230C nozzle, 80C bed, supports off, and all commanded moves were validated inside the 220x220x250mm build volume. Numakers recommends 240C plus/minus 10C, 80-90C bed and 20-50% cooling; the selected 235/230C and 80C are in range, but a small calibration print is still prudent before long enclosure prints.
+
+---
+
 ## [2026-08-01] — Claude Code (ELECTRONICS fork)
 **Task:** Two-cell electronics design, full beginner soldering guide, soldering-iron buying guide; correct two false facts across the docs.
 **Changes:** `docs/ELECTRONICS_PLAN.md` gained Part 9 (buying a soldering iron), Part 10 (the two-cell product + pin map), Part 11 (soldering from zero). Corrected `ELECTRONICS_BOM.md`, `MASTER_BOM.md`, `DEMO_VS_PRODUCT.md`. PDFs regenerated. `.ai-sync/handoff.md` electronics section updated. No CAD touched.
