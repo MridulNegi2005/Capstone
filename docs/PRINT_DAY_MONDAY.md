@@ -78,11 +78,17 @@ Copy **both folders**. That is the "one setting difference" — you switch folde
 | What you see | What it means | What to do |
 |---|---|---|
 | Clean, no cobwebs | 230 °C is right | Carry on with the rest of the folder |
-| Fine hairs between features | Too hot, or damp filament | Switch to the **alt_225C** folder |
-| Layers splitting, part lifts off the bed | Too cold | Stay at 230, raise the **bed** to 85 °C on the printer menu |
-| Rough, gritty top surface | Under-extruding | Tell me — it is a flow setting, not temperature |
+| **Fine hairs / cobwebs** | **Damp filament**, almost certainly | ⚠️ Do **not** drop the temperature — 230 is already the low end of the Numakers range (240 ±10). Stringing is a moisture problem. Dry it. |
+| Layers splitting, corners lifting | Too **cold** | Switch to the **alt_240C** folder, and raise the **bed** to 85 °C on the printer menu |
+| Weak, easily snapped part | Too cold / poor layer bonding | **alt_240C** |
+| Rough, gritty top surface | Under-extruding | Tell me — a flow setting, not temperature |
 
-Nothing else needs judging. Those four cases cover it.
+Nothing else needs judging. Those cover it.
+
+> **Why the backup is hotter, not cooler.** Numakers specifies **240 ± 10 °C**. The default set runs
+> 230, already at the bottom of their range, so there is nothing useful below it — going cooler just
+> buys weak layers. The only temperature move that helps is **upward**, and stringing is fixed by
+> drying, not by chasing the dial.
 
 ---
 
