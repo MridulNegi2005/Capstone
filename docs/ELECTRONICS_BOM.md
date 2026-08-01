@@ -91,6 +91,8 @@ The soldering station is the bulk of it and is the one genuinely missing tool.
 
 | Component | Why | Est. ₹ |
 |---|---|---|
+| **Hot glue gun + sticks** | ⭐ Strain relief on every joint. **Reworkable** — this is why it beats epoxy while the pin map can still change. See `ELECTRONICS_PLAN.md` Part 12. | ~250 |
+| **Neutral-cure RTV silicone** | Optional upgrade over hot glue for vibration. 🔴 Must say **neutral cure** — the vinegar-smelling acetic kind corrodes copper. | ~150 |
 | Flux paste | Makes soldering to ULN2003 pins much easier for a beginner | ~100 |
 | Helping-hands / third hand | Not really optional — you cannot hold iron, solder and two wires with two hands | ~200 |
 | Brass wool tip cleaner | Better than the wet sponge; keeps the tip alive | ~100 |
@@ -99,6 +101,26 @@ The soldering station is the bulk of it and is the one genuinely missing tool.
 | Desoldering pump/wick | Fixing bridges; also for lifting the TO-92 off the hall module | ~120 |
 | Small drill bits 1.5/1.7/2.5mm | FDM holes print 0.2–0.3mm undersize | ~150 |
 | Electrical tape | — | ~30 |
+
+## 2D. Cost of each ADDITIONAL cell (the scaling claim, priced)
+
+You are building two. This is what a third, fourth or eighth costs — no custom parts at any
+point. Full architecture in `ELECTRONICS_PLAN.md` Part 5.
+
+| Per extra cell | Est. ₹ |
+|---|---|
+| 28BYJ-48 motor + ULN2003 board | ~160 |
+| Hall sensor module | ~50 |
+| **MCP23017 expander (DIP-28)** + 3 address jumpers | ~90 |
+| Wire, connector, heat-shrink | ~50 |
+| **Total per cell** | **~₹350** |
+
+**One-off, only when you go past 2 cells:** 2× 4.7kΩ pull-ups (~₹5, brain end only).
+**One-off, only past 16 cells:** TCA9548A I²C mux (~₹120).
+
+⚠️ Cells 1 and 2 run **direct-GPIO** and need no expander at all — but building both muscle
+boards with the expander anyway is what makes the N-cell claim demonstrable rather than
+theoretical.
 
 ---
 
@@ -109,8 +131,9 @@ The soldering station is the bulk of it and is the one genuinely missing tool.
 | Already spent (incl. multimeter) | ~1,435 |
 | Demo essentials (2A) | ~1,900 |
 | Mechanism (2B) | ~1,430 |
-| Optional (2C) | ~560 |
-| **Everything** | **~5,325 of ₹15,000** |
+| Optional (2C) | ~960 |
+| **Everything** | **~5,725 of ₹15,000** |
+| *each cell beyond the 2nd (2D)* | *~350* |
 
 **The breadboard demo needs NO soldering at all** — only the breadboard and a data cable
 (~₹250). The soldering station is required to *assemble* a cell, not to demonstrate one.
@@ -122,8 +145,8 @@ The soldering station is the bulk of it and is the one genuinely missing tool.
 | Item | Verdict |
 |---|---|
 | **Any motor driver IC** | ❌ You own it. The chip on the blue board **is** the ULN2003A. |
-| **ATmega328P / custom muscle board** | ❌ Only for multi-cell I²C chains. The ESP32 drives one cell directly. Also TQFP-32 at 0.8mm pitch — beyond basic soldering; would need assembled (PCBA) ordering. |
-| **Resistors** | ❌ None for a single cell. *(Only if you later build the multi-cell I²C bus: 2× 4.7kΩ pull-ups, master end only.)* |
+| **ATmega328P / custom muscle board** | ❌ Never. Multi-cell is solved by an **MCP23017 per brick** (DIP-28, hand-solderable, ~₹80) — see `ELECTRONICS_PLAN.md` Part 5. TQFP-32 at 0.8mm pitch is beyond basic soldering and would need PCBA ordering. |
+| **Resistors** | ❌ None for one or two cells. *(From 3 cells: exactly 2× 4.7kΩ I²C pull-ups, **at the brain end only, once, ever** — repeating them per brick kills the bus.)* |
 | **Capacitors** | ❌ None. Both modules and the DevKit carry their own. |
 | **Flyback diodes** | ❌ Built into the ULN2003A (that's what COM does). |
 | **Level shifters** | ❌ Not needed — hall runs on 3V3, so GPIO34 never sees 5V. |

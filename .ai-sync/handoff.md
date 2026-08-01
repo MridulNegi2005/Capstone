@@ -17,10 +17,25 @@ issues but never changes `cad/scad/*`. Source of truth: **`docs/ELECTRONICS_PLAN
 - **Seven docs still reference it and are STALE:** `DEMO_VS_PRODUCT.md`, `ELECTRONICS_BOM.md`,
   `MASTER_BOM.md`, `PRINT_CHECKLIST.md`, `SHOPPING_LIST.md`, `SOFTWARE_TEAM_README.md`,
   `WIRING_AND_ASSEMBLY.md`. `ELECTRONICS_PLAN.md` supersedes them.
-- **Multi-cell, when it comes, uses an MCP23017 I²C expander module** — DIP, hand-solderable,
-  ~₹100, 3 cells each, 8 per bus. **Explicitly NOT the PCF8574**: its outputs are
-  quasi-bidirectional with a weak high side and cannot reliably source the few mA a ULN2003
-  input needs. Zero custom silicon, zero SMD.
+- **Multi-cell uses an MCP23017 I²C expander — one PER BRICK** (revised 2026-08-02; was
+  "3 cells share one"). DIP-28, hand-solderable, ~₹80. One-per-brick wastes 11 of 16 I/O but
+  makes every cell an **identical, self-contained, addressable module**: adding a cell means
+  plugging in and setting 3 address jumpers, never rewiring a neighbour. Ceiling: 8 cells/bus
+  → 16 on the ESP32's second I²C controller → 64 via a TCA9548A mux. **Explicitly NOT the
+  PCF8574**: quasi-bidirectional outputs with a weak high side cannot reliably source the few
+  mA a ULN2003 input needs. Zero custom silicon, zero SMD at every tier.
+- **Inter-brick cable is a FIXED 4 wires (5V, GND, SDA, SCL) regardless of cell count.** This
+  is the whole scaling argument — 5 wires per cell is the dead end.
+- **First limit hit is POWER, ~11 cells** on the 3A supply, and only if all motors move
+  simultaneously. Sequential refresh removes it. This makes *"de-energise coils when idle"* an
+  architectural rule, not a nicety.
+- 🔴 **I²C pull-ups: 2× 4.7kΩ at the BRAIN end ONLY, once, ever.** Repeating them per brick is
+  the classic failure — 8 × 4.7k parallel = 590Ω, beyond what an I²C device can sink.
+- **Multi-cell forces hall sensors from AO to DO** (expanders have no ADC), which means a
+  per-cell trimmer calibration pass. Budgeted, not a redesign.
+- **Plan: build both muscle boards WITH the expander** even though 2 cells don't need it — that
+  makes the N-cell claim demonstrable to the panel rather than theoretical. Breadboard bring-up
+  stays direct-GPIO.
 
 **🔴 New electronics defect found 2026-08-01 — GPIO PIN CONFLICT:**
 
@@ -30,8 +45,19 @@ SOFTWARE_TEAM_README                   GPIO21 = I2C SDA      , GPIO22 = I2C SCL
 ```
 
 The motor and the I²C bus are assigned the same two pins. Harmless with one cell; breaks the
-instant a second cell is added. Fix is IN3 -> GPIO23 and IN4 -> GPIO5. **Do not change before
-the demo.**
+instant a second cell is added. Fix is **IN3 -> GPIO23 and IN4 -> GPIO27**. **Do not change
+before the demo.**
+
+⚠️ **Corrected 2026-08-02:** an earlier revision of this handoff and of `ELECTRONICS_PLAN.md`
+Part 3 said `IN4 -> GPIO5`. **GPIO5 is a strapping pin** sampled at boot; a motor coil on it
+can stop the ESP32 starting. **27** is correct and matches Part 10's pin map.
+
+**Joint durability (added 2026-08-02, `ELECTRONICS_PLAN.md` Part 12):** solder joints fail
+because the *wire* flexes at the joint edge, not because the solder breaks — so the fix is
+heat-shrink plus **anchoring the wire 5–10mm away**, not adhesive on the joint. Use **hot glue,
+not epoxy**, until the pin map is frozen (it isn't — see the conflict above and the expander
+migration). 🔴 Never use acetic-cure (vinegar-smelling) silicone: it corrodes copper. Never
+glue the inter-brick connection — modularity depends on it separating.
 
 **Electronics status:** nothing is blocked by electronics. Every part for one working cell is
 owned. The blocker is that **the breadboard circuit has never been built** — no soldering

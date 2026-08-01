@@ -18,6 +18,9 @@ older documents in this repo tell you to build things you do not need.
 | Is the jack polarity safe? | ✅ **YES — measured and confirmed correct, 2026-08-01.** |
 | Do I own a soldering iron? | ❌ **No.** Buying guide in Part 9. **Do not buy a cheap plain iron.** |
 | Can two cells work? | ✅ Yes, **direct-drive, no expander** — the ESP32 has the pins. See Part 10. |
+| Does it scale past two? | ✅ Yes — **8 cells on one bus, 64 with a mux**, at ~₹80/cell and zero custom parts. Part 5. |
+| What breaks first at scale? | **Power, ~11 cells** — and only if they all move at once. Refresh sequentially and it goes away. |
+| How do I stop joints breaking? | Heat-shrink + **anchor the wire**, not glue on the joint. **Hot glue, not epoxy** — the pin map will still change. Part 12. |
 | What is the real blocker? | Nothing electronic. **The circuit has never been built on a breadboard** — and that needs no soldering at all. |
 
 ---
@@ -587,7 +590,75 @@ open, look at the cross-section. Twenty minutes of practice with ₹5 of wire sa
 
 ---
 
-# PART 12 — Flagged for the CAD fork (do not fix here)
+# PART 12 — Making joints permanent (what to put on after soldering)
+
+## First, the thing almost everyone gets wrong
+
+> **Solder joints don't fail because the solder breaks.
+> They fail because the WIRE flexes right where it enters the joint.**
+
+The solder is stiff; the wire is soft. Every wiggle concentrates at that exact boundary until
+the copper work-hardens and snaps — often *inside* the insulation, so it looks perfect and
+reads open on the multimeter.
+
+⚠️ **So gluing the joint itself doesn't fix it.** A hard blob only moves the flex point 2mm
+along and can make it *worse*. **You have to stop the wire from moving** — anchor it 5–10mm
+away so the joint never sees the force. That's what "strain relief" means, and it does more
+than any adhesive.
+
+## Do these in order
+
+| Order | What | Why |
+|---|---|---|
+| **1** | **Heat-shrink tubing** over every joint | ⭐ Insulates *and* stiffens the transition. Slide it on **before** you solder — everyone forgets this once. |
+| **2** | **Anchor the cable** — zip tie, clamp, or a dab of hot glue on the wire *away* from the joint | This is the actual fix. The joint stops flexing. |
+| **3** | *Only then* consider a coating | Everything below is a bonus, not a substitute |
+
+## The coatings, honestly compared
+
+| Option | Hardness | Reworkable? | Verdict for Braillix |
+|---|---|---|---|
+| **Hot glue** | soft, rubbery | ✅ peels off | ⭐ **Use this.** Cheap, instant, great strain relief, and you *will* need to undo things. Softens ~70°C — irrelevant here. |
+| **Neutral-cure RTV silicone** | flexible | ✅ mostly | ⭐ Best vibration resistance. ⚠️ Must be **neutral-cure** — see warning below. |
+| **2-part epoxy** | rock hard | ❌ **never** | Only for the final, fully-tested build. Hard *and brittle* — it transfers shock to the joint instead of absorbing it. |
+| **Conformal coating** (acrylic spray) | thin film | ✅ with thinner | Protects against moisture/oxidation. Adds **no** mechanical strength. Not needed indoors. |
+| **UV resin** (you have a resin printer) | hard, brittle | ❌ | Tempting since it's on hand — but it won't cure in shadow under a wire, leaving sticky uncured resin. Skip it. |
+| **Nail polish** | thin | ✅ acetone | Genuinely fine for locking a *screw* or marking polarity. Not a structural adhesive. |
+
+### 🔴 Two warnings worth more than the rest of this section
+
+1. **Never use acetic-cure silicone** (the hardware-store bathroom kind that smells of
+   vinegar). It releases **acetic acid** as it cures, which corrodes copper and eats your
+   joints over months. The tube must say **neutral cure** / oxime / alkoxy.
+2. **Do not epoxy anything until the whole circuit is verified working.** Epoxy on ESP32
+   header pins means the board is scrap if the pin map changes — and *your pin map is going
+   to change* (Part 3's conflict fix, and the expander migration in Part 5). **Hot glue until
+   the design is frozen.**
+
+## Where each one belongs on this build
+
+```
+DC jack wires ---------> heat-shrink + hot glue blob at the strain point
+ULN2003 flat wires ----> heat-shrink; hot glue ONLY after the pocket fit is confirmed
+Hall sensor 3 wires ---> heat-shrink; the TO-92 itself gets epoxied into the CAD pocket
+Inter-brick cable -----> connector, not glue -- it MUST come apart (Part 5 is modular)
+Nav buttons -----------> hot glue, so the pod can be opened
+```
+
+⚠️ **Never glue the inter-brick connection.** The entire scaling argument in Part 5 depends on
+bricks separating. Glue there and you've built a permanent 2-cell device.
+
+⚠️ **Keep every adhesive away from the cam, the linkage feet and the dot holes.** A drop of
+hot glue in the mechanism is far harder to remove than a bad solder joint.
+
+## The 5-second test that beats any coating
+
+**Tug it.** Pull each wire firmly by hand before you insulate anything. A properly soldered
+joint will not come off — if it moves, no glue on earth will save it. Redo the joint.
+
+---
+
+# PART 13 — Flagged for the CAD fork (do not fix here)
 
 1. **Hall module does not fit** the base plate — needs the bare TO-92 desoldered, and a pocket
    that can hold it.
