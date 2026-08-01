@@ -193,8 +193,8 @@ Building the demo is not throwaway work — it *is* the first cell.
 # PART 4 — What to do right now
 
 **This week (~₹1,100):**
-1. Buy: **multimeter**, breadboard, USB-C **data** cable, 0.8mm solder, wire strippers
-2. 🔴 **Check barrel jack polarity with the multimeter before powering anything.** There is no
+1. Buy: **60W temperature-controlled soldering station**, breadboard, USB-C **data** cable, 0.8mm 60/40 solder, wire strippers. *(Multimeter already owned.)*
+2. ✅ **Jack polarity already measured and confirmed correct (2026-08-01), red = positive.** Note there is still no
    reverse-polarity protection in this circuit — wrong polarity kills the ESP32 instantly.
 3. Build the Stage-1 breadboard circuit (13 wires, `ASSEMBLY_BIBLE.md`)
 4. Flash `breadboard_test.ino`, confirm the dashboard on your phone

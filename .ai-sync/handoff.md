@@ -38,9 +38,25 @@ owned. The blocker is that **the breadboard circuit has never been built** — n
 required, Dupont only. The single soldering job available today is putting header pins on the
 DC pigtail's bare wires so it plugs into a breadboard.
 
-**Still open (electronics):** buy multimeter / breadboard / solder / strippers (~₹1,100);
-🔴 check jack polarity before powering anything; the `+32` mid-dwell firmware fix is deferred
-because it is tied to the mechanical re-derivation.
+**Corrections logged 2026-08-01 (earlier docs were WRONG):**
+- ✅ **Multimeter is OWNED** and **jack polarity has been MEASURED CORRECT** (red = positive).
+  The single biggest risk to the ESP32 is retired.
+- ❌ **NO soldering iron is owned.** `ELECTRONICS_BOM.md` and `MASTER_BOM.md` both claimed one
+  was — both corrected. Buy a **60W temperature-controlled "936" station, ceramic heater,
+  2.4mm chisel tip, ~₹1,300**. NOT a plain ₹200 pencil iron: uncontrolled heat burns the flux
+  off before it can wet the joint, which makes soldering feel impossible and is blamed on
+  technique. `ELECTRONICS_PLAN.md` Part 9 has the full reasoning.
+
+**TWO-CELL DESIGN DECIDED (Part 10):** two cells need **NO expander and NO I²C** — the ESP32 has
+15 safe output pins and two cells plus nav need 11. Direct drive both. The pin map is chosen so
+**adding cell 2 never touches cell 1's wiring**: cell 1 on GPIO 18/19/23/27 + hall 34, cell 2 on
+13/14/26/33 + hall 35, nav on 32/25/17, and 21/22 left free for I²C if a 3rd cell ever appears.
+Avoid GPIO 0/2/5/12/15 entirely — they are strapping pins read at boot and a motor coil on one
+can stop the ESP32 booting. An expander only earns its place at roughly 4 cells.
+
+**Still open (electronics):** buy the soldering station + solder + breadboard + strippers
+(~₹1,900); build the breadboard circuit (no soldering needed); the `+32` mid-dwell firmware fix
+is deferred because it is tied to the mechanical re-derivation.
 
 ---
 

@@ -27,7 +27,7 @@
 |---|---|---|
 | ESP32 DevKit V1 (30-pin, USB-C) | ✅ HAVE IT | — |
 | 5V/3A power adapter | ✅ HAVE IT | — |
-| Inline female DC pigtail jack | ✅ **HAVE FOR TESTING** | Photo-identified; no thread/nut, so it cannot mount in the pod wall. Verify centre-pin polarity by continuity before power. |
+| Inline female DC pigtail jack | ✅ **HAVE FOR TESTING** | Photo-identified; no thread/nut, so it cannot mount in the pod wall (CAD issue). ✅ Polarity measured correct 2026-08-01, red = positive. |
 | Threaded 5.5×2.1mm female panel-mount jack | ❌ **NEED TO BUY / SELECT** | Final enclosure part. Must have retaining nut and ≥5V/3A rating; record exact drawing/link before finalizing lid CAD. |
 | 28BYJ-48 stepper motor (5V) | ✅ HAVE IT / MEASURED | Fit-critical caliper readings recorded, including M5=3.0mm. Vertical stack still needs one coordinated CAD pass. |
 | ULN2003 driver module | ✅ HAVE IT | Fits the 16mm pocket **only** with wires soldered flat (~12mm). With vertical Dupont headers it is ~20mm and will NOT fit. |
@@ -70,8 +70,8 @@
 
 | Tool | Status | Action Needed |
 |---|---|---|
-| Soldering iron | ✅ **HAVE IT** | You stated basic experience and an iron. 25–60W with a conical/chisel tip is right. |
-| **Digital multimeter** | ❌ **NEED TO BUY — MANDATORY** | 🔴 The single most important purchase. Barrel-jack polarity is unverified and getting it wrong destroys the ESP32 on first power-up. Also your only way to debug a dead rail. ~₹500 |
+| Soldering station | ❌ **NEED TO BUY** | 🔴 **Not owned** (an earlier revision of this file wrongly said it was). Buy a **60W temperature-controlled "936" station with a 2.4mm chisel tip**, ~₹1,300 — NOT a plain ₹200 pencil iron. Full reasoning in `ELECTRONICS_PLAN.md` Part 9. |
+| **Digital multimeter** | ✅ **HAVE IT** (bought 2026-08-01) | Jack polarity measured and **confirmed correct** — red = positive. The largest single risk to the ESP32 is retired. |
 | **Digital calipers** | ✅ **IN HAND / USED** | Motor, Hall thickness, and ESP32 row-pitch readings recorded on 2026-07-31. |
 | Wire stripper / cutter | ❌ NEED TO BUY | ~₹200 |
 | Desoldering pump or wick | ❌ OPTIONAL | Useful if you need to lift the TO-92 off the hall module, or fix a bridge. ~₹120 |

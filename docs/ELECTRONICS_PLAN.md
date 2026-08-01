@@ -12,11 +12,13 @@ older documents in this repo tell you to build things you do not need.
 
 | Question | Answer |
 |---|---|
-| Do we need a custom PCB? | **No.** Not for one cell, and not for multi-cell either. |
+| Do we need a custom PCB? | **No.** Not for one cell, not for two, not for multi-cell. |
 | Do we need custom ICs? | **No.** The ATmega328P plan was over-engineering. |
-| What do I own that works? | ESP32, 28BYJ-48 motor, ULN2003 driver, hall module, 5V adapter. **That is a complete single cell.** |
-| What do I solder today? | Two wires on the DC jack. That is genuinely all. |
-| What is the real blocker? | Nothing electronic. **The circuit has never been built on a breadboard.** |
+| What do I own that works? | ESP32, 28BYJ-48 motor, ULN2003 driver, hall module, 5V adapter, **multimeter**. That is a complete single cell. |
+| Is the jack polarity safe? | ✅ **YES — measured and confirmed correct, 2026-08-01.** |
+| Do I own a soldering iron? | ❌ **No.** Buying guide in Part 9. **Do not buy a cheap plain iron.** |
+| Can two cells work? | ✅ Yes, **direct-drive, no expander** — the ESP32 has the pins. See Part 10. |
+| What is the real blocker? | Nothing electronic. **The circuit has never been built on a breadboard** — and that needs no soldering at all. |
 
 ---
 
@@ -124,9 +126,12 @@ back. **Not needed for the breadboard demo.**
 
 ---
 
-# PART 5 — Multi-cell, without a single custom part
+# PART 5 — MANY cells, without a single custom part
 
-Only relevant after one cell physically works. Recorded so nobody re-invents the PCB.
+> ⚠️ **This part is about 4+ cells.** For **two** cells you need none of it — the ESP32 has
+> enough pins to drive both directly. **See Part 10.** Read this only when you outgrow that.
+
+Recorded so nobody re-invents the PCB.
 
 **The problem:** each cell needs 4 motor lines + 1 sensor = 5 pins. An ESP32 runs out at
 roughly 4 cells, and you cannot route 5 wires per cell between snap-together bricks.
@@ -158,33 +163,17 @@ half-work — the worst possible failure. MCP23017 sources properly.
 
 # PART 6 — What to actually do, in order
 
-### 1. 🔴 Check the jack polarity. Before anything else, ever.
+### 1. ✅ Jack polarity — DONE, 2026-08-01
 
-There is **no reverse-polarity protection anywhere in this circuit.** Backwards = a dead
-ESP32, instantly and silently. Red-wire-means-positive is a convention, not a guarantee.
+Measured with a multimeter and **confirmed correct: red = positive, black = ground.**
+The single largest risk to the ESP32 is now retired. Mark the positive wire physically
+(nail polish, marker, a tag) so it can never be confused later.
 
-```
-Multimeter on DC volts. Adapter in the wall. Nothing else connected.
-  black probe on one wire, red probe on the other
-  reads about +5V  -> the wire under the RED probe is POSITIVE
-  reads about -5V  -> it is the other way round
-Mark the positive wire. Nail polish, marker, anything.
-```
+### 2. Buy a soldering iron — see Part 9
 
-**Needs:** a multimeter (~₹500, still to buy).
-
-### 2. The one soldering job available today
-
-Your DC jack is an **inline pigtail** — a barrel socket with two bare wire ends and no
-thread or nut. Bare wires do not sit in a breadboard.
-
-> **Tin both wire ends, then solder them to a 2-pin male header strip.**
-> Now the adapter plugs into the breadboard like any other component.
-
-Nothing is powered while you do this, so it is a safe first job.
-**Needs:** 0.8mm 60/40 rosin-core solder (~₹150). Iron already owned.
-
-*(Mechanical mounting of this jack in the pod lid is a **CAD** question — flagged, not solved here.)*
+You do **not** own one. Nothing in the build is blocked by this yet, because the
+breadboard demo needs no soldering. **Part 9 explains exactly what to buy and why the
+₹200 irons are a trap.**
 
 ### 3. Build the breadboard circuit — **the actual blocker**
 
@@ -240,22 +229,279 @@ mechanical cause that does not exist.
 
 # PART 8 — Shopping, electronics only
 
+✅ **Already owned:** multimeter, ESP32, motor, ULN2003, hall module, 5V adapter, DC pigtail.
+
 | Item | Why | ₹ |
 |---|---|---|
-| **Multimeter** | 🔴 Mandatory. The only thing standing between you and a dead ESP32. | ~500 |
+| **Soldering station** (see Part 9) | 🔴 The one real gap. **Temperature-controlled, not a plain iron.** | ~1,300 |
+| **Solder, 0.8mm 60/40 leaded, rosin core** | Every joint in this project | ~150 |
 | **Breadboard** | The entire demo runs on it | ~100 |
-| **Solder, 0.8mm 60/40 rosin core** | The jack job, later the ULN2003 | ~150 |
 | **Wire strippers** | Prepping wire ends | ~200 |
 | **USB-C data cable** | To flash the ESP32. Charge-only cables look identical and fail silently — **test yours first.** | ~150 |
+| **Heat-shrink assortment** | Insulating every splice | ~100 |
+| **Desoldering wick** | Fixing bridges; lifting the hall sensor off its module | ~80 |
+| **Helping-hands / third hand** | Not optional in practice — you cannot hold iron, solder and two wires with two hands | ~200 |
 
-**~₹1,100**, or ~₹950 if your existing cable carries data.
+**~₹2,280**, or ~₹2,130 if your existing USB-C cable carries data.
 
 **Not needed:** any driver IC (you own it), resistors, capacitors, flyback diodes (inside the
 ULN2003), level shifters, crystals, and **any custom PCB**.
 
 ---
 
-# PART 9 — Flagged for the CAD fork (do not fix here)
+# PART 9 — Buying a soldering iron, explained
+
+You said the options confused you. They are confusing, and **most of what an electronics shop
+will sell you for ₹200 is close to useless for this work.** Here is the whole decision.
+
+## The only choice that really matters
+
+> ### Buy a temperature-CONTROLLED soldering STATION. Not a plain "pencil" iron.
+
+| | Plain pencil iron ₹150–300 | **Soldering station ₹1,200–1,800** |
+|---|---|---|
+| Temperature | Uncontrolled — climbs until it stops | **You set it. It holds it.** |
+| In practice | Too hot: burns flux instantly, oxidises the tip black, lifts pads | Correct heat, joints flow properly |
+| Tip life | Days | Months |
+| Stand | Usually none | Included |
+| Beginner result | Blames themselves for "being bad at soldering" | Actually learns |
+
+**Why uncontrolled irons ruin beginners:** solder needs the *joint* at ~250°C. A plain iron
+free-runs to 400°C+, which burns the flux off before it can clean the metal. Solder then balls
+up and refuses to stick — and it looks exactly like bad technique. It isn't. It's the tool.
+
+**This is the single highest-value ₹1,000 in the whole project.**
+
+## What to search for
+
+> **"60W soldering station temperature controlled 936"**
+
+The `936` design is an old Hakko layout that everyone clones. Common brands in India: **Soldron,
+Yihua, Aptech**. They are all much the same. Roughly **₹1,200–1,800**.
+
+## Reading the spec sheet
+
+| Spec | Get | Why |
+|---|---|---|
+| **Temperature control** | **Yes — non-negotiable** | The entire reason to buy a station |
+| **Wattage** | **60W** | Not "how hot" — how *fast it recovers* after touching cold metal. 60W recovers quickly. |
+| **Heating element** | **Ceramic** | Faster and more accurate than nichrome |
+| **Tip shape** | **Chisel ~2.4mm** ("D24"/"D-type") | More contact area = faster heat transfer. **A fine conical tip is the classic beginner mistake** — it looks precise and transfers heat poorly. |
+| **Temp range** | 200–450°C | You'll use 320–350°C |
+| **Stand + sponge** | Included | Ignore, buy brass wool if you can |
+
+## Settings for this project
+
+```
+Solder      0.8mm  60/40 LEADED, rosin core     <- leaded, deliberately
+Temperature 330 C  for everything here
+Tip         2.4mm chisel
+```
+
+**Use leaded 60/40, not lead-free.** Lead-free melts ~40°C hotter, wets far worse, and is
+genuinely harder for a first-timer. Leaded is legal for hobby/education use. **Wash your hands
+afterwards, don't eat at the bench**, and that is the whole safety story.
+
+**Ventilate.** The smoke is burning flux, not lead — it is an irritant, not a heavy-metal
+vapour. Open a window; don't hunch over it.
+
+## What NOT to buy
+
+- ❌ **A plain 25W/35W pencil iron.** The trap this section exists to prevent.
+- ❌ **A "soldering gun"** (pistol-shaped, instant heat) — for wiring, far too crude here.
+- ❌ **TS100 / Pinecil USB-C smart irons** (₹3,000–5,000) — genuinely excellent, but they need a
+  good USB-C PD supply and cost triple. Overkill for this build.
+- ❌ **Fine conical tips.** Get the chisel.
+
+---
+
+# PART 10 — The two-cell product
+
+## What it looks like
+
+```
+   +--------------+   +--------------+   +--------------+
+   |  BRAIN POD   |   |    CELL 1    |   |    CELL 2    |
+   |              |   |              |   |              |
+   |   ESP32      |   |   . .        |   |   . .        |   <- 6 braille dots each
+   |   3 buttons  |   |   . .        |   |   . .        |
+   |   DC jack    |   |   . .        |   |   . .        |
+   |              |   |  motor+cam   |   |  motor+cam   |
+   +--------------+   +--------------+   +--------------+
+        68mm              68mm               68mm          = 204mm
+
+   Shows TWO characters at once. Magnets hold the bricks together.
+   Wires run between them through the existing wire-exit holes.
+```
+
+**Two cells = two characters.** With the nav buttons you scroll a longer word through them.
+
+## 🔑 The key decision: no expander, no I²C, no extra parts
+
+Earlier this document said multi-cell needs an MCP23017 expander. **That is true at ~4 cells.
+At two cells it is unnecessary** — the ESP32 has enough pins to drive both directly:
+
+```
+safe output pins available : 15
+two cells + nav need       : 11
+spare                      : 4
+```
+
+So **cell 2 costs you nothing but wire.** No new chips, no I²C, no addresses, no pull-ups.
+
+## Pin map — designed so adding cell 2 never touches cell 1
+
+| Signal | GPIO | Notes |
+|---|---|---|
+| **Cell 1** IN1 / IN2 / IN3 / IN4 | 18, 19, **23**, **27** | 21/22 freed — see the Part 3 conflict |
+| **Cell 1** hall AO | 34 | input-only, ADC1 |
+| **Cell 2** IN1 / IN2 / IN3 / IN4 | 13, 14, 26, 33 | all safe, no strapping pins |
+| **Cell 2** hall AO | 35 | input-only, ADC1 |
+| Nav Prev / Select / Next | 32, 25, 17 | `INPUT_PULLUP`, active-LOW |
+| *(reserved)* I²C SDA / SCL | 21, 22 | kept free for a 3rd+ cell later |
+
+⚠️ **Avoid GPIO 0, 2, 5, 12, 15** entirely — they are *strapping pins* read at boot. A motor
+coil wired to one can stop the ESP32 booting. That is why cell 1 moves off 21/22 to 23/27.
+
+## Power
+
+```
+5V 3A adapter
+   |
+   +--> ESP32        ~250mA peak (WiFi)
+   +--> Cell 1 motor ~250mA while energised
+   +--> Cell 2 motor ~250mA while energised
+                     ------
+                     ~750mA of 3000mA available   -> plenty
+```
+
+⚠️ **De-energise the motors when idle.** A stepper holding position draws full current and gets
+warm for no benefit. The firmware should release the coils after each move.
+
+---
+
+# PART 11 — Soldering, from zero
+
+Written assuming you have never made a reliable joint. Nothing here needs a steady surgeon's
+hand — soldering is about **heat and cleanliness**, not dexterity.
+
+## The one idea that makes soldering work
+
+> ### Heat the JOINT. Let the JOINT melt the solder.
+> **Never melt solder on the iron and carry it over.**
+
+Solder flows *toward heat* and sticks only to metal that is hot enough and chemically clean.
+Melting solder on the tip and dabbing it on gives you a **cold joint** — it looks attached,
+conducts badly, and fails weeks later. This is the mistake essentially every beginner makes.
+
+```
+   RIGHT                                WRONG
+   1. tip touches BOTH parts            1. melt blob on tip
+   2. wait ~2 seconds                   2. dab blob onto parts
+   3. feed solder INTO the joint        3. it sits there like grey chewing gum
+   4. it flows and wets instantly
+   5. remove solder, then iron
+```
+
+**A good joint is shiny and concave**, like a tiny volcano hugging the wire.
+**A bad joint is dull, round and blobby** — it beaded up instead of wetting.
+
+## Before your first joint
+
+1. **Set 330°C.** Wait for it to reach temperature.
+2. **Tin the tip:** melt a little solder onto it, wipe on brass wool or damp sponge. It should be
+   mirror-silver. A black tip transfers almost no heat — re-tin it.
+3. **Re-tin every few joints, and always before switching off.** A tip left bare oxidises and dies.
+
+## Job 1 — DC jack to header pins *(do this first, it's the easiest)*
+
+Your jack is an **inline pigtail**: a barrel socket with two bare wire ends. Bare wire does not
+sit in a breadboard.
+
+```
+   [barrel socket]===red wire=====> solder to pin 1 --+
+                  ===black wire===> solder to pin 2 --+--> 2-pin male header
+                                                            plugs into breadboard
+```
+
+1. Strip ~4mm of insulation from each wire.
+2. **Tin each wire:** heat it, feed solder in, until the strands turn silver and hold together.
+3. **Tin the two header pins** the same way.
+4. Hold the wire against the pin, touch the iron to both, and they fuse in about a second —
+   both surfaces are already tinned. This is called a **tack joint**.
+5. **Slide heat-shrink over each joint before you solder the second one.** Everyone forgets.
+   Shrink it with the side of the iron barrel or a lighter held well away.
+6. ⚠️ **Keep red and black clearly distinguishable.** Polarity is confirmed correct — do not
+   lose that information at the connector.
+
+**Nothing is powered while you do this.** Ideal first job.
+
+## Job 2 — ULN2003 wires flat *(only when you assemble cell 1)*
+
+**Why:** with Dupont jumpers plugged in vertically the board is ~20mm tall. The pocket is
+**16mm**. Soldered flat it is ~12mm.
+
+1. Cut the Dupont connector off six wires — IN1, IN2, IN3, IN4, `+`, `−`.
+2. Strip and tin each.
+3. Feed each wire through its hole from the **top**, bend it flat along the board, solder underneath.
+4. Snip the excess.
+5. ⚠️ **Check for bridges** — solder accidentally joining two adjacent pads. Hold it to the light.
+   A bridge between IN1 and IN2 means the motor will buzz and not turn. Fix with desoldering wick.
+
+## Job 3 — Hall sensor off its module *(cell assembly, later)*
+
+The blue module does not fit inside the machine. Only the little black 3-legged sensor does.
+
+1. Note **which leg is which** before removing anything. Photograph it.
+2. Heat each leg and lift with tweezers, or use desoldering wick to clear the pads.
+3. Solder three wires to the legs, **heat-shrink each individually** — they are ~1.27mm apart
+   and a short between VCC and GND is a dead sensor.
+4. **This is the fiddliest job in the project.** Leave it until you're comfortable.
+
+*(Where it physically mounts is a **CAD** question — flagged, not solved here.)*
+
+## Job 4 — Adding cell 2
+
+Cell 1 stays untouched. All you do is add wires.
+
+**The power spine** — one source feeding three places:
+
+```
+        jack red (+)                    jack black (-)
+             |                               |
+        +----+----+                     +----+----+
+        |    |    |                     |    |    |
+      ESP32 C1   C2                   ESP32 C1   C2
+```
+
+1. Strip a 10mm window in the middle of a wire (don't cut it) and wrap the branch wire through it.
+2. Solder, then heat-shrink. This is a **Western Union splice** and it is far stronger than
+   twisting.
+3. Alternative if you'd rather not splice: a **2-way screw terminal block**, ~₹20, no soldering.
+4. Run cell 2's four control wires to GPIO **13, 14, 26, 33** and its hall to **35**.
+
+**Firmware:** add a second `AccelStepper` object on the new pins. The braille encoding, homing
+and dashboard all work unchanged.
+
+## When it goes wrong
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| Solder balls up, won't stick | Joint not hot enough, or tip oxidised | Re-tin the tip; heat the joint longer |
+| Joint dull and lumpy | Cold joint — moved before it set | Reheat until it flows shiny |
+| Iron won't melt solder | Black oxidised tip | Re-tin. If it won't take solder, replace the tip |
+| Motor buzzes, doesn't turn | Solder bridge between IN pins, **or** two coil wires swapped | Inspect for bridges; try swapping IN2/IN3 |
+| Wire pulls straight out | Cold joint | Redo it. A good joint won't pull off. |
+| Everything worked, now nothing | Check the **common ground** first | It is almost always the ground |
+
+## Practice first
+
+**Do not let the ESP32 be your first ever joint.** Solder a few scrap wires together, cut them
+open, look at the cross-section. Twenty minutes of practice with ₹5 of wire saves a ₹350 board.
+
+---
+
+# PART 12 — Flagged for the CAD fork (do not fix here)
 
 1. **Hall module does not fit** the base plate — needs the bare TO-92 desoldered, and a pocket
    that can hold it.

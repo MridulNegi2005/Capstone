@@ -17,7 +17,7 @@ you own**:
 | Button pull-up resistors | ESP32 has **internal** pull-ups. Firmware uses `INPUT_PULLUP`. |
 | Hall sensor pull-up / comparator | **On the blue MH module already** (that's the second IC and the trimmer pot). |
 | Voltage regulator + decoupling caps | **On the ESP32 DevKit already** (AMS1117 + caps). |
-| Reverse-polarity protection | ⚠️ **NOT present.** This is why the multimeter matters — see below. |
+| Reverse-polarity protection | ⚠️ **NOT present** in the circuit. Mitigated by measurement: the owned jack was tested and is correct. Measure any new connector before trusting it. |
 
 **Total passives to buy for the demo: zero.**
 
@@ -34,20 +34,21 @@ you actually have the right thing.*
 | 3 | **ULN2003 driver board** | Small **blue** PCB, 4 red LEDs, white 5-pin socket, black 16-pin chip, IN1–IN4 + `+`/`-` pins | 1 | ✅ HAVE — **this is your motor driver, no chip to buy** |
 | 4 | **Hall sensor module (MH-Sensor-Series)** | Small **blue** PCB, tiny black 3-pin sensor on one edge, blue trimmer pot, 1–2 LEDs, pins marked **AO DO GND VCC** | 1 | ✅ HAVE (₹50) — ⚠️ **must use AO (analog)**, and the pocket won't fit it (see note) |
 | 5 | **5V / 3A power adapter** | Wall plug, barrel connector on the lead, "5V 3A" on the label | 1 | ✅ HAVE (₹160 w/ jack) |
-| 6 | **Inline female DC pigtail jack** | Black cylindrical barrel socket with red/black wires; no thread or nut | 1 | ✅ HAVE for testing; 🔴 polarity still requires a multimeter check |
+| 6 | **Inline female DC pigtail jack** | Black cylindrical barrel socket with red/black wires; no thread or nut | 1 | ✅ HAVE for testing; ✅ **polarity MEASURED CORRECT 2026-08-01** (red = +). No thread/nut, so mounting is a CAD problem. |
 | 6b | **5.5×2.1mm female panel-mount jack** | Threaded neck plus retaining nut, rated ≥5V/3A | 1 | ❌ SELECT/BUY for the final pod; record exact drawing/link before lid CAD |
 | 7 | **Connecting wire (2m)** | Loose hookup wire | 2m | ✅ HAVE (₹20) |
 | 8 | **Dupont jumper wires** | Ribbon of coloured wires with plastic pin housings | some | ✅ HAVE — need ~8× M-F and ~5× M-M |
 | 9 | **Neodymium magnets 8×1mm** | Small silver discs, strongly attract each other | 10 | ✅ HAVE (₹135) — for docking, **not** for cam homing |
 | 10 | **Tactile switches 6×6×5mm** | Tiny square black buttons, 4 legs | 3 | ✅ HAVE — not needed for the demo |
-| 11 | **Soldering iron** | — | 1 | ✅ HAVE |
+| 11 | **Digital multimeter** | Handheld meter with DC volts | 1 | ✅ HAVE (bought 2026-08-01) — jack polarity measured and CONFIRMED correct |
 
-### Two warnings about things you already have
+### Notes on things you already have
 
-**#6 — the pigtail polarity is still unverified.** There is no reverse-polarity protection
-anywhere in this circuit. If the centre pin reaches the wrong wire and you connect it as positive, the ESP32
-dies instantly and silently. **This is the single most likely way to lose ₹350 in this project.**
-Check it with a multimeter before anything is powered. Procedure is in `ASSEMBLY_BIBLE.md` Step 1.
+**#6 — ✅ polarity is VERIFIED CORRECT (2026-08-01).** Measured with the multimeter: **red = positive.**
+This retires the single largest risk to the ESP32. Mark the positive wire physically (nail polish,
+marker, tag) so the information cannot be lost at the bench.
+There is still no reverse-polarity protection in the circuit, so any *new* power connector must be
+measured the same way before it is trusted.
 
 **#4 — your whole Hall module does not fit the base plate.** v7.5 rebuilt an underside pocket for
 the *bare* TO-92 sensor only; the blue PCB is still far too large. M11b measures 1.6mm and the
@@ -63,13 +64,14 @@ module and run three wires back to it.
 
 | # | Component | Spec | Why | Est. ₹ |
 |---|---|---|---|---|
-| 1 | **Digital multimeter** | Any basic DMM with DC volts | 🔴 **MANDATORY.** Verifies barrel jack polarity before power-up. Also your only way to debug a dead rail. | ~500 |
+| 1 | **Soldering station, 60W, TEMPERATURE-CONTROLLED** | "936" type, ceramic heater, 2.4mm chisel tip | 🔴 **NOT OWNED.** ⚠️ Do NOT buy a plain ₹200 pencil iron — uncontrolled heat burns the flux off and makes soldering feel impossible. See `ELECTRONICS_PLAN.md` Part 9. | ~1,300 |
 | 2 | **Breadboard** | Half-size or full-size, 400–830 tie points | The whole Tier-0 demo is breadboard-based, and it's the safe way to bring up wiring before soldering. | ~100 |
 | 3 | **USB-C cable (DATA)** | Must carry data, not charge-only | To flash the ESP32. Charge-only cables look identical and fail silently. **Test the one you have first — you may already be fine.** | ~150 |
 | 4 | **Solder wire** | **0.8mm, 60/40 rosin core** | For soldering wires flat to the ULN2003. Not plumbing solder. | ~150 |
 | 5 | **Wire stripper / cutter** | Small, for 22–26 AWG | Prepping wire ends. | ~200 |
 
-**Demo subtotal: ~₹1,100** (or ~₹950 if your existing USB-C cable does data)
+**Demo subtotal: ~₹1,900** (or ~₹1,750 if your existing USB-C cable does data).
+The soldering station is the bulk of it and is the one genuinely missing tool.
 
 ## 2B. For the mechanism (buy when the resin parts arrive)
 
@@ -90,6 +92,8 @@ module and run three wires back to it.
 | Component | Why | Est. ₹ |
 |---|---|---|
 | Flux paste | Makes soldering to ULN2003 pins much easier for a beginner | ~100 |
+| Helping-hands / third hand | Not really optional — you cannot hold iron, solder and two wires with two hands | ~200 |
+| Brass wool tip cleaner | Better than the wet sponge; keeps the tip alive | ~100 |
 | Heat-shrink tubing | Insulating soldered joints | ~80 |
 | Tweezers | Handling 2mm springs and 1mm linkages — genuinely hard without | ~80 |
 | Desoldering pump/wick | Fixing bridges; also for lifting the TO-92 off the hall module | ~120 |
@@ -102,13 +106,14 @@ module and run three wires back to it.
 
 | | ₹ |
 |---|---|
-| Already spent | 935 |
-| Demo essentials (2A) | ~1,100 |
+| Already spent (incl. multimeter) | ~1,435 |
+| Demo essentials (2A) | ~1,900 |
 | Mechanism (2B) | ~1,430 |
 | Optional (2C) | ~560 |
-| **Everything** | **~4,025 spent, of ₹15,000** |
+| **Everything** | **~5,325 of ₹15,000** |
 
-**If you buy only 2A (~₹1,100) you can run the full presentation demo.**
+**The breadboard demo needs NO soldering at all** — only the breadboard and a data cable
+(~₹250). The soldering station is required to *assemble* a cell, not to demonstrate one.
 
 ---
 
