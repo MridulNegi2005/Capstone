@@ -245,9 +245,10 @@ function gotoIndex(i) {
   idx = ((i % cells.length) + cells.length) % cells.length;
   const { ch, cell } = cells[idx];
   const pos = cellToPos(cell);
-  targetDeg = camAngleForState(pos);
-  // always advance the same way a real indexing cam would, never shortest-path
-  while (targetDeg > camDeg) targetDeg -= 360;
+  // shortest path: wrap the wanted angle to the nearest equivalent of camDeg, so
+  // the cam turns whichever way is closer. 63 -> 0 is 5.6deg back, not 354.4 forward.
+  const want = camAngleForState(pos);
+  targetDeg = camDeg + ((((want - camDeg) % 360) + 540) % 360) - 180;
   updateReadout(ch, cell, pos);
 }
 
