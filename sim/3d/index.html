@@ -72,7 +72,8 @@
     text-transform:uppercase;margin-bottom:6px}
   input[type=text]{width:100%;background:#0e1020;border:1px solid var(--line);
     color:var(--ink);padding:9px 11px;border-radius:8px;font-size:14px;
-    letter-spacing:.16em;text-transform:uppercase;font-family:ui-monospace,monospace}
+    letter-spacing:.16em;font-family:ui-monospace,monospace}
+  /* no text-transform here: case is meaningful, it decides the capital sign */
   input[type=text]:focus{outline:none;border-color:var(--accent)}
   .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
   button{background:var(--panel2);border:1px solid var(--line);color:var(--ink);
