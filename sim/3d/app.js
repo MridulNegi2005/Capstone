@@ -34,6 +34,9 @@ const SIGN = {
   capital: [6],         // the NEXT letter is upper case. Braille is lower case by default.
   letter:  [5,6],       // cancels number mode so a letter can follow a digit
 };
+// There is deliberately NO "lower case" sign: lower case is the default state, and a
+// sign marking the absence of a change would cost a cell for nothing. Capitals are
+// what need announcing — once per letter, or twice to capitalise a whole word.
 // digits reuse a-j: 1->a ... 9->i, 0->j
 const DIGIT = { '1':'a','2':'b','3':'c','4':'d','5':'e','6':'f','7':'g','8':'h','9':'i','0':'j' };
 const PUNCT = {
@@ -238,9 +241,28 @@ function currentCells() {
   const out = [];
   let numeric = false;
   const push = (glyph, cell, kind, note) => out.push({ ch: glyph, cell, kind, note });
+  const src = word || ' ';
+  const isLetter = c => c && LETTERS[c.toLowerCase()] && c !== ' ';
 
-  for (const raw of (word || ' ')) {
+  for (let i = 0; i < src.length; i++) {
+    const raw = src[i];
     const ch = raw.toLowerCase();
+
+    // ALL-CAPS run of 2+ letters: one capital WORD sign beats one sign per letter.
+    // Only when the whole run is upper case, so no terminator is ever needed.
+    if (isLetter(raw) && raw !== ch) {
+      let j = i;
+      while (j < src.length && isLetter(src[j])) j++;
+      const run = src.slice(i, j);
+      if (run.length > 1 && run === run.toUpperCase()) {
+        if (numeric) { push('~', SIGN.letter, 'sign', 'ends the number'); numeric = false; }
+        push('^^', SIGN.capital, 'sign', 'whole word is capital');
+        push('^^', SIGN.capital, 'sign', 'second half of the pair');
+        for (const c of run) push(c, LETTERS[c.toLowerCase()], 'letter', 'upper case');
+        i = j - 1;
+        continue;
+      }
+    }
 
     if (raw === ' ') {                       // space always drops numeric mode
       numeric = false;
@@ -265,7 +287,7 @@ function currentCells() {
 }
 
 const KIND_LABEL = {
-  sign:   { '#': 'NUMBER SIGN', '^': 'CAPITAL SIGN', '~': 'LETTER SIGN' },
+  sign:   { '#': 'NUMBER SIGN', '^': 'CAPITAL SIGN', '^^': 'CAPITAL WORD', '~': 'LETTER SIGN' },
   digit:  'NUMBER', letter: 'LETTER', punct: 'PUNCTUATION', space: 'SPACE',
 };
 
@@ -275,7 +297,8 @@ function updateReadout(item, pos) {
   const isSign = kind === 'sign';
   const isSpace = kind === 'space';
 
-  glyph.textContent = isSpace ? 'SPACE' : isSign ? { '#': '#', '^': '⇧', '~': '↩' }[ch] : ch;
+  glyph.textContent = isSpace ? 'SPACE'
+    : isSign ? { '#': '#', '^': '⇧', '^^': '⇪', '~': '↩' }[ch] : ch;
   glyph.classList.toggle('space', isSpace);
   glyph.classList.toggle('sign', isSign);
 
