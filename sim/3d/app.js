@@ -298,16 +298,18 @@ function tick(now) {
   const dt = Math.min((now - last) / 1000, 0.05);
   last = now;
 
-  if (running) {
-    const diff = targetDeg - camDeg;
-    if (Math.abs(diff) > 0.05) {
-      camDeg += Math.sign(diff) * Math.min(Math.abs(diff), 150 * speed * dt);
-      dwell = 0;
-    } else {
-      camDeg = targetDeg;
+  // the cam always drives toward targetDeg, running or not — otherwise Step sets a
+  // new target and nothing turns. Only the auto-advance is gated on `running`.
+  const diff = targetDeg - camDeg;
+  if (Math.abs(diff) > 0.05) {
+    camDeg += Math.sign(diff) * Math.min(Math.abs(diff), 150 * speed * dt);
+    dwell = 0;
+  } else {
+    camDeg = targetDeg;
+    if (running) {
       dwell += dt;
       if (dwell > 0.85 / speed) { dwell = 0; gotoIndex(idx + 1); }
-    }
+    } else dwell = 0;
   }
 
   updateMechanism(camDeg);
