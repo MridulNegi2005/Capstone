@@ -33,7 +33,7 @@
 | ULN2003 driver module | ✅ HAVE IT | Fits the 16mm pocket **only** with wires soldered flat (~12mm). With vertical Dupont headers it is ~20mm and will NOT fit. |
 | Hall sensor — MH-Sensor-Series (blue module) | ⚠️ **HAVE BUT WRONG FORM FACTOR** | The whole blue PCB will not fit. v7.5 provides a **4.5 × 3.5 × 1.6mm underside pocket** for its bare TO-92 sensor. M11b is exactly 1.6mm, so dry-fit before gluing. Desolder the sensor and run three wires back; use analog AO behavior for homing. |
 | Neodymium magnets 8×1mm (docking) | ✅ HAVE IT | 10 purchased. 4 needed per cell (2 per ±X face). |
-| Homing magnet **3×2mm** (for the cam) | ❌ NEED TO BUY | 1 per cell. An 8×1mm will **not** fit the cam's 3.2mm pocket. Search "3x2mm neodymium magnet" — ~₹120 for 10–20 pcs. |
+| Homing magnet **3×1mm** (for the cam) | ❌ NEED TO BUY | 1 per cell (buy 10). 🔴 **1mm thick, NOT 2mm** — changed in v7.5: the cam disc floor is only 2mm, so a 2mm-thick magnet's pocket cut clean through it across three cam tracks. An 8×1mm docking magnet is also too wide. Search "3x1mm neodymium magnet" — ~₹120 for 10–20 pcs. |
 | Tactile switches 6×6×5mm | ✅ HAVE IT | 3 needed (pod nav buttons). Not required for a Tier-0 demo. |
 | Female header strips 1×15 | ❌ NEED TO BUY | 2 for the pod DevKit mount. ~₹40. Not needed for a breadboard demo. |
 | USB-C cable (data, not charge-only) | ❌ NEED TO BUY / verify | Must carry **data**. Many charge-only cables look identical and silently fail to flash. ~₹150. |

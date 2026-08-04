@@ -47,10 +47,12 @@ of each spring. Must be squishy sponge/upholstery/packing foam — **NOT stiff E
 foam**, which is roughly 20x too stiff and risks stalling the motor. Free from packaging.
 The printed parts are identical either way, so this can be tested without a reprint.
 
-### 2. Homing magnets 3×2mm ×1 per cell — small but specific
+### 2. Homing magnets 3×1mm ×1 per cell — small but specific
 Your 8×1mm magnets are for DOCKING. The cam's homing pocket (`braille_cam.scad`) needs a
-**3mm dia × 2mm thick** disc — an 8mm one won't fit the 2mm-thick cam base.
-- Search: **"3x2mm neodymium magnet"** on robu.in / Amazon.in — ₹100–200 for 10–20 pcs.
+**3mm dia × 1mm thick** disc. 🔴 **1mm, NOT 2mm** (changed in v7.5) — the cam disc floor is
+only 2mm, so a 2mm-thick magnet's pocket cuts clean through it across three cam tracks. An
+8mm-wide docking magnet also won't fit.
+- Search: **"3x1mm neodymium magnet"** on robu.in / Amazon.in — ₹100–200 for 10–20 pcs.
 - Glue flush into the cam underside pocket at r=17.35 (the 90° position).
 
 ### 3. ~~Bearing balls 2mm~~ — NO LONGER NEEDED (v7.1)
