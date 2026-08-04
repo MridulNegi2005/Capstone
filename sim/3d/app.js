@@ -27,6 +27,20 @@ const LETTERS = {
   ' ':[],
 };
 
+// Indicators are CELLS IN THEIR OWN RIGHT — the mechanism displays them exactly
+// like a letter, one full cam index each. "A1" is three cells, not two.
+const SIGN = {
+  number:  [3,4,5,6],   // digits follow, until a space or a letter sign
+  capital: [6],         // the NEXT letter is upper case. Braille is lower case by default.
+  letter:  [5,6],       // cancels number mode so a letter can follow a digit
+};
+// digits reuse a-j: 1->a ... 9->i, 0->j
+const DIGIT = { '1':'a','2':'b','3':'c','4':'d','5':'e','6':'f','7':'g','8':'h','9':'i','0':'j' };
+const PUNCT = {
+  ',':[2], ';':[2,3], ':':[2,5], '.':[2,5,6], '?':[2,3,6],
+  '!':[2,3,5], "'":[3], '-':[3,6],
+};
+
 let P, CAM, STACK, D2B, STATES, SLICE, RAMP, PIN_LIFT, CAM_FLAT, Z_SIGN, STEPS_PER_POS;
 
 // ---------------------------------------------------------------- cam maths
@@ -67,7 +81,7 @@ const cellToPos = cell => cell.reduce((v, d) => v | (1 << D2B[d]), 0);
 const XRAY_PARTS = ['outer_box', 'top_plate', 'dot_insert'];
 let renderer, scene, camera, controls, parts = {}, linkages = [];
 let running = true, xray = false, speed = 1;
-let word = 'BRAILLE', idx = 0, camDeg = 0, targetDeg = 0, dwell = 0;
+let word = 'Braille 101', idx = 0, camDeg = 0, targetDeg = 0, dwell = 0;
 let homeCam = null, homeTarget = null;
 
 function buildScene() {
@@ -218,20 +232,61 @@ function setXray(on) {
 // ---------------------------------------------------------------- UI
 const $ = id => document.getElementById(id);
 
+// Expand a typed string into the cells a real display would show. Indicators cost
+// a cell each, so "A1" -> capital, a, number, a  =  four cam positions.
 function currentCells() {
-  const w = (word || ' ').toLowerCase();
-  return [...w].map(ch => ({ ch, cell: LETTERS[ch] ?? [] }));
+  const out = [];
+  let numeric = false;
+  const push = (glyph, cell, kind, note) => out.push({ ch: glyph, cell, kind, note });
+
+  for (const raw of (word || ' ')) {
+    const ch = raw.toLowerCase();
+
+    if (raw === ' ') {                       // space always drops numeric mode
+      numeric = false;
+      push(' ', [], 'space', 'word break');
+    } else if (DIGIT[raw]) {
+      if (!numeric) { push('#', SIGN.number, 'sign', 'digits follow'); numeric = true; }
+      push(raw, LETTERS[DIGIT[raw]], 'digit', 'digit ' + raw + ' = letter ' + DIGIT[raw].toUpperCase());
+    } else if (LETTERS[ch] && ch !== ' ') {
+      if (numeric) { push('~', SIGN.letter, 'sign', 'ends the number'); numeric = false; }
+      if (raw !== ch) push('^', SIGN.capital, 'sign', 'next letter is capital');
+      push(raw, LETTERS[ch], 'letter', raw === ch ? 'lower case' : 'upper case');
+    } else if (PUNCT[raw]) {
+      // a . or , inside a number stays part of it (2.5, 1,000)
+      if (numeric && raw !== '.' && raw !== ',') numeric = false;
+      push(raw, PUNCT[raw], 'punct', 'punctuation');
+    } else {
+      numeric = false;
+      push(raw, [], 'space', 'not in this chart');
+    }
+  }
+  return out.length ? out : [{ ch: ' ', cell: [], kind: 'space', note: 'word break' }];
 }
 
-function updateReadout(ch, cell, pos) {
+const KIND_LABEL = {
+  sign:   { '#': 'NUMBER SIGN', '^': 'CAPITAL SIGN', '~': 'LETTER SIGN' },
+  digit:  'NUMBER', letter: 'LETTER', punct: 'PUNCTUATION', space: 'SPACE',
+};
+
+function updateReadout(item, pos) {
+  const { ch, cell, kind, note } = item;
   const glyph = $('glyph');
-  const isSpace = ch === ' ';
-  glyph.textContent = isSpace ? 'SPACE' : ch.toUpperCase();
+  const isSign = kind === 'sign';
+  const isSpace = kind === 'space';
+
+  glyph.textContent = isSpace ? 'SPACE' : isSign ? { '#': '#', '^': '⇧', '~': '↩' }[ch] : ch;
   glyph.classList.toggle('space', isSpace);
+  glyph.classList.toggle('sign', isSign);
+
+  const label = isSign ? KIND_LABEL.sign[ch] : KIND_LABEL[kind];
+  $('cellmeta').textContent = label;
+  $('cellmeta').classList.toggle('sign', isSign);
+  $('cellnote').textContent = note || '';
 
   for (let d = 1; d <= 6; d++) $('d' + d).classList.toggle('up', cell.includes(d));
 
-  $('e_char').textContent = isSpace ? '(space)' : ch.toUpperCase();
+  $('e_char').textContent = isSpace ? '(space)' : isSign ? label.toLowerCase() : ch;
   $('e_dots').textContent = cell.length ? cell.join(' · ') : 'none';
   $('e_pos').textContent = pos + ' / 63';
   $('e_step').textContent = (pos * STEPS_PER_POS + STEPS_PER_POS / 2) + ' / 4096';
@@ -243,18 +298,18 @@ function gotoIndex(i) {
   const cells = currentCells();
   if (!cells.length) return;
   idx = ((i % cells.length) + cells.length) % cells.length;
-  const { ch, cell } = cells[idx];
-  const pos = cellToPos(cell);
+  const item = cells[idx];
+  const pos = cellToPos(item.cell);
   // shortest path: wrap the wanted angle to the nearest equivalent of camDeg, so
   // the cam turns whichever way is closer. 63 -> 0 is 5.6deg back, not 354.4 forward.
   const want = camAngleForState(pos);
   targetDeg = camDeg + ((((want - camDeg) % 360) + 540) % 360) - 180;
-  updateReadout(ch, cell, pos);
+  updateReadout(item, pos);
 }
 
 function wireUI() {
   $('word').addEventListener('input', e => {
-    word = e.target.value.toUpperCase() || ' ';
+    word = e.target.value || ' ';   // case is meaningful now: it drives the capital sign
     idx = 0; gotoIndex(0);
   });
   $('btnXray').addEventListener('click', () => setXray(!xray));
