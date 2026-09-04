@@ -497,6 +497,56 @@ const MECH_INFO = [
 ];
 const SPOT_MAX = 190;             // px: beyond this the dot is at its dimmest
 
+// A 68mm dimension across the front of the first brick. Not LineBasicMaterial:
+// `linewidth` is ignored on every platform but Firefox, so a Line renders as a
+// 1px hairline at any distance and reads as a rendering bug. Thin cylinders
+// scale correctly and catch the light like a drawn leader.
+//
+// The LABEL is an HTML element positioned by the same projection that places
+// the hotspots, so it stays crisp mono text with tabular figures instead of a
+// rasterised font texture that goes soft the moment you zoom.
+let dimGroup = null;
+const DIM_Y = -44, DIM_Z = 1.5, DIM_HALF = 34;      // outer_box is 68 wide
+
+function buildDimension() {
+  const g = new THREE.Group();
+  const mat = new THREE.MeshBasicMaterial({ color: cssColor('--ink-3'), fog: false });
+  // CylinderGeometry's axis is +Y, so 'y' needs no rotation.
+  const bar = (len, pos, axis) => {
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, len, 6), mat);
+    if (axis === 'x') m.rotation.z = Math.PI / 2;
+    if (axis === 'z') m.rotation.x = Math.PI / 2;
+    m.position.set(...pos);
+    return m;
+  };
+  g.add(bar(DIM_HALF * 2, [0, DIM_Y, DIM_Z], 'x'));            // the run
+  for (const sx of [-1, 1]) {
+    // extension lines run from the corner being measured out to the run, and
+    // the end ticks stand UP off it. Both along Y drew a rectangle instead of
+    // a dimension.
+    g.add(bar(12, [sx * DIM_HALF, DIM_Y + 6, DIM_Z], 'y'));
+    g.add(bar(5, [sx * DIM_HALF, DIM_Y, DIM_Z + 2.5], 'z'));
+  }
+  g.renderOrder = 2;
+  return g;
+}
+
+function updateDimension() {
+  if (!dimGroup) return;
+  // close in it is clutter, far out it is unreadable; show it in between
+  const d = camera.position.distanceTo(controls.target);
+  const on = d > 95 && d < 420 && !$('info').classList.contains('on');
+  dimGroup.visible = on;
+  const el = $('dim');
+  if (!on) { el.classList.remove('on'); return; }
+  const v = new THREE.Vector3(0, DIM_Y - 5, DIM_Z).project(camera);
+  if (v.z > 1) { el.classList.remove('on'); return; }
+  el.classList.add('on');
+  el.textContent = (DIM_HALF * 2).toFixed(1) + ' mm';
+  el.style.left = (SB.left + (v.x * 0.5 + 0.5) * SB.width) + 'px';
+  el.style.top = (SB.top + (-v.y * 0.5 + 0.5) * SB.height) + 'px';
+}
+
 function buildHotspots() {
   const layer = $('spots');
   for (const [name, title, body] of [...MECH_INFO, ...PART_INFO]) {
@@ -543,11 +593,62 @@ const ptr = { x: -1e4, y: -1e4 };
 // cached canvas box; refreshed by resizeStage rather than measured every frame
 let SB = { left: 0, top: 0, width: 1, height: 1 };
 
+// A dot drawn over the wall that hides its own part is worse than no dot: you
+// click something glowing and get a description of a thing you cannot see.
+// Raycast anchor -> camera and hide the dot when anything OPAQUE is in the way.
+//
+// Two things make this cheap enough to keep: it runs at 8Hz rather than per
+// frame, and it tests against a small list of shells rather than the ~600
+// meshes in the scene. Transparency is the other half -- in X-ray the walls
+// stop occluding, which is exactly what a viewer expects.
+const OCCLUDE_HZ = 8;
+let occludeAt = 0;
+const rc = new THREE.Raycaster();
+const rcDir = new THREE.Vector3();
+
+function occluders() {
+  const list = [];
+  for (const u of units) list.push(...u.xray);
+  return list.concat(podShells).filter(o => o && o.visible);
+}
+
+function refreshOcclusion() {
+  const blockers = occluders().filter(o => {
+    let solid = false;
+    o.traverse(c => { if (c.isMesh && (!c.material.transparent || c.material.opacity > 0.5)) solid = true; });
+    return solid;
+  });
+  for (const s of SPOTS) {
+    if (!blockers.length) { s.hidden = false; continue; }
+    rcDir.copy(s.anchor).sub(camera.position);
+    const dist = rcDir.length();
+    rc.set(camera.position, rcDir.normalize());
+    rc.far = dist - 2.0;                    // stop short of the anchor itself
+    const hit = rc.intersectObjects(blockers, true)
+      .find(h => !isPartOf(h.object, s.o));
+    s.hidden = !!hit;
+  }
+}
+
+function isPartOf(mesh, root) {
+  for (let p = mesh; p; p = p.parent) if (p === root) return true;
+  return false;
+}
+
 function updateHotspots() {
   if (!SPOTS.length) return;
+  const now = performance.now();
+  if (now - occludeAt > 1000 / OCCLUDE_HZ) { occludeAt = now; refreshOcclusion(); }
   const v = new THREE.Vector3();
   for (const s of SPOTS) {
-    if (!shown(s.o)) { s.el.style.display = 'none'; continue; }
+    if (!shown(s.o) || s.hidden) {
+      s.el.style.display = 'none';
+      s.el.setAttribute('aria-hidden', 'true');
+      s.el.tabIndex = -1;
+      continue;
+    }
+    s.el.removeAttribute('aria-hidden');
+    s.el.tabIndex = 0;
     v.copy(s.anchor).project(camera);
     if (v.z > 1) { s.el.style.display = 'none'; continue; }   // behind the camera
     // The canvas is NOT the window: the rail insets it on desktop and the sheet
@@ -928,7 +1029,10 @@ function wireUI() {
     // never steal keys from the text field, and never fight a browser shortcut
     if (e.target.matches('input,textarea,summary') ||
         e.metaKey || e.ctrlKey || e.altKey) {
-      if (e.key === 'Escape') closeInfo();
+      if (e.key === 'Escape') {
+        if ($('help').classList.contains('on')) showHelp(false);
+        else closeInfo();
+      }
       return;
     }
     switch (e.key) {
@@ -939,7 +1043,11 @@ function wireUI() {
       case 'e': case 'E': setElectronics(!elec); break;
       case 'r': case 'R': resetView(); break;
       case 'c': case 'C': $('railToggle').click(); break;
-      case 'Escape':      closeInfo(); break;
+      case 'Escape':
+        if ($('help').classList.contains('on')) showHelp(false);
+        else closeInfo();
+        break;
+      case '?': showHelp(!$('help').classList.contains('on')); break;
     }
   });
 
@@ -954,6 +1062,22 @@ function wireUI() {
       }
     });
   $('info').querySelector('.x').addEventListener('click', closeInfo);
+
+  // The "what is this" card. Shown once per visitor, then it lives behind the ?
+  // so a demo is never interrupted by it. localStorage is wrapped because a
+  // private window or blocked site-data makes the accessor itself throw.
+  const help = $('help'), helpBtn = $('helpBtn');
+  const showHelp = on => {
+    help.classList.toggle('on', on);
+    helpBtn.setAttribute('aria-expanded', String(on));
+    if (on) help.focus();
+    try { if (!on) localStorage.setItem('braillix.seen', '1'); } catch (e) { /* fine */ }
+  };
+  helpBtn.addEventListener('click', () => showHelp(!help.classList.contains('on')));
+  help.querySelector('.x').addEventListener('click', () => showHelp(false));
+  let seen = true;
+  try { seen = localStorage.getItem('braillix.seen') === '1'; } catch (e) { seen = false; }
+  if (!seen) showHelp(true);
 
   $('btnAddCell').addEventListener('click', addUnit);
   $('btnDelCell').addEventListener('click', removeUnit);
@@ -1085,6 +1209,7 @@ function tick(now) {
   stepXray(dt);
   updateMechanism();
   updateHotspots();
+  updateDimension();
 
   controls.update();
   renderer.render(scene, camera);
@@ -1148,6 +1273,8 @@ async function main() {
 
   await buildElectronics(gltf.scene);
   addUnit();                       // unit 0 wraps the template already in the scene
+  dimGroup = buildDimension();
+  scene.add(dimGroup);
 
   wireUI();
   syncRun();
@@ -1179,6 +1306,12 @@ async function main() {
     },
     lift: (d, deg = camDeg) => linkageLift(d, deg),
     units: () => units.length,
+    cam: () => camera,
+    occl: () => ({
+      blockers: (() => { const l=[]; for(const u of units) l.push(...u.xray);
+        return l.concat(podShells).filter(o=>o&&o.visible).map(o=>o.name); })(),
+      spots: SPOTS.map(s => ({ t: s.title.slice(0, 20), hidden: !!s.hidden })),
+    }),
     unitState: () => units.map((u, k) => ({
       k, deg: +u.deg.toFixed(2), target: +u.target.toFixed(2),
       pos: u.pos, moving: !!u.move,

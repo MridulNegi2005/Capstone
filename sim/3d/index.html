@@ -333,6 +333,37 @@
     letter-spacing:.08em;text-transform:uppercase}
   #tabs button[aria-selected=true]{background:var(--bg-3);color:var(--acc)}
 
+
+  /* ---- the "what is this" card ----
+     The page could explain HOW for an hour and never once say WHY. Six words of
+     copy was the entire pitch. Shown once per visitor, then parked behind the ?
+     so it never gets in the way of a demo. */
+  #help{position:fixed;z-index:12;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:min(520px,calc(100vw - 32px));max-height:calc(100dvh - 64px);overflow-y:auto;
+    background:var(--bg-2);border:1px solid var(--line-2);border-radius:var(--r2);
+    box-shadow:var(--shadow-pop);padding:var(--s5);display:none}
+  #help.on{display:block}
+  #help h2{font-size:var(--t18);font-family:var(--f-mono);letter-spacing:.12em;
+    font-weight:600;margin-bottom:var(--s2)}
+  #help h2 span{color:var(--acc)}
+  #help p{font-size:var(--t12);line-height:1.7;color:var(--ink-2);margin-bottom:var(--s3)}
+  #help dl{display:grid;grid-template-columns:auto 1fr;gap:var(--s2) var(--s4);
+    font-family:var(--f-mono);font-size:var(--t11);margin-bottom:var(--s4);
+    font-variant-numeric:tabular-nums}
+  #help dt{color:var(--ink-3);white-space:nowrap}
+  #help dd{color:var(--ink-1)}
+  #help dd b{color:var(--acc);font-weight:600}
+  #help .x{position:absolute;top:var(--s2);right:var(--s2);width:28px;height:28px;
+    border:0;background:transparent;color:var(--ink-3);font-size:var(--t14);
+    cursor:pointer;padding:0}
+  #help .x:hover{color:var(--ink-1);background:var(--bg-3)}
+  #helpBtn{position:fixed;z-index:11;top:var(--s4);right:var(--s4);
+    width:28px;height:28px;min-width:0;padding:0;border-radius:50%;
+    font-family:var(--f-mono);font-size:var(--t12)}
+  /* under the readout, which owns the top-right corner */
+  #cell{margin-right:36px}
+  @media (max-width:840px){ #cell{margin-right:0} #helpBtn{top:var(--s3);right:var(--s3)} }
+
   /* ============================================================ MOBILE
      The old breakpoint deleted #decode, #cellnote, the tagline and the hint.
      The rail becomes a bottom sheet with tabs instead, so nothing is lost. */
@@ -494,6 +525,34 @@
 
 <!-- the accessible restatement of the readout above; the dots are decorative -->
 <div id="live" class="sr" role="status" aria-live="polite" aria-atomic="true"></div>
+
+
+<button id="helpBtn" aria-label="What is Braillix?" aria-controls="help"
+        aria-expanded="false">?</button>
+
+<div id="help" role="dialog" aria-labelledby="helpTitle" aria-modal="false" tabindex="-1">
+  <button class="x" aria-label="Close">&times;</button>
+  <h2 id="helpTitle">BRAIL<span>LIX</span></h2>
+  <p>A <b>refreshable braille cell</b>: six dots that rise and fall under a fingertip,
+     so a blind reader can read changing text from a screen instead of a printed page.
+     Commercial displays do this with one piezo actuator per dot &mdash; which is why a
+     40-cell display costs several lakh rupees and almost nobody owns one.</p>
+  <p>This cell replaces the actuators with <b>one motor and one shaped disc</b>. The disc
+     carries six concentric tracks and 64 angular positions; turning it to an angle
+     selects which dots stand up. One moving part instead of six, and the cost falls with
+     it.</p>
+  <dl>
+    <dt>cell size</dt><dd>68 &times; 68 &times; 46.5 mm</dd>
+    <dt>dot pitch</dt><dd>2.6 mm square, 0.5 mm rise</dd>
+    <dt>positions</dt><dd>64 &mdash; every pattern six dots can make</dd>
+    <dt>actuators</dt><dd><b>1</b> stepper, vs 6 piezos per cell</dd>
+  </dl>
+  <p>What you are looking at is <b>one cell</b>. A real display is a row of them, and
+     that is the point of the dock: only power and an I&sup2;C bus cross the joint, so
+     adding a cell costs no extra wiring. Press <b>+</b> under CELLS to add one.</p>
+  <p style="color:var(--ink-3);margin:0">Turn on <b>X-Ray</b> to see the mechanism,
+     <b>Electronics</b> for the boards and loom, and hover the model for callouts.</p>
+</div>
 
 <div id="spots" role="group" aria-label="Part callouts"></div>
 <div id="dim"></div>
