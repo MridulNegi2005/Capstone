@@ -567,23 +567,144 @@ function buildHotspots() {
 }
 
 let openSpot = null;
+// ---------------------------------------------------------------- focus mode
+// Clicking a callout isolates that part: everything else fades back and the
+// camera flies to frame it. It is the difference between "here is a label on a
+// dense machine" and "here is the part, on its own, at a readable size".
+//
+// THE TRAP IS SHARED MATERIALS. Object3D.clone() shares materials by reference
+// so a second cell costs nothing, and electronics.js memoises one blackPlas for
+// every black plastic part in the scene. So dimming "everything that is not
+// this" by walking materials would dim the focused part too, and isolating the
+// ULN2003 would leave every unrelated black component bright.
+//
+// So: collect the materials the focused part uses; any OTHER mesh sharing one
+// gets a private clone before it is dimmed. Everything is recorded and put back
+// on close, then the X-ray state is reasserted over the top, because both write
+// the same opacity fields.
+// Everything that is not the part gets HIDDEN, except the enclosure shells,
+// which stay as a faint ghost so the part keeps its context.
+//
+// Dimming everything instead was the first attempt and it does not work: alpha
+// accumulates, so 241 surfaces at 0.06 stacked ten deep read as solid again.
+// Hiding is also cheaper and sidesteps the shared-material problem entirely --
+// visibility is per mesh, not per material, and electronics.js memoises one
+// blackPlas for every black part in the scene.
+// Only the OUTER silhouette is ghosted, and faintly. Ghosting all four
+// XRAY_PARTS buried the part: outer_box is a single mesh but a ray through it
+// crosses the wall, the floor, the standoffs and the motor cup, so even 0.05
+// stacks several layers deep and reads as solid dark. One shell, one layer.
+const GHOST_OPACITY = 0.055;
+const GHOST_NAMES = ['outer_box', 'pod_shell'];
+let focusState = null;
+let camTween = null;
+
+function focusOn(o) {
+  focusOff(true);
+  const keep = new Set();
+  o.traverse(c => { if (c.isMesh) keep.add(c); });
+
+  // one shell stays, faintly, so the part is somewhere rather than nowhere
+  const ghostRoots = [];
+  for (const u of units)
+    for (const g of u.xray) if (GHOST_NAMES.includes(g.name)) ghostRoots.push(g);
+  ghostRoots.push(...podShells.filter(o => GHOST_NAMES.includes(o.name)));
+  const ghost = new Set();
+  for (const g of ghostRoots)
+    if (g) g.traverse(c => { if (c.isMesh && !keep.has(c)) ghost.add(c); });
+
+  const hidden = [], mats = new Map();
+  scene.traverse(c => {
+    if (!c.isMesh || keep.has(c)) return;
+    if (ghost.has(c)) {
+      const m = c.material;
+      if (!mats.has(m)) {
+        mats.set(m, { transparent: m.transparent, opacity: m.opacity,
+                      depthWrite: m.depthWrite });
+        m.transparent = true;
+        m.opacity = GHOST_OPACITY;
+        m.depthWrite = false;
+      }
+      return;
+    }
+    if (c.visible) { hidden.push(c); c.visible = false; }
+  });
+
+  focusState = { hidden, mats, root: o };
+  flyTo(o);
+}
+
+function focusOff(silent) {
+  if (!focusState) return;
+  focusState.hidden.forEach(c => { c.visible = true; });
+  for (const [m, v] of focusState.mats) Object.assign(m, v);
+  focusState = null;
+  // X-ray writes the same fields, so reassert it rather than trusting the
+  // values just restored
+  applyXray(xrayT);
+  if (!silent) flyHome();
+}
+
+// Frame one object the way frameRow frames the whole row: bounding sphere
+// against the tighter FOV axis, so it works in portrait too.
+function flyTo(o) {
+  const sph = new THREE.Box3().setFromObject(o).getBoundingSphere(new THREE.Sphere());
+  const vFov = THREE.MathUtils.degToRad(camera.fov);
+  const hFov = 2 * Math.atan(Math.tan(vFov / 2) * camera.aspect);
+  const dist = Math.max(26, sph.radius / Math.sin(Math.min(vFov, hFov) / 2) * 2.1);
+  const dir = camera.position.clone().sub(controls.target).normalize();
+  startTween(sph.center.clone().addScaledVector(dir, dist), sph.center.clone());
+}
+
+function flyHome() { startTween(homeCam.clone(), homeTarget.clone()); }
+
+function startTween(pos, target) {
+  camTween = {
+    p0: camera.position.clone(), p1: pos,
+    t0: controls.target.clone(), t1: target,
+    t: 0, T: 0.55,
+  };
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) camTween.T = 0.001;
+}
+
+function stepTween(dt) {
+  if (!camTween) return;
+  camTween.t = Math.min(camTween.T, camTween.t + dt);
+  const k = camTween.t / camTween.T;
+  const e = k * k * (3 - 2 * k);                 // smoothstep
+  camera.position.lerpVectors(camTween.p0, camTween.p1, e);
+  controls.target.lerpVectors(camTween.t0, camTween.t1, e);
+  if (camTween.t >= camTween.T) camTween = null;
+}
+
 function openInfo(spot, ev) {
   openSpot = spot;
+  focusOn(spot.o);
   SPOTS.forEach(s => s.el.classList.toggle('open', s === spot));
   $('infoTitle').textContent = spot.title;
   $('infoBody').textContent = spot.body;
   const card = $('info');
   card.classList.add('on');
-  // sit beside the dot, but never off-screen
-  const r = spot.el.getBoundingClientRect();
-  const w = 268, h = card.offsetHeight || 120;
-  card.style.left = Math.min(Math.max(12, r.left + 24), innerWidth - w - 12) + 'px';
-  card.style.top  = Math.min(Math.max(12, r.top - 10), innerHeight - h - 12) + 'px';
+  // DOCKED, not beside the dot. Two reasons: the camera flies on open so the
+  // dot it was anchored to is somewhere else a moment later, and the old clamp
+  // measured against innerWidth -- which is 0 while the viewport is still
+  // settling, and `innerWidth - w - 12` then goes NEGATIVE, so the clamp put
+  // the card at -280,-327 and it vanished off screen entirely.
+  //
+  // Clamp against the CANVAS box, which is the thing it has to stay inside.
+  const w = 268, h = card.offsetHeight || 160;
+  const bx = SB.width > 1 ? SB : { left: 0, top: 0, width: innerWidth, height: innerHeight };
+  const left = bx.left + 16;
+  const top = Math.max(12, Math.min(bx.top + 16, bx.top + bx.height - h - 16));
+  card.style.left = Math.max(12, Math.min(left, bx.left + bx.width - w - 16)) + 'px';
+  card.style.top = top + 'px';
 }
 function closeInfo() {
+  if (!openSpot) return;
   openSpot = null;
   SPOTS.forEach(s => s.el.classList.remove('open'));
   $('info').classList.remove('on');
+  focusOff();
 }
 
 // visible only if the object and every parent above it is visible
@@ -641,7 +762,7 @@ function updateHotspots() {
   if (now - occludeAt > 1000 / OCCLUDE_HZ) { occludeAt = now; refreshOcclusion(); }
   const v = new THREE.Vector3();
   for (const s of SPOTS) {
-    if (!shown(s.o) || s.hidden) {
+    if (!shown(s.o) || s.hidden || (focusState && s !== openSpot)) {
       s.el.style.display = 'none';
       s.el.setAttribute('aria-hidden', 'true');
       s.el.tabIndex = -1;
@@ -1207,6 +1328,7 @@ function tick(now) {
   } else if (!running) dwell = 0;
 
   stepXray(dt);
+  stepTween(dt);
   updateMechanism();
   updateHotspots();
   updateDimension();
