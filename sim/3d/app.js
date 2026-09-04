@@ -506,14 +506,17 @@ const SPOT_MAX = 190;             // px: beyond this the dot is at its dimmest
 // the hotspots, so it stays crisp mono text with tabular figures instead of a
 // rasterised font texture that goes soft the moment you zoom.
 let dimGroup = null;
+let dimOn = false;                                  // OFF by default; it is a tool
 const DIM_Y = -44, DIM_Z = 1.5, DIM_HALF = 34;      // outer_box is 68 wide
 
 function buildDimension() {
   const g = new THREE.Group();
-  const mat = new THREE.MeshBasicMaterial({ color: cssColor('--ink-3'), fog: false });
+  // Amber, like every other annotation in the UI, and hairline-thin. Flat grey
+  // at 0.35 radius read as a piece of the machine rather than a note about it.
+  const mat = new THREE.MeshBasicMaterial({ color: cssColor('--acc'), fog: false });
   // CylinderGeometry's axis is +Y, so 'y' needs no rotation.
   const bar = (len, pos, axis) => {
-    const m = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, len, 6), mat);
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, len, 6), mat);
     if (axis === 'x') m.rotation.z = Math.PI / 2;
     if (axis === 'z') m.rotation.x = Math.PI / 2;
     m.position.set(...pos);
@@ -533,9 +536,11 @@ function buildDimension() {
 
 function updateDimension() {
   if (!dimGroup) return;
-  // close in it is clutter, far out it is unreadable; show it in between
-  const d = camera.position.distanceTo(controls.target);
-  const on = d > 95 && d < 420 && !$('info').classList.contains('on');
+  // The toggle is the gate. It used to appear on its own inside a distance
+  // band, which meant it showed up unasked while you were orbiting and looked
+  // like a glitch. Still suppressed while a callout is open, because focus mode
+  // hides the box it is measuring.
+  const on = dimOn && !$('info').classList.contains('on');
   dimGroup.visible = on;
   const el = $('dim');
   if (!on) { el.classList.remove('on'); return; }
@@ -1163,6 +1168,7 @@ function wireUI() {
       case 'x': case 'X': setXray(!xray); break;
       case 'e': case 'E': setElectronics(!elec); break;
       case 'r': case 'R': resetView(); break;
+      case 'd': case 'D': setDim(!dimOn); break;
       case 'c': case 'C': $('railToggle').click(); break;
       case 'Escape':
         if ($('help').classList.contains('on')) showHelp(false);
@@ -1199,6 +1205,8 @@ function wireUI() {
   let seen = true;
   try { seen = localStorage.getItem('braillix.seen') === '1'; } catch (e) { seen = false; }
   if (!seen) showHelp(true);
+
+  $('btnDim').addEventListener('click', () => setDim(!dimOn));
 
   $('btnAddCell').addEventListener('click', addUnit);
   $('btnDelCell').addEventListener('click', removeUnit);
@@ -1251,6 +1259,13 @@ function syncRun() {
   const b = $('btnRun');
   b.classList.toggle('on', running);
   b.textContent = running ? 'Pause' : 'Simulate';
+}
+
+function setDim(on) {
+  dimOn = on;
+  const b = $('btnDim');
+  b.classList.toggle('on', on);
+  b.setAttribute('aria-pressed', String(on));
 }
 
 function resetView() {

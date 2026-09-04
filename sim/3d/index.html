@@ -322,9 +322,14 @@
 
   /* The in-scene dimension label, positioned by the same projection code that
      places the hotspots so it stays crisp text rather than a font texture. */
+  /* Annotation, not geometry: amber like every other callout in the UI, on a
+     chip so it stays readable over a light plate or a dark cavity. */
   #dim{position:fixed;z-index:7;pointer-events:none;font-family:var(--f-mono);
-    font-size:var(--t10);color:var(--ink-3);display:none;
-    font-variant-numeric:tabular-nums;transform:translate(-50%,-50%)}
+    font-size:var(--t10);letter-spacing:.06em;color:var(--acc);display:none;
+    font-variant-numeric:tabular-nums;transform:translate(-50%,-50%);
+    background:color-mix(in srgb,var(--bg-0) 82%,transparent);
+    border:1px solid var(--line-1);border-radius:var(--r1);padding:2px 6px;
+    white-space:nowrap}
   #dim.on{display:block}
 
   #tabs{display:none;gap:var(--s1);border:1px solid var(--line-1);
@@ -467,6 +472,7 @@
     <div class="btns">
       <button id="btnXray" aria-pressed="false">X-Ray Vision</button>
       <button id="btnElec" aria-pressed="false">Electronics</button>
+      <button id="btnDim" class="wide" aria-pressed="false">Dimensions</button>
     </div>
 
     <div class="rowspeed" id="unitrow">
@@ -502,7 +508,8 @@
       <dl class="dl"><dt>disc angle</dt><dd id="e_ang">—</dd></dl>
     </div>
     <div id="hint">drag to orbit · scroll to zoom · right-drag to pan<br>
-      space play/pause · ←→ step · X x-ray · E electronics · R reset</div>
+      space play/pause · ←→ step · X x-ray · E electronics<br>
+      D dimensions · C controls · R reset · ? about</div>
   </div>
 </div>
 
