@@ -356,6 +356,33 @@ function get_height_at_angle(angle, track) =
 
 // --- 3. GEOMETRY MODULES ---
 
+// v8.10: TRACKS SIT ON THE FLOOR INSTEAD OF THROUGH IT.
+//
+// Every track used to be modelled from z=0 to its own height, while the disc
+// floor also spans 0..disk_base_thickness. So 2.0mm of every track occupied the
+// same space as the floor - about 10mm of annular width, overlapping through a
+// 2mm-thick volume, six times over.
+//
+// The printed part was never wrong: a union is a union, and only the 0.5mm above
+// the floor does any work. But coincident solids are the hardest case for a mesh
+// booleaner, and it showed - CGAL 2021 and CGAL 2026 agreed on 4190.042mm3 while
+// Manifold returned 3615.565, which is less than the disc floor by itself and so
+// cannot be right. That is what has kept the project on the slow backend.
+//
+// The tracks now start just BELOW the floor's top face rather than at its
+// bottom. They still merge with it - a gap would leave six floating rings - but
+// the overlap drops from 2.0mm to 0.1mm, a 20x cut in coincident volume.
+//
+// IT CANNOT START AT EXACTLY disk_base_thickness. Where a pattern bit is 0 the
+// track top IS disk_base_thickness, so a track starting there would have zero
+// height: a degenerate solid, which is worse than the overlap it fixes.
+track_base_z = disk_base_thickness - 0.1;
+
+assert(track_base_z < disk_base_thickness,
+       "tracks must start below the floor top or they will not merge with it");
+assert(track_base_z > 0,
+       "track base has dropped through the disc floor");
+
 // Optimized Polyhedron Builder (Much faster than linear_extrude loop)
 module build_track_polyhedron(t_idx) {
     r_in = inner_radius + t_idx * (track_width + track_gap);
@@ -376,8 +403,8 @@ module build_track_polyhedron(t_idx) {
         each [
             [r_in * cos(a), r_in * sin(a), h],  // Inner Top
             [r_out * cos(a), r_out * sin(a), h], // Outer Top
-            [r_in * cos(a), r_in * sin(a), 0],   // Inner Bottom
-            [r_out * cos(a), r_out * sin(a), 0]  // Outer Bottom
+            [r_in * cos(a), r_in * sin(a), track_base_z],   // Inner Bottom
+            [r_out * cos(a), r_out * sin(a), track_base_z]  // Outer Bottom
         ]
     ];
     
@@ -396,11 +423,18 @@ module build_track_polyhedron(t_idx) {
         // non-planar - invalid polyhedron input. OpenSCAD 2021 silently picked a
         // diagonal; 2026 CGAL throws "assertion violation" on every one of them.
         // Splitting it explicitly makes the mesh valid and the choice ours.
+        // WINDING REVERSED, v8.10. OpenSCAD wants each face ordered CLOCKWISE
+        // seen from OUTSIDE the solid; these were counter-clockwise, so every
+        // track was inside-out. CGAL normalises orientation when it builds a Nef
+        // polyhedron and never complained, which is why it survived this long -
+        // but Manifold trusts the input, took the tracks as negative volume, and
+        // returned a cam 574mm3 light: exactly two times the 287mm3 of bumps.
+        // That single number is what kept the project on the 88-second backend.
         each [
-            [i0, i1, next_i1], [i0, next_i1, next_i0],   // Top
-            [i2, next_i2, next_i3], [i2, next_i3, i3],   // Bottom
-            [i0, next_i0, next_i2], [i0, next_i2, i2],   // Inner wall
-            [i1, i3, next_i3], [i1, next_i3, next_i1]    // Outer wall
+            [next_i1, i1, i0], [next_i0, next_i1, i0],   // Top
+            [next_i3, next_i2, i2], [i3, next_i3, i2],   // Bottom
+            [next_i2, next_i0, i0], [i2, next_i2, i0],   // Inner wall
+            [next_i3, i3, i1], [next_i1, next_i3, i1]    // Outer wall
         ]
     ];
 

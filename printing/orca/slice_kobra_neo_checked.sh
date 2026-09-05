@@ -5,6 +5,10 @@
 set -euo pipefail
 
 ORCA="/c/Program Files/OrcaSlicer/orca-slicer.exe"
+# STLs must be exported by the 2026 nightly with --backend=Manifold. CGAL and
+# Manifold agree on every part since the cam winding fix (v8.10) and Manifold is
+# ~60x faster: a full rebuild is 3s against 23 minutes. Re-export before slicing
+# if any .scad is newer than its .stl - see the closure check in the handoff.
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 WREPO="$(cygpath -m "$REPO")"
 MACHINE_OVERLAY="$WREPO/printing/orca/braillix_kobra_neo_machine.json"
