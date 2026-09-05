@@ -78,7 +78,14 @@ pogo_fit_top     = 0.8;    // deliberate headroom for bridge sag, see above
 pogo_win_l       = pogo_boss_l + pogo_fit_side;      // 20.4
 pogo_win_w       = pogo_boss_w + pogo_fit_top;       //  4.8
 pogo_pocket_l    = pogo_flange_l + pogo_fit_side;    // 27.4
-pogo_pocket_w    = pogo_flange_w + pogo_fit_top;     //  4.8
+// +0.2 over the window on purpose. The ear plate and the boss are both 4.0mm
+// tall, so with the same fit the pocket and the window had IDENTICAL Z extents
+// and their floors landed exactly coplanar. CGAL resolves that; Manifold left
+// 16 edges owned by more than two triangles in the box and 8 in the pod, which
+// tools/validate_print_assets.py correctly refuses. Offsetting by 0.2 costs
+// nothing - the pocket is hidden behind the connector - and removes the
+// coincident plane instead of asking the booleaner to guess.
+pogo_pocket_w    = pogo_flange_w + pogo_fit_top + 0.2;   //  5.0
 pogo_pocket_d    = pogo_flange_t + 0.1;              //  2.1
 
 pogo_tail_span   = (pogo_pins - 1) * pogo_pin_pitch;   // 10.16 across the tails
