@@ -67,14 +67,36 @@ def main():
             killed += 1
     print(f"  lead pieces removed: {killed}")
 
+    # Split the OUTPUT SHAFT off the can so the simulator can spin it with the
+    # cam. Everything above the can face (source z < -19, i.e. beyond the body)
+    # and within a few mm of the shaft axis is shaft; the rest is stator.
     keep = [x for x in bpy.data.objects if x.type == 'MESH']
-    bpy.ops.object.select_all(action='DESELECT')
+    shaft, body = [], []
     for p in keep:
-        p.select_set(True)
-    bpy.context.view_layer.objects.active = keep[0]
-    bpy.ops.object.join()
-    m = bpy.context.active_object
-    m.name = "motor_28byj48"
+        vs = [p.matrix_world @ v.co for v in p.data.vertices]
+        # source frame: body spans y -19..0, shaft pokes past -19; axis at x=21,z=6
+        beyond_face = min(v.y for v in vs) < -19.5
+        near_axis = max(abs(v.x - SHAFT_X) for v in vs) < 6.0 and                     max(abs(v.z - SHAFT_Z) for v in vs) < 6.0
+        (shaft if (beyond_face and near_axis) else body).append(p)
+
+    def join(parts, name):
+        if not parts:
+            return None
+        bpy.ops.object.select_all(action='DESELECT')
+        for p in parts:
+            p.select_set(True)
+        bpy.context.view_layer.objects.active = parts[0]
+        if len(parts) > 1:
+            bpy.ops.object.join()
+        o = bpy.context.active_object
+        o.name = name
+        return o
+
+    print(f"  shaft pieces: {len(shaft)}, body pieces: {len(body)}")
+    if not shaft:
+        print("  WARNING: no shaft isolated — it will not rotate")
+    join(shaft, "motor_shaft")
+    m = join(body, "motor_28byj48")
 
     # -Y (the output direction) -> +Z, then drop the shaft onto the origin and
     # swing the body's 8mm offset onto -X so it matches MOTOR.xOffset in the CAD.
@@ -85,11 +107,18 @@ def main():
     rx = Matrix.Rotation(math.radians(-90), 4, 'X')   # -Y (output) -> +Z
     tr = Matrix.Translation((-SHAFT_X, -SHAFT_Z, 0))  # shaft axis -> origin
     rz = Matrix.Rotation(math.radians(90), 4, 'Z')    # body offset -> -X
-    m.data.transform(rz @ tr @ rx)
-    m.matrix_world = Matrix.Identity(4)
-    m.data.update()
+    xform = rz @ tr @ rx
+    for o in [x for x in bpy.data.objects if x.type == 'MESH']:
+        o.data.transform(xform)
+        o.matrix_world = Matrix.Identity(4)
+        o.data.update()
 
     vs = [m.matrix_world @ v.co for v in m.data.vertices]
+    sh = bpy.data.objects.get("motor_shaft")
+    if sh:
+        sv = [sh.matrix_world @ v.co for v in sh.data.vertices]
+        print(f"  shaft  : z=[{min(v.z for v in sv):.1f},{max(v.z for v in sv):.1f}] "
+              f"r={max(math.hypot(v.x, v.y) for v in sv):.1f}")
     print(f"  tris   : {len(m.data.polygons)}")
     print(f"  x=[{min(v.x for v in vs):.1f},{max(v.x for v in vs):.1f}] "
           f"y=[{min(v.y for v in vs):.1f},{max(v.y for v in vs):.1f}] "
