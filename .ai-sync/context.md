@@ -536,3 +536,77 @@ MY ARM THICKENING WAS WRONG AND MRIDUL CAUGHT IT IN THE RENDER. link_thickness i
 THE CAM POLYHEDRON HAS BEEN INVALID ALL ALONG: top faces were non-planar quads wherever a track is on a ramp. OpenSCAD 2021 silently picked a diagonal; the 2026 nightly throws CGAL assertion violations on every one. Now split into explicit triangles.
 TOOLCHAIN: use the nightly with --backend=CGAL - identical volume to 2021 to three decimals, but strict. Manifold is 230x faster (7m39s -> 2s) but returns a volume SMALLER than the disc floor alone, which is impossible for a union containing it; CGAL matches hand arithmetic. Probable cause is that every track polyhedron starts at z=0 while the floor spans 0..2.0, so 2mm of each track is buried in the floor - a huge coincident-face overlap. Starting tracks at z=disk_base_thickness would likely fix it and unlock the speedup.
 THE DOT NOT CLEARING THE PLATE RIM IS NOT A BUG: it rises 0.5mm above the recessed reading surface, which is what the finger touches; the rim is 0.8mm proud and 30mm away. Raising the linkage cannot help - it is rigid, so it moves both dot states together.
+
+---
+
+## [2026-09-04 14:00] — Codex
+**Task:** Independent pre-print audit of the CAD, electronics/firmware integration, and the 3D simulator.
+**Changes:** No product code or geometry changed. Re-ran the simulator-parameter extractor and Python braille validation; inspected the live local simulator at desktop and 390x844; ran `tools/validate_print_assets.py`.
+**Status:** Blocked from final/full production print pending build-spec reconciliation and physical tests.
+**Notes:** All expected STLs are closed/manifold, but every checked G-code file hashes to an older source STL. Current CAD requires 8x1 homing magnet and 0.20mm-wire 2mm-OD springs, while BOM/build docs still say 3x1 and 0.30mm. Firmware homes at field minimum despite CAD requiring a repeatable first Hall edge for the wide magnet. There is no button/buzzer firmware, and button/pogo/driver docs disagree with the latest CAD (`electronics_spec.scad` specifies an upright bare DIP-16 on perfboard). Do not slice full parts until those are resolved; print/re-slice only the coupon/bench-test set first.
+
+---
+
+## [2026-09-04 14:10] — Codex
+**Task:** Create the requested dated independent audit report.
+**Changes:** Added `docs/INDEPENDENT_PREPRINT_AUDIT_2026-09-04.md` and indexed it in `.ai-sync/artifacts/`. The report records the user’s decisions: only 2mm OD/0.30mm-wire springs are available, the intended demo is real multi-cell docking, and the first feedback mode is beep-based.
+**Status:** Report complete. Full production print remains on hold.
+**Notes:** The report gives a staged test/release ladder. The 0.30mm spring is a P0 fit and torque risk; a real five-pogo dock needs selected local cell logic, carrier, and firmware before it can be claimed as working. A piezo buzzer is preferred over a generic speaker for the first demo.
+
+---
+
+## [2026-09-09 01:08] — Codex
+**Task:** Hardware/CAD audit and ranked student-build plan; report only as requested.
+**Changes:** Created docs/HARDWARE_AUDIT_AND_PLAN_2026-09-09.md and an identical copy in .ai-sync/artifacts/. No production CAD, Blender, firmware or print assets changed.
+**Status:** Completed audit and planning. Physical implementation not started.
+**Notes:** User confirmed each added muscle cell must add a simultaneously displayed Braille character; INR 10,000 is TOTAL budget (possible INR 15,000); college FDM available for filament cost, resin outsourced. Preserve matching brain/muscle envelope. Proposed baseline is brain + two muscles, conditional on real spending ledger and resin quotes. Both .blend assemblies independently inspected in background Blender and are stale (36.4mm cams versus current 48.4mm); v5 units/ghost sizes inconsistent. Current normal validator PASSES 22 STL/11 G-code checks; do not repeat blanket stale-G-code claim. Comb separately manifold but roofed; cam running gap zero, Hall roof absent, fixture undersized. Comb resin adds 5.15cm3 to 5.015cm3 core set. Five-pin bus needs local interface from first cell; current firmware has no expander implementation. Sensor identity, spring load, complete electronics fit and calibrated motion remain physical gates. Report includes budget caps, assembly/glue guidance, shrink options and image/work order.
+
+---
+
+## [2026-09-09 01:55] — Codex
+**Task:** Implement an isolated compact hardware candidate after user authorization; independent CAD and motor reviews.
+**Changes:** Added tools/build_compact_candidate.py, check_compact_candidate.py, probe_compact_candidate.py, render_compact_candidate.py; generated cad/candidates/compact_2026_09_09 with SCAD, 19 STLs, source/result hashes, 13 probes and two Blender scenes/PNGs. Added docs/COMPACT_CANDIDATE_AND_BUILD_ORDER_2026-09-09.md, MOTOR_TRADE_STUDY_2026-09-09.md and PROCUREMENT_SOURCE_2026-09-09.md. Linked later implementation from original audit and copied reports to artifacts.
+**Status:** Candidate and reports completed; NOT a physical or production print release.
+**Notes:** User authorized multiple agents; CAD reviewer fixed shell nonmanifold edges and detached comb marker/clash, identified complete-electronics and motor-ear fit gates. Shared64mm bodies,0.4mm cam clearance,sparse comb2626.87mm3 (~49% less),Hall roof/retainer,base throughbolts,new ramp profile,fixture/coupons implemented. 19/19 mesh exports,13/13 selected probes and64 analytical states pass; densecam usesManifold afterCGAL timeout. Views visually inspected. Actual ledger5510 leaves4490/9490 at10000/15000 total. Owns one motor/one of each purchased part; retain ownedmotorfirst. Springs,ear/wireblock,nominalPCB0.25mm wallclearance,full retainedelectronics andrealpoweredbus remain gates. MCP bundle inspected only; used installed BlenderCLI without installing server. Originalproduction CAD/Gcode and unrelated preexisting modifications preserved.
+
+---
+
+## [2026-09-11 00:50] — Codex
+**Task:** Review simulator as an open-source hardware explanation.
+**Changes:** Added docs/SIMULATOR_OPEN_SOURCE_REVIEW_2026-09-11.md and artifact copy. No simulator or CAD changes.
+**Status:** Completed review.
+**Notes:** Live local browser review covered desktop, phone, X-Ray, electronics and adding a cell. Priorities: guided explanation, isolated track/follower view, accurate claims, revision/status and source navigation. Public deployment parity and physical hardware were not tested.
+
+---
+
+## [2026-09-11 01:23] — Codex
+**Task:** Implement approved simulator onboarding and open-source file navigation.
+**Changes:** Added learning.js/learning.css; updated app.js/index.html with tour, parts explorer, GitHub links, mobile layout and encoding disclosure. Added implementation report and artifact copy.
+**Status:** Completed locally; not pushed or deployed.
+**Notes:** User explicitly excluded revision/testing-status UI. Browser checked eight tour steps, dot-2 a/b example, controls, mobile, parts and Escape. CAD/STL paths and representative GitHub URLs verified. Preserve unrelated motor model edits.
+
+---
+
+## [2026-09-12 20:35] — Codex
+**Task:** Fix user-reported simulator onboarding and interaction issues.
+**Changes:** First-visit splash/modal, transparent lids, camera inertia reset, 28-component pod lists, three-axis adaptive dimensions, hardware guidance/layout, and per-cell readouts. Added regression test and dated implementation report/artifact.
+**Status:** Completed locally; not pushed or deployed.
+**Notes:** Node regression passes; browser checked fresh/returning visitors, desktop and phone layouts, hardware lesson, multi-cell readouts. Dimensions use actual shell/lid envelope including raised details. Physical connections not tested. Revision/testing-status UI remains excluded.
+
+---
+
+## [2026-09-12 20:39] — Codex
+**Task:** Hide stray controls toggle during tour.
+**Changes:** sim/3d/learning.css hides railToggle for every tour step and viewport.
+**Status:** Completed locally.
+**Notes:** Browser verified hidden during tour and visible after Skip. Not deployed.
+
+---
+
+## [2026-09-12 22:59] — Codex
+**Task:** Save simulator session for agent handoff.
+**Changes:** Replaced handoff.md with complete current state, user scope decisions, modified files, verification and next steps. Archived prior handoff in artifacts/handoff_before_simulator_session_close.md.
+**Status:** Completed handoff; implementation local and uncommitted.
+**Notes:** Latest controls-toggle tour fix is included. User excludes revision/testing-status UI. Existing GitHub Pages hosting stays. Preserve unrelated motor/CAD/doc changes; see handoff for exact boundaries.
+
+---
