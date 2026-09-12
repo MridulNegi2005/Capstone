@@ -671,9 +671,11 @@ export function buildBrainPod(printed) {
   }
 
   // header strips, then the DevKit sitting on them
+  const headers = new THREE.Group(); headers.name = 'pod_headers';
   for (const s of [-1, 1])
-    pod.add(box(POD.hdr.len, POD.hdr.w, POD.hdr.h, m.blackPlas,
+    headers.add(box(POD.hdr.len, POD.hdr.w, POD.hdr.h, m.blackPlas,
       [POD.devkit.xOffset + 2, s * POD.hdr.pitch / 2, floor + POD.hdr.h / 2 - 1]));
+  pod.add(headers);
 
   const dk = esp32Devkit();
   dk.name = 'esp32';
@@ -771,12 +773,14 @@ export function buildCellElectronics(realMotor) {
   g.add(outPins);
 
   // the cell's mating magnets, flush with its -X face and polarised to attract
+  const cellMagnets = new THREE.Group(); cellMagnets.name = 'cell_magnets';
   for (const y of POD.mag.ys) {
     const mag = cyl(POD.mag.dia, 1.2, m.magnet,
       [-CELL.length / 2 + 0.6, y, POD.mag.z], null, 20);
     mag.rotation.set(0, 0, Math.PI / 2);
-    g.add(mag);
+    cellMagnets.add(mag);
   }
+  g.add(cellMagnets);
 
   g.add(expanderSlot());
   g.add(cellHarness());

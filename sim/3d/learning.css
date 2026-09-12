@@ -1,0 +1,118 @@
+/* Existing instrument palette, with a quiet reading surface beside the 3D stage.
+   Graphite #101113, raised #16181b, amber #f0a02a, text #f2f4f6, secondary #a8aeb6.
+   System sans carries lessons; the existing mono is reserved for progress/data.
+   Desktop: rail | focused model | lesson. Phone: model above a compact lesson. */
+[hidden]{display:none!important}
+body.learning #railToggle{display:none}
+#encodingDetails summary{cursor:pointer;color:var(--ink-2);padding:10px 0;font-size:13px}
+#encodingDetails[open] summary{margin-bottom:12px;color:var(--ink-1)}
+#learningNav{position:fixed;z-index:14;left:calc(var(--rail) + 20px);top:18px;display:flex;gap:8px}
+#learningNav button,#learningNav a{padding:9px 12px;border:1px solid var(--line-2);border-radius:4px;background:var(--bg-1);color:var(--ink-1);font:12px var(--f-sans);text-decoration:none;cursor:pointer;min-height:38px}
+#learningNav button:hover,#learningNav a:hover{border-color:var(--acc);color:var(--acc)}
+body.railoff #learningNav{left:20px}
+.learn-card{position:fixed;z-index:15;right:24px;bottom:24px;width:330px;padding:22px;background:var(--bg-1);border:1px solid var(--line-2);border-top:2px solid var(--acc);border-radius:6px;box-shadow:var(--shadow-pop);text-align:left;max-height:calc(100dvh - 100px);overflow:auto}
+.learn-card h2{font:600 23px/1.2 var(--f-sans);margin:12px 0;color:var(--ink-1);letter-spacing:-.5px}
+.learn-card p{font:14px/1.6 var(--f-sans);color:var(--ink-2);margin:0 0 18px}
+.learn-card button,.learn-card a,#infoFiles a{font:13px var(--f-sans);min-height:40px;padding:10px 12px;border:1px solid var(--line-2);border-radius:4px;background:var(--bg-2);color:var(--ink-1);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.learn-card button:hover,.learn-card a:hover,#infoFiles a:hover{border-color:var(--acc)}
+.learn-card .primary{background:var(--acc);color:var(--acc-ink);border-color:var(--acc);font-weight:600}
+.learn-card button:disabled{opacity:.4;cursor:default}
+.learn-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.learn-top{display:flex;justify-content:space-between;align-items:center;color:var(--ink-2)}
+.learn-top button{border:0;background:none;padding:4px 8px;min-height:32px;color:var(--ink-2)}
+#learnProgress{font:12px var(--f-mono)}
+#learnDemo{width:100%;color:var(--acc)}
+.lesson-target{outline:2px solid var(--acc)!important;outline-offset:4px;box-shadow:0 0 0 7px #f0a02a18}
+#partList{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 20px}
+#partList button{font-size:12px;min-height:36px;padding:8px 10px}
+#partList button[aria-pressed=true]{border-color:var(--acc);color:var(--acc)}
+#partTitle{font-size:18px;margin-bottom:10px}
+#partFiles,#infoFiles{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+#partsPanel footer{border-top:1px solid var(--line-1);padding-top:12px;display:flex;gap:8px}
+body.learning #info,body.inspecting #info,body.learning #spots,body.inspecting #spots{display:none}
+body.learning:not(.lesson-controls) #stage,body.inspecting #stage{right:370px}
+body.learning:not(.lesson-controls) #cell,body.inspecting #cell{display:none}
+body.learning:not(.lesson-controls) #learnPanel,body.inspecting #partsPanel{top:86px;bottom:auto}
+button:focus-visible,a:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+@media(max-width:1100px) and (min-width:841px){
+  body.learning:not(.lesson-controls) #rail,body.inspecting #rail{visibility:hidden}
+  body.learning:not(.lesson-controls) #stage,body.inspecting #stage{left:0}
+  body.learning #learningNav,body.inspecting #learningNav{left:20px}
+}
+@media(max-width:840px){
+  #learningNav,body.railoff #learningNav{left:12px;top:12px;gap:5px}
+  #learningNav button,#learningNav a{font-size:11px;padding:8px;min-height:36px}
+  .learn-card{left:12px;right:12px;bottom:12px;width:auto;padding:16px;max-height:46dvh}
+  .learn-card h2{font-size:21px;margin:8px 0}
+  .learn-card p{font-size:13px;margin-bottom:10px}
+  body.learning:not(.lesson-controls) #stage,body.inspecting #stage{inset:0 0 46dvh 0}
+  body.learning:not(.lesson-controls) #learnPanel,body.inspecting #partsPanel{top:auto;bottom:12px}
+  body.learning:not(.lesson-controls) #railToggle,body.inspecting #railToggle{display:none}
+  body.inspecting #rail{visibility:hidden}
+  body.lesson-controls #learnPanel{top:60px;bottom:auto;max-height:25dvh}
+  body.lesson-controls #learnPanel h2{font-size:17px;margin:4px 0}
+  body.lesson-controls #learnPanel p{font-size:12px;line-height:1.4}
+  body.lesson-controls #learnPanel .learn-actions{margin-top:6px}
+  body.lesson-controls #cell{display:none}
+  #partsPanel{max-height:46dvh}
+  #partList{margin:8px 0;gap:4px}
+}
+@media(prefers-reduced-motion:reduce){#stage{transition:none!important}}
+
+/* First visit: a brief branded load, then a native modal choice. */
+#introSplash{display:none}
+.first-visit #introSplash{display:block;text-align:center}
+.first-visit #loading{justify-items:center;gap:24px}
+.first-visit #loading .wordmark{font-size:38px}
+#introSplash p{font-size:17px;color:var(--ink-2);margin-top:22px}
+.splash-dots{display:grid;grid-template-columns:repeat(2,16px);gap:12px;justify-content:center}
+.splash-dots i{width:16px;height:16px;border-radius:50%;background:var(--acc);animation:dot-arrive .65s both}
+.splash-dots i:nth-child(2n){animation-delay:.12s}
+.splash-dots i:nth-child(3n){animation-delay:.24s}
+@keyframes dot-arrive{from{opacity:.1;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+#learnWelcome{inset:50% auto auto 50%;transform:translate(-50%,-50%);margin:0;width:min(500px,calc(100vw - 32px));max-height:calc(100dvh - 40px);padding:32px;text-align:center}
+#learnWelcome::backdrop{background:#05060899;backdrop-filter:blur(9px)}
+#learnWelcome .learn-actions{justify-content:center}
+#learnWelcome h2{font-size:28px}
+
+/* The rail scrolls its controls instead of laying expanded disclosures over one another. */
+#paneCtl{overflow-y:auto;flex:1 1 auto;padding:4px}
+#paneCtl>*{flex-shrink:0}
+#paneEnc{flex:0 0 auto;max-height:40%;min-height:40px}
+#rail .spacer{display:none}
+#hwbody .btns{grid-template-columns:1fr}
+#hwbody .btns button{height:auto;min-height:42px;white-space:normal;overflow:visible;text-overflow:clip;line-height:1.4;padding:10px}
+#hwHelp{font:12px/1.55 var(--f-sans);color:var(--ink-2);margin-bottom:6px}
+
+/* An assembly selector and a scrollable list scale to all modelled components. */
+#partPod{display:flex;gap:6px;margin:12px 0}
+#partPod button{flex:1}
+#partPod button[aria-pressed=true]{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+#partList{display:block;list-style:none;margin:12px 0 18px;max-height:220px;overflow-y:auto;border-block:1px solid var(--line-1);padding:6px 0}
+#partList li{margin:0}
+#partList button{display:flex;width:100%;justify-content:flex-start;border-color:transparent;background:transparent;min-height:36px;text-align:left}
+#partList button[aria-pressed=true]{background:var(--bg-3);border-left:2px solid var(--acc)}
+
+#dim{inset:0;transform:none;background:none;border:0;padding:0}
+.dimension-label{position:fixed;transform:translate(-50%,-50%);background:#101113ec;border:1px solid var(--acc-dim);padding:5px 7px;border-radius:3px;letter-spacing:0}
+#rowReadout{position:fixed;z-index:10;top:72px;right:18px;display:flex;gap:6px;max-width:calc(100vw - var(--rail) - 36px);overflow-x:auto;padding:4px}
+#rowReadout button{display:grid;grid-template-columns:1fr auto;gap:3px 9px;min-width:76px;max-width:122px;text-align:left;white-space:normal;padding:8px 10px;border:1px solid var(--line-2);border-radius:5px;background:var(--bg-1);color:var(--ink-1);cursor:pointer}
+#rowReadout button>span:first-child{grid-column:1/-1;font:11px var(--f-sans);color:var(--ink-2)}
+#rowReadout strong{font:600 17px var(--f-sans);align-self:center;overflow-wrap:anywhere}
+.row-dots{font-size:28px;color:var(--acc)}
+#rowReadout button[aria-pressed=true]{border-color:var(--acc)}
+#rowReadout button{height:auto;min-height:72px;overflow:visible}
+.multiple-cells #cell{display:none}
+#cellBadges span{position:fixed;z-index:6;transform:translate(-50%,-50%);border:1px solid var(--line-2);border-radius:50%;background:var(--bg-1);color:var(--ink-1);width:23px;height:23px;text-align:center;line-height:21px;pointer-events:none}
+#cellBadges .selected{border-color:var(--acc);color:var(--acc)}
+body.learning #rowReadout,body.inspecting #rowReadout{display:none}
+body.railoff #rowReadout{max-width:calc(100vw - 36px)}
+@media(max-width:840px){
+  #paneCtl.on,#paneEnc.on{flex:1;max-height:none}
+  #partList{max-height:130px}
+  #rowReadout,body.railoff #rowReadout{top:60px;left:12px;right:12px;max-width:none;justify-content:center}
+  #rowReadout button{min-width:70px;padding:6px}
+  .dimension-label{font-size:9px;padding:3px}
+  #learnWelcome{padding:24px}
+}
+@media(prefers-reduced-motion:reduce){.splash-dots i{animation:none}}

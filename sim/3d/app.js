@@ -14,6 +14,7 @@
 // addons' own relative imports — GLTFLoader does `../utils/BufferGeometryUtils.js` —
 // resolve without patching a single line of vendored code.
 import * as THREE from 'three';
+import { initLearning, PARTS, fileLinks } from './learning.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { buildBrainPod, buildCellElectronics, PART_INFO } from './electronics.js';
@@ -121,6 +122,7 @@ let pod = null, cellElec = null, glbMotor = [], podShells = [];
 const CELL_PITCH = 68;            // outer_box is 68mm; bricks butt face to face
 const MAX_UNITS = 4;
 let units = [];                   // [{root, elec, linkages, cam, deg, target, move}]
+let selectedCell = 0;
 let unitTemplate = null;          // the loaded GLB scene, cloned per unit
 let running = true, xray = false, elec = false, speed = 1;
 let cell = null, hwBusy = false;      // the real hardware, over Web Serial
@@ -204,7 +206,8 @@ function resizeStage() {
   camera.updateProjectionMatrix();
   renderer.setSize(w, h);
   SB = { left: r.left, top: r.top, width: w, height: h };
-  if (units.length) frameRow();
+  if (focusState) flyTo(focusState.root);
+  else if (units.length && !camTween) frameRow();
 }
 
 function buildScene() {
@@ -267,7 +270,7 @@ function buildScene() {
 
   // Near-neutral. A blue fill against an orange rim is the look of a gaming
   // keyboard, not a bench instrument, and it was tinting the white PETG.
-  const fill = new THREE.DirectionalLight(0xd8dee8, 0.38);
+  const fill = new THREE.DirectionalLight(0xd8dee8, 0.65);
   fill.position.set(-120, -140, 50);
   scene.add(fill);
 
@@ -277,7 +280,7 @@ function buildScene() {
   rim.position.set(-30, 170, 140);
   scene.add(rim);
 
-  scene.add(new THREE.HemisphereLight(0xc7ceda, 0x0a0b0c, 0.18));
+  scene.add(new THREE.HemisphereLight(0xc7ceda, 0x0a0b0c, 0.32));
 
   // catch shadows so the mechanism reads as a solid object in space
   const floor = new THREE.Mesh(
@@ -491,7 +494,7 @@ const MECH_INFO = [
   ['cam', 'THE CAM DISC',
    'The whole mechanism in one part. Six concentric tracks, 64 angular slices - one per possible dot pattern. Rotating it to an angle IS choosing a character.'],
   ['linkage_1', 'LINKAGE (x6)',
-   'One per dot. A foot rides the cam track; when it meets a raised section the arm pivots and pushes its dot up 0.5mm through the reading surface.'],
+   'One per dot. A foot rides the cam track; when it meets a raised section the guided linkage slides upward and pushes its dot up 0.5mm through the reading surface.'],
   ['top_plate', 'READING SURFACE',
    'What the finger touches. Braille pitch is SQUARE - 2.6mm between rows AND between the two columns. A cell looks tall because it is 2 columns by 3 rows, not because the pitch is uneven.'],
 ];
@@ -507,49 +510,58 @@ const SPOT_MAX = 190;             // px: beyond this the dot is at its dimmest
 // rasterised font texture that goes soft the moment you zoom.
 let dimGroup = null;
 let dimOn = false;                                  // OFF by default; it is a tool
-const DIM_Y = -44, DIM_Z = 1.5, DIM_HALF = 34;      // outer_box is 68 wide
-
+let dimensionLabels = [];
 function buildDimension() {
-  const g = new THREE.Group();
-  // Amber, like every other annotation in the UI, and hairline-thin. Flat grey
-  // at 0.35 radius read as a piece of the machine rather than a note about it.
-  const mat = new THREE.MeshBasicMaterial({ color: cssColor('--acc'), fog: false });
-  // CylinderGeometry's axis is +Y, so 'y' needs no rotation.
-  const bar = (len, pos, axis) => {
-    const m = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, len, 6), mat);
-    if (axis === 'x') m.rotation.z = Math.PI / 2;
-    if (axis === 'z') m.rotation.x = Math.PI / 2;
-    m.position.set(...pos);
-    return m;
-  };
-  g.add(bar(DIM_HALF * 2, [0, DIM_Y, DIM_Z], 'x'));            // the run
-  for (const sx of [-1, 1]) {
-    // extension lines run from the corner being measured out to the run, and
-    // the end ticks stand UP off it. Both along Y drew a rectangle instead of
-    // a dimension.
-    g.add(bar(12, [sx * DIM_HALF, DIM_Y + 6, DIM_Z], 'y'));
-    g.add(bar(5, [sx * DIM_HALF, DIM_Y, DIM_Z + 2.5], 'z'));
-  }
-  g.renderOrder = 2;
-  return g;
+  const group = new THREE.Group(); group.renderOrder = 2;
+  return group;
 }
-
+function rebuildDimensions() {
+  if (!dimGroup || !units.length) return;
+  for (const child of [...dimGroup.children]) {
+    child.geometry.dispose(); child.material.dispose(); dimGroup.remove(child);
+  }
+  $('dim').replaceChildren(); dimensionLabels = [];
+  units.forEach(u => u.root.updateWorldMatrix(true,true));
+  const envelope = u => new THREE.Box3().setFromObject(u.root.getObjectByName('outer_box'))
+    .union(new THREE.Box3().setFromObject(u.root.getObjectByName('top_plate')));
+  const first = envelope(units[0]), last = envelope(units.at(-1));
+  const line = (a,b) => {
+    const geom = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(...a),new THREE.Vector3(...b)]);
+    dimGroup.add(new THREE.Line(geom,new THREE.LineBasicMaterial({color:cssColor('--acc'),depthTest:false})));
+  };
+  const measure = (a,b, label, anchor, axis) => {
+    line(a,b);
+    for (const p of [a,b]) {
+      const q=[...p],r=[...p]; q[axis]-=2; r[axis]+=2; line(q,r);
+    }
+    const el=document.createElement('span'); el.className='dimension-label'; el.textContent=label; $('dim').append(el);
+    dimensionLabels.push({el,anchor:new THREE.Vector3(...anchor)});
+  };
+  const {min:f,max:g}=first, {min:l,max:r}=last;
+  measure([f.x,f.y-10,f.z],[g.x,f.y-10,f.z],`Cell length ${(g.x-f.x).toFixed(1)} mm`,[(f.x+g.x)/2,f.y-15,f.z],1);
+  line([f.x,f.y,f.z],[f.x,f.y-12,f.z]); line([g.x,f.y,f.z],[g.x,f.y-12,f.z]);
+  measure([r.x+12,l.y,l.z],[r.x+12,r.y,l.z],`Overall width ${(r.y-l.y).toFixed(1)} mm`,[r.x+18,(l.y+r.y)/2,l.z],0);
+  line([r.x,l.y,l.z],[r.x+14,l.y,l.z]); line([r.x,r.y,l.z],[r.x+14,r.y,l.z]);
+  measure([r.x+8,l.y-9,l.z],[r.x+8,l.y-9,r.z],`Height ${(r.z-l.z).toFixed(1)} mm`,[r.x+14,l.y-12,(l.z+r.z)/2],0);
+  line([r.x,l.y,r.z],[r.x+10,l.y-9,r.z]);
+}
 function updateDimension() {
   if (!dimGroup) return;
-  // The toggle is the gate. It used to appear on its own inside a distance
-  // band, which meant it showed up unasked while you were orbiting and looked
-  // like a glitch. Still suppressed while a callout is open, because focus mode
-  // hides the box it is measuring.
-  const on = dimOn && !$('info').classList.contains('on');
-  dimGroup.visible = on;
-  const el = $('dim');
-  if (!on) { el.classList.remove('on'); return; }
-  const v = new THREE.Vector3(0, DIM_Y - 5, DIM_Z).project(camera);
-  if (v.z > 1) { el.classList.remove('on'); return; }
-  el.classList.add('on');
-  el.textContent = (DIM_HALF * 2).toFixed(1) + ' mm';
-  el.style.left = (SB.left + (v.x * 0.5 + 0.5) * SB.width) + 'px';
-  el.style.top = (SB.top + (-v.y * 0.5 + 0.5) * SB.height) + 'px';
+  const on = dimOn && !focusState && !overviewMaterials.length && !document.body.classList.contains('learning');
+  dimGroup.visible = on; $('dim').classList.toggle('on',on);
+  if (!on) return;
+  const placed = [];
+  for (const {el,anchor} of dimensionLabels) {
+    const v=anchor.clone().project(camera);
+    el.hidden = v.z > 1 || v.z < -1;
+    const x=SB.left+(v.x*.5+.5)*SB.width, y=SB.top+(-v.y*.5+.5)*SB.height;
+    const w=el.offsetWidth,h=el.offsetHeight;
+    const left=Math.max(SB.left+w/2+4,Math.min(SB.left+SB.width-w/2-4,x));
+    let top=Math.max(SB.top+14,Math.min(SB.top+SB.height-14,y));
+    for (const p of placed) if (Math.abs(left-p.x)<(w+p.w)/2+6 && Math.abs(top-p.y)<(h+p.h)/2+6)
+      top=Math.max(SB.top+h/2+4,p.y-(h+p.h)/2-8);
+    el.style.left=left+'px'; el.style.top=top+'px'; placed.push({x:left,y:top,w,h});
+  }
 }
 
 function buildHotspots() {
@@ -600,14 +612,49 @@ let openSpot = null;
 // crosses the wall, the floor, the standoffs and the motor cup, so even 0.05
 // stacks several layers deep and reads as solid dark. One shell, one layer.
 const GHOST_OPACITY = 0.055;
-const GHOST_NAMES = ['outer_box', 'pod_shell'];
+const GHOST_NAMES = ['outer_box', 'pod_shell', 'pod_lid', 'top_plate'];
 let focusState = null;
 let camTween = null;
+let overviewMaterials = [];
+
+function clearOverview() {
+  for (const [mesh, original] of overviewMaterials) {
+    mesh.material.dispose(); mesh.material = original;
+  }
+  overviewMaterials = [];
+  applyXray(xrayT);
+}
+
+function showOverview() {
+  clearOverview(); setElectronics(true); applyXray(0);
+  const shells = [...podShells, ...units.flatMap(u => u.xray)];
+  for (const root of shells.filter(o => GHOST_NAMES.includes(o.name))) root.traverse(mesh => {
+    if (!mesh.isMesh) return;
+    const original = mesh.material; mesh.material = original.clone();
+    mesh.visible = true; mesh.material.transparent = true;
+    mesh.material.opacity = ['pod_lid','top_plate'].includes(root.name) ? 0.08 : 0.16;
+    mesh.material.depthWrite = false; overviewMaterials.push([mesh, original]);
+  });
+  frameRow();
+  const distance = camera.position.distanceTo(controls.target);
+  startTween(controls.target.clone().addScaledVector(new THREE.Vector3(.55,-.7,.85).normalize(),distance),controls.target.clone());
+}
 
 function focusOn(o) {
   focusOff(true);
   const keep = new Set();
   o.traverse(c => { if (c.isMesh) keep.add(c); });
+  const selected = [];
+  for (const c of keep) {
+    const original = c.material;
+    const highlight = m => {
+      const copy = m.clone(); copy.transparent = false; copy.opacity = 1; copy.depthWrite = true;
+      if (copy.emissive) { copy.emissive.set(0xf0a02a); copy.emissiveIntensity = 0.10; }
+      return copy;
+    };
+    c.material = Array.isArray(original) ? original.map(highlight) : highlight(original);
+    selected.push({ mesh:c, original });
+  }
 
   // one shell stays, faintly, so the part is somewhere rather than nowhere
   const ghostRoots = [];
@@ -635,13 +682,17 @@ function focusOn(o) {
     if (c.visible) { hidden.push(c); c.visible = false; }
   });
 
-  focusState = { hidden, mats, root: o };
+  focusState = { hidden, mats, selected, root: o };
   flyTo(o);
 }
 
 function focusOff(silent) {
   if (!focusState) return;
   focusState.hidden.forEach(c => { c.visible = true; });
+  for (const {mesh, original} of focusState.selected) {
+    const copies = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+    copies.forEach(m => m.dispose()); mesh.material = original;
+  }
   for (const [m, v] of focusState.mats) Object.assign(m, v);
   focusState = null;
   // X-ray writes the same fields, so reassert it rather than trusting the
@@ -656,7 +707,8 @@ function flyTo(o) {
   const sph = new THREE.Box3().setFromObject(o).getBoundingSphere(new THREE.Sphere());
   const vFov = THREE.MathUtils.degToRad(camera.fov);
   const hFov = 2 * Math.atan(Math.tan(vFov / 2) * camera.aspect);
-  const dist = Math.max(26, sph.radius / Math.sin(Math.min(vFov, hFov) / 2) * 2.1);
+  const margin = matchMedia('(max-width:840px)').matches ? 1.3 : 1.7;
+  const dist = Math.max(26, sph.radius / Math.sin(Math.min(vFov, hFov) / 2) * margin);
   const dir = camera.position.clone().sub(controls.target).normalize();
   startTween(sph.center.clone().addScaledVector(dir, dist), sph.center.clone());
 }
@@ -664,6 +716,7 @@ function flyTo(o) {
 function flyHome() { startTween(homeCam.clone(), homeTarget.clone()); }
 
 function startTween(pos, target) {
+  stopCameraMomentum();
   camTween = {
     p0: camera.position.clone(), p1: pos,
     t0: controls.target.clone(), t1: target,
@@ -688,6 +741,7 @@ function openInfo(spot, ev) {
   SPOTS.forEach(s => s.el.classList.toggle('open', s === spot));
   $('infoTitle').textContent = spot.title;
   $('infoBody').textContent = spot.body;
+  fileLinks($('infoFiles'), PARTS.find(p => p.id === spot.o.name));
   const card = $('info');
   card.classList.add('on');
   // DOCKED, not beside the dot. Two reasons: the camera flies on open so the
@@ -831,6 +885,7 @@ function applyXray(k) {
 }
 
 function stepXray(dt) {
+  if (focusState || overviewMaterials.length) return;
   if (xrayEl >= XRAY_DUR) return;
   xrayEl = Math.min(XRAY_DUR, xrayEl + dt);
   xrayT = xrayFrom + (xrayTo - xrayFrom) * (xrayEl / XRAY_DUR);
@@ -912,6 +967,7 @@ const KIND_LABEL = {
 
 function updateReadout(item, pos) {
   const { ch, cell, kind, note } = item;
+  $('decode').querySelector('h2').textContent = units.length > 1 ? `Cell ${selectedCell + 1} encoding` : 'How this letter is encoded';
   const glyph = $('glyph');
   const isSign = kind === 'sign';
   const isSpace = kind === 'space';
@@ -944,6 +1000,52 @@ function updateReadout(item, pos) {
            ` Cam position ${pos} of 63. ${uni}`);
 }
 
+// The strip mirrors every physical character cell; selecting a card only inspects it.
+function chooseReadout(k) {
+  selectedCell=k;
+  updateReadout(units[k].item, units[k].pos); updateRowReadout();
+  $('encodingDetails').open = true;
+  if (document.body.classList.contains('railoff')) $('railToggle').click();
+  if (matchMedia('(max-width:840px)').matches) $('tabEnc').click();
+}
+function updateRowReadout() {
+  const strip=$('rowReadout'); strip.hidden=units.length<2;
+  document.body.classList.toggle('multiple-cells',units.length>1);
+  // Reuse the buttons so keyboard focus survives animation updates.
+  if (strip.children.length !== units.length) {
+    strip.replaceChildren(); $('cellBadges').replaceChildren();
+    units.forEach((u,k) => {
+      const button=document.createElement('button'); button.addEventListener('click',()=>chooseReadout(k));
+      const number=document.createElement('span'), glyph=document.createElement('strong'), dots=document.createElement('span');
+      number.textContent=`Cell ${k+1}`; dots.className='row-dots'; button.append(number,glyph,dots); strip.append(button);
+      const badge=document.createElement('span'); badge.textContent=String(k+1); $('cellBadges').append(badge);
+    });
+  }
+  units.forEach((u,k) => {
+    if (!u.item) return;
+    const {ch,cell,kind}=u.item;
+    const label=kind==='space'?'Space':kind==='sign'?KIND_LABEL.sign[ch]:ch;
+    const button=strip.children[k];
+    button.children[1].textContent=kind==='space'?'␣':kind==='sign'?({'#':'#','^':'⇧','^^':'⇪','~':'↩'}[ch]||ch):ch;
+    button.title=`Inspect cell ${k+1}: ${label}`;
+    button.children[2].textContent=String.fromCodePoint(0x2800+cell.reduce((v,d)=>v|(1<<(d-1)),0));
+    button.setAttribute('aria-label',`Cell ${k+1}: ${label}. Dots ${cell.join(', ')||'none'}. Inspect encoding.`);
+    button.setAttribute('aria-pressed',String(k===selectedCell));
+  });
+}
+function updateCellBadges() {
+  const on=units.length>1 && !focusState && !overviewMaterials.length && !document.body.classList.contains('learning');
+  $('cellBadges').hidden=!on;
+  if (!on) return;
+  units.forEach((u,k) => {
+    const el=$('cellBadges').children[k]; if (!el) return;
+    const v=new THREE.Vector3(u.root.position.x,0,STACK.plate_top_z+9).project(camera);
+    el.hidden=v.z>1||Math.abs(v.x)>1||Math.abs(v.y)>1;
+    el.style.left=(SB.left+(v.x*.5+.5)*SB.width)+'px'; el.style.top=(SB.top+(-v.y*.5+.5)*SB.height)+'px';
+    el.classList.toggle('selected',k===selectedCell);
+  });
+}
+
 // One live region for the whole readout. The six dot divs are aria-hidden --
 // announcing them individually is noise, and this sentence says the same thing
 // better. Throttled: at the 250ms auto-advance an unthrottled region is unusable.
@@ -957,7 +1059,7 @@ function announce(text) {
   }, running ? 900 : 120);
 }
 
-function gotoIndex(i) {
+function gotoIndex(i, sendHardware = true) {
   const seq = currentCells();
   if (!seq.length) return;
   idx = ((i % seq.length) + seq.length) % seq.length;
@@ -974,11 +1076,15 @@ function gotoIndex(i) {
     u.target = u.deg + ((((want - u.deg) % 360) + 540) % 360) - 180;
     u.move = Math.abs(u.target - u.deg) > 1e-6 ? planMove(u.deg, u.target) : null;
     u.pos = pos;
-    if (k === 0) { targetDeg = u.target; move = u.move; updateReadout(item, pos); }
+    if (k === 0) { targetDeg = u.target; move = u.move; }
+    u.item = item;
   });
+  selectedCell = Math.min(selectedCell, units.length - 1);
+  updateReadout(units[selectedCell].item, units[selectedCell].pos);
+  updateRowReadout();
 
   // one real cell exists, so it follows unit 0
-  if (cell && cell.connected) {
+  if (sendHardware && cell && cell.connected) {
     hwBusy = true;
     cell.goToState(units[0].pos).finally(() => { hwBusy = false; });
   }
@@ -1022,12 +1128,13 @@ function removeUnit() {
   const u = units.pop();
   scene.remove(u.root);
   if (u.elec) scene.remove(u.elec);
-  u.root.traverse(o => { if (o.isMesh) o.geometry?.dispose?.(); });
+  // Cloned cells share geometry with the original; keep those resources alive.
   syncUnitUI();
   gotoIndex(idx);
 }
 
 function syncUnitUI() {
+  if (dimGroup) rebuildDimensions();
   const n = units.length;
   const lbl = $('unitcount');
   if (lbl) lbl.textContent = n + (n === 1 ? ' cell' : ' cells');
@@ -1123,8 +1230,7 @@ function wireHardware() {
     // as nonsense on a tablet. Name the real requirement: a desktop.
     btnUsb.textContent = 'USB: desktop only';
     btnUsb.disabled = true;
-    say('Web Serial needs Chrome or Edge on a computer. Bluetooth works here, '
-      + 'and is the only one that works from GitHub Pages.', 'bad');
+    say('USB needs a browser with Web Serial support. You can explore the simulator without connecting hardware.', 'bad');
   } else {
     // requestPort() must be reached straight from the click, not after an await
     btnUsb.addEventListener('click', () =>
@@ -1152,6 +1258,9 @@ function wireUI() {
     if (openSpot && !e.target.closest('#info') && !e.target.closest('.spot')) closeInfo();
   });
   addEventListener('keydown', e => {
+    if (document.body.classList.contains('inspecting') ||
+        (document.body.classList.contains('learning') && !document.body.classList.contains('lesson-controls'))) return;
+    if (e.target.closest('#learningNav,.learn-card,#rowReadout')) return;
     // never steal keys from the text field, and never fight a browser shortcut
     if (e.target.matches('input,textarea,summary') ||
         e.metaKey || e.ctrlKey || e.altKey) {
@@ -1182,6 +1291,7 @@ function wireUI() {
   const tabs = [['tabCtl', 'paneCtl'], ['tabEnc', 'paneEnc']];
   for (const [t, pane] of tabs)
     $(t).addEventListener('click', () => {
+      if (t === 'tabEnc') $('encodingDetails').open = true;
       for (const [t2, p2] of tabs) {
         const on = t2 === t;
         $(t2).setAttribute('aria-selected', String(on));
@@ -1202,9 +1312,7 @@ function wireUI() {
   };
   helpBtn.addEventListener('click', () => showHelp(!help.classList.contains('on')));
   help.querySelector('.x').addEventListener('click', () => showHelp(false));
-  let seen = true;
-  try { seen = localStorage.getItem('braillix.seen') === '1'; } catch (e) { seen = false; }
-  if (!seen) showHelp(true);
+  // The replayable guided tour now owns the first-visit invitation.
 
   $('btnDim').addEventListener('click', () => setDim(!dimOn));
 
@@ -1268,7 +1376,19 @@ function setDim(on) {
   b.setAttribute('aria-pressed', String(on));
 }
 
+function stopCameraMomentum() {
+  // A non-damped update consumes and clears the queued rotation/pan deltas.
+  // Preserve the pose so draining momentum never creates a visible jump.
+  const position = camera.position.clone(), target = controls.target.clone();
+  const damping = controls.enableDamping;
+  controls.enableDamping = false; controls.autoRotate = false; controls.update();
+  camera.position.copy(position); controls.target.copy(target);
+  controls.update(); controls.enableDamping = damping;
+}
+
 function resetView() {
+  camTween = null;
+  stopCameraMomentum();
   camera.position.copy(homeCam);
   controls.target.copy(homeTarget);
   controls.update();
@@ -1347,6 +1467,7 @@ function tick(now) {
   updateMechanism();
   updateHotspots();
   updateDimension();
+  updateCellBadges();
 
   controls.update();
   renderer.render(scene, camera);
@@ -1412,6 +1533,7 @@ async function main() {
   addUnit();                       // unit 0 wraps the template already in the scene
   dimGroup = buildDimension();
   scene.add(dimGroup);
+  rebuildDimensions();
 
   wireUI();
   syncRun();
@@ -1428,7 +1550,43 @@ async function main() {
   syncRun();
   syncSpeedFill();
   syncWordMeta();
-  $('loading').classList.add('gone');
+  initLearning({
+    ready: () => { $('loading').classList.add('gone'); $('loading').setAttribute('aria-hidden','true'); },
+    has: name => !!scene.getObjectByName(name),
+    save: () => ({running, elec, xray, word, idx, rail: !document.body.classList.contains('railoff'),
+      position: (camTween?.p1 || camera.position).clone(), target: (camTween?.t1 || controls.target).clone()}),
+    pause: () => { running = false; syncRun(); },
+    clear: () => { closeInfo(); focusOff(true); clearOverview(); },
+    overview: showOverview,
+    home: () => { camTween = null; frameRow(); },
+    focus: (name, demo) => {
+      setElectronics(true);
+      const o = scene.getObjectByName(name);
+      if (!o) return;
+      focusOn(o);
+      // A whole track beneath the linkage makes the motion understandable.
+      if (demo && parts.cam) {
+        parts.cam.traverse(c => { if (c.isMesh) c.visible = true; });
+        word = 'ab'; $('word').value = word; syncWordMeta(); gotoIndex(0, false);
+      }
+    },
+    demo: () => {
+      word = 'ab'; $('word').value = word; syncWordMeta();
+      running = false; syncRun(); gotoIndex(idx === 0 ? 1 : 0, false);
+      return idx;
+    },
+    restore: state => {
+      setElectronics(state.elec); setXray(state.xray);
+      if (word !== state.word || idx !== state.idx) {
+        word = state.word; $('word').value = word; gotoIndex(state.idx, false); syncWordMeta();
+      }
+      running = state.running; syncRun();
+      if (document.body.classList.contains('railoff') === state.rail) $('railToggle').click();
+      startTween(state.position, state.target);
+    },
+  });
+  // Learning panels change the stage's usable rectangle without a window resize.
+  new ResizeObserver(() => resizeStage()).observe($('stage'));
 
   // Verification hook. The plan requires checking that the dots raised in 3D match
   // the encoding table exactly, and that no dot ever rests at a partial height

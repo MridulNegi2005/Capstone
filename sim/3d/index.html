@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Braillix — Mechanism Simulator</title>
+<script>
+try { if (localStorage.getItem('braillix.tour.seen') !== '1') document.documentElement.classList.add('first-visit'); }
+catch { document.documentElement.classList.add('first-visit'); }
+</script>
 
 <!-- Import map so the vendored Three.js addons can say `from 'three'`.
      Everything is local: this runs with no internet, which is the point. -->
@@ -419,6 +423,7 @@
       animation-duration:.01ms!important}
   }
 </style>
+<link rel="stylesheet" href="./learning.css">
 </head>
 <body>
 
@@ -427,6 +432,7 @@
 <div id="grain"></div>
 
 <div id="loading">
+  <div id="introSplash"><div class="splash-dots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div><p>Text you can touch.</p></div>
   <div class="wordmark mono">BRAIL<span style="color:var(--acc)">LIX</span></div>
   <div class="bar" id="loadbar"><i></i></div>
   <div id="loadfile" class="mono"><span id="loadname">initialising</span><span id="loadpct">0%</span></div>
@@ -469,6 +475,7 @@
 
     <div class="rule"></div>
 
+    <h2 class="label">View</h2>
     <div class="btns">
       <button id="btnXray" aria-pressed="false">X-Ray Vision</button>
       <button id="btnElec" aria-pressed="false">Electronics</button>
@@ -485,6 +492,7 @@
     <details id="hwdisc">
       <summary><span class="label">Hardware link</span><span id="hwled" aria-hidden="true"></span></summary>
       <div id="hwbody">
+        <p id="hwHelp">Optional: connect a physical Braillix cell running the matching firmware. USB or Bluetooth opens a device chooser. Once connected, the first cell follows your text and playback controls. No hardware is needed to explore this simulation.</p>
         <div class="btns">
           <button id="btnHw">Connect USB</button>
           <button id="btnBle">Connect Bluetooth</button>
@@ -497,6 +505,8 @@
   <div class="spacer"></div>
 
   <div class="pane" id="paneEnc">
+    <details id="encodingDetails">
+    <summary>Encoding details</summary>
     <div id="decode">
       <h2 class="label">How this letter is encoded</h2>
       <dl class="dl"><dt>character</dt><dd id="e_char">—</dd></dl>
@@ -510,6 +520,7 @@
     <div id="hint">drag to orbit · scroll to zoom · right-drag to pan<br>
       space play/pause · ←→ step · X x-ray · E electronics<br>
       D dimensions · C controls · R reset · ? about</div>
+    </details>
   </div>
 </div>
 
@@ -529,6 +540,8 @@
     <div id="pitchnote">2.6 mm pitch</div>
   </div>
 </div>
+<div id="rowReadout" role="group" aria-label="Characters displayed by each cell" hidden></div>
+<div id="cellBadges" aria-hidden="true"></div>
 
 <!-- the accessible restatement of the readout above; the dots are decorative -->
 <div id="live" class="sr" role="status" aria-live="polite" aria-atomic="true"></div>
@@ -546,8 +559,7 @@
      40-cell display costs several lakh rupees and almost nobody owns one.</p>
   <p>This cell replaces the actuators with <b>one motor and one shaped disc</b>. The disc
      carries six concentric tracks and 64 angular positions; turning it to an angle
-     selects which dots stand up. One moving part instead of six, and the cost falls with
-     it.</p>
+     selects which dots stand up. One motor drives all six dots through guided linkages.</p>
   <dl>
     <dt>cell size</dt><dd>68 &times; 68 &times; 46.5 mm</dd>
     <dt>dot pitch</dt><dd>2.6 mm square, 0.5 mm rise</dd>
@@ -566,7 +578,33 @@
 <div id="info" role="dialog" aria-labelledby="infoTitle" tabindex="-1">
   <button class="x" aria-label="Close">&times;</button>
   <h3 id="infoTitle"></h3><p id="infoBody"></p>
+  <div id="infoFiles"></div>
 </div>
+
+<nav id="learningNav" aria-label="Explore Braillix">
+  <button id="replayTour" disabled>Take a tour</button>
+  <button id="exploreParts" disabled aria-expanded="false" aria-controls="partsPanel">Explore parts</button>
+  <a href="https://github.com/MridulNegi2005/Capstone" target="_blank" rel="noopener noreferrer">GitHub</a>
+</nav>
+<dialog id="learnWelcome" class="learn-card" aria-labelledby="welcomeTitle" aria-describedby="welcomeText" hidden>
+  <h2 id="welcomeTitle">A closer look at Braillix.</h2>
+  <p id="welcomeText">One motor. Six tactile dots. Take a short tour inside the mechanism, then explore the parts and their source files.</p>
+  <div class="learn-actions"><button id="startTour" class="primary">Take a tour</button><button id="skipWelcome">Explore on my own</button></div>
+</dialog>
+<section id="learnPanel" class="learn-card" aria-labelledby="learnTitle" hidden>
+  <div class="learn-top"><span id="learnProgress"></span><button id="learnSkip">Skip tour</button></div>
+  <h2 id="learnTitle" tabindex="-1"></h2><p id="learnText"></p>
+  <button id="learnDemo" hidden>Watch a → b</button>
+  <div class="learn-actions"><button id="learnBack">Back</button><button id="learnNext" class="primary">Next</button></div>
+</section>
+<section id="partsPanel" class="learn-card" aria-labelledby="partsTitle" hidden>
+  <div class="learn-top"><span>Inside the assembly</span><button id="partsClose" aria-label="Close parts">Close</button></div>
+  <h2 id="partsTitle" tabindex="-1">Explore parts</h2>
+  <div id="partPod" role="group" aria-label="Choose a pod"><button data-pod="muscle" aria-pressed="true">Muscle pod</button><button data-pod="brain" aria-pressed="false">Brain pod</button></div>
+  <ul id="partList" aria-label="Choose a component"></ul>
+  <h3 id="partTitle"></h3><p id="partText"></p><div id="partFiles"></div>
+  <footer><a href="https://github.com/MridulNegi2005/Capstone/blob/main/docs/BUILD_PACK.md" target="_blank" rel="noopener noreferrer">Build guide</a><a href="https://github.com/MridulNegi2005/Capstone/issues" target="_blank" rel="noopener noreferrer">Discuss on GitHub</a></footer>
+</section>
 
 <script type="module" src="./app.js"></script>
 </body>
