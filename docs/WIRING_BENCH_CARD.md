@@ -214,7 +214,7 @@ pin instead, because it sits beside the ESP32.
 
 Pin 1 and pin 5 both carry ground for two reasons. Ground carries the current of
 every cell downstream, and ground is also the signal reference for the bus. See
-`docs/BUILD_PACK.md` Part 10.
+the archived `BUILD_PACK.md`, Part 10.
 
 ## 10. Checks before you apply power
 

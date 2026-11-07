@@ -96,58 +96,45 @@ angle is position zero. The controller counts steps from there.
 ## Repository layout
 
     Capstone/
-    |
     +-- cad/                        the design
-    |   +-- scad/                   OpenSCAD source, 35 files. This IS the design.
-    |   |   +-- mech_layout.scad        every shared dimension lives here
-    |   |   +-- braille_cam.scad        the cam disc and its six tracks
-    |   |   +-- linkage.scad            the six followers
-    |   |   +-- linkage_comb.scad       the guide that stops them turning
-    |   |   +-- outer_box.scad          the enclosure
-    |   |   +-- base_plate.scad         holds the motor and the cam
-    |   |   +-- mid_plate.scad          the motor shelf
-    |   |   +-- top_plate.scad          the reading surface
-    |   |   +-- dot_insert.scad         resin tile, six dot holes
-    |   |   +-- esp32_pod_*.scad        housing for the controller
-    |   +-- stl/                    meshes exported from scad/. Print these.
-    |   +-- dxf/                    2D outlines
-    |   +-- models/                 third-party component models
+    |   +-- README.md                   what to print and upload now
+    |   +-- scad/                       OpenSCAD source
+    |   |   +-- mech_layout.scad            shared dimensions for the FDM parts
+    |   |   +-- outer_box.scad              the enclosure, 58 mm tall
+    |   |   +-- base_plate.scad             holds the cam above the motor
+    |   |   +-- top_plate.scad              the reading surface
+    |   |   +-- linkage_comb.scad           the guide that stops the arms turning
+    |   |   +-- braille_cam.scad            the cam disc and its magnet pocket
+    |   |   +-- arm_1.scad .. arm_6.scad    the six followers
+    |   |   +-- print_resin_1_muscle_cell.scad  the resin batch for one cell
+    |   +-- assets/                     exact meshes of the resin parts already made
+    |   +-- stl/                        meshes exported from scad/. Print these.
+    |   +-- images/                     renders of the current parts
+    |   +-- verification/               export logs and collision checks
     |
     +-- firmware/                   what runs on the board
-    |   +-- braille_cell/
-    |   |   +-- braille_cell.ino        the current sketch
-    |   +-- breadboard_test/            earlier bring-up sketch
-    |   +-- braille_mapping.py          text to dot patterns
-    |   +-- braille_converter.py
+    |   +-- braille_cell/braille_cell.ino   the current sketch
+    |   +-- breadboard_test/                the first bring-up sketch
+    |   +-- braille_mapping.py              text to dot patterns
     |
-    +-- sim/                        the simulator
-    |   +-- 3d/
-    |   |   +-- index.html              the page
-    |   |   +-- app.js                  cam maths and animation
-    |   |   +-- braillix.glb            the 3D model
-    |   |   +-- vendor/                 a local copy of Three.js
+    +-- sim/                        the browser simulator
+    |   +-- 3d/                         the page, the 3D models and the cam maths
     |   +-- braillix_params.json        the CAD-to-software bridge
-    |   +-- extract_params.py           writes that file from the OpenSCAD source
     |
-    +-- printing/                   getting parts made
-    |   +-- orca/                       slicer profiles and the slice script
-    |   +-- gcode_kobra_neo_checked/    released G-code
-    |   +-- gcode_HOLD_*/               G-code held back, fit not yet proven
+    +-- printing/orca/              slicer profiles
+    |   +-- kobra_2_neo/                current profile and PRINT_SETTINGS.txt
     |
-    +-- docs/                       the engineering record, 32 notes
-    |   +-- BRAILLE_READABILITY.md      measured against braille standards
-    |   +-- MEASUREMENTS_NEEDED.md      every measurement, in plain words
-    |   +-- BREADBOARD_STEP_BY_STEP.md  the wiring, one wire at a time
-    |   +-- PRINT_DAY_MONDAY.md         the print procedure
-    |   +-- MULTICELL_ARCHITECTURE.md   how to reach more than one cell
-    |   +-- img/                        images used by this README
+    +-- docs/                       the engineering record
+    |   +-- START_HERE.md               which document to read first
+    |   +-- CURRENT_HARDWARE.md         the parts in the current build
+    |   +-- WIRING_BENCH_CARD.md        the cell wiring on one page
+    |   +-- college/                    reports and the presentation
     |
-    +-- tools/
-    |   +-- validate_print_assets.py    checks meshes and G-code before release
-    |
+    +-- tools/                      scripts that rebuild and check the CAD
     +-- renders/                    images, and the scripts that make them
-    +-- print_batch/                files prepared for a print shop
-    +-- _archive/                   superseded work, kept for history
+
+Superseded work is not in this repository. It is in
+`D:/TIET/Capstone_archive/`, with a manifest that records the old path of each file.
 
 ---
 
@@ -155,17 +142,12 @@ angle is position zero. The controller counts steps from there.
 
 ### Design
 
-The tree above names each part. Three of them need a word of explanation.
-
-- **`cad/scad/mech_layout.scad`** is the single source of truth. Dot positions, the
-  vertical stack, spring sizes and arm geometry live here, and every other file
-  includes it. Change a number here, and every part follows. A dimension copied
-  into a second file has caused real errors in this project, so nothing is copied.
-- **`cad/scad/linkage.scad`** builds all six followers at once. Each one has a
-  different arm length, because each foot sits on a different track.
-- **`cad/scad/dot_insert.scad`** builds a small resin tile. It carries the six dot
-  holes and the six spring pockets. Those features are too fine for an FDM printer,
-  so they move out of the top plate and into one small part.
+- **`cad/README.md`** states which files to print and which file to upload to the
+  resin supplier. Read it before you order parts.
+- **`cad/scad/mech_layout.scad`** holds the shared dimensions of the FDM parts.
+  Change a number here, and the box, the plates and the comb follow.
+- **`cad/assets/`** holds exact meshes of the resin cam, arms and tile. The resin
+  parts come from these meshes, so that a new order matches the parts already made.
 
 ### Firmware
 
@@ -179,27 +161,19 @@ The tree above names each part. Three of them need a word of explanation.
 - **`sim/3d/index.html`** and **`sim/3d/app.js`** are the simulator. The app reads
   the cam profile from the parameter file, and drives a 3D model with it.
 - **`sim/braillix_params.json`** is the bridge between the CAD and the software.
-  `sim/extract_params.py` writes it from the OpenSCAD source.
 
 ### Checks
 
-- **`tools/validate_print_assets.py`** checks the printable files. It confirms that
-  each mesh is closed, and that each G-code file matches the mesh it came from.
-- **`printing/orca/slice_kobra_neo_checked.sh`** makes the G-code, and runs those
-  checks.
+- **`tools/build_current_muscle.py`** exports every current part from `cad/scad/`.
+- **`tools/check_current_muscle.py`** tests the parts against each other for
+  collisions.
 
 ### Documentation
 
-The `docs/` directory holds the engineering record. These files are the most
-useful:
-
-- `BRAILLE_READABILITY.md` compares the design against braille standards.
-- `MEASUREMENTS_NEEDED.md` lists every measurement, in plain words.
-- `BREADBOARD_STEP_BY_STEP.md` gives the wiring, one wire at a time.
-- `PRINT_DAY_MONDAY.md` gives the print procedure.
-- `MULTICELL_ARCHITECTURE.md` studies how to reach more than one cell.
-
----
+- `docs/START_HERE.md` names the document to read first.
+- `docs/CURRENT_HARDWARE.md` lists the parts in the current build.
+- `docs/WIRING_BENCH_CARD.md` gives the cell wiring on one page.
+- `docs/BRAILLE_READABILITY.md` compares the design against braille standards.
 
 ## Hardware
 
@@ -304,13 +278,11 @@ file. Change both values before any public demonstration.
 
 ### 6. Rebuild the printable files
 
-Install OpenSCAD to change the design. Then export a part:
+Install the OpenSCAD nightly build to change the design. Then export and check every
+current part from the project root:
 
-    openscad -o cad/stl/braille_cam.stl cad/scad/braille_cam.scad
-
-Check every printable file:
-
-    python tools/validate_print_assets.py --skip-gcode
+    python tools/build_current_muscle.py
+    python tools/check_current_muscle.py
 
 ### 6b. Rebuild the images in this file
 

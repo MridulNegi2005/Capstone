@@ -3,9 +3,6 @@
 GEMINI.md
 .codex-remote-attachments/
 
-# NOTE: .ai-sync/ is NOT ignored — it's the real cross-agent context log
-# (Claude/Codex/Antigravity), meant to be committed and shared.
-
 # --- Python ---
 __pycache__/
 *.py[cod]
@@ -37,7 +34,9 @@ secrets.h
 # Blender frame output — regenerable via renders/braillix_anim.py
 renders/out/
 
-# Legacy G-code: contains G2/G3 arcs the stock Kobra Neo firmware cannot run.
-# The good set is printing/gcode_kobra_neo_checked/ (regenerate with
-# printing/orca/slice_kobra_neo_checked.sh). Delete printing/gcode/ locally.
-printing/gcode/
+
+# cross-agent sync logs: local only, never committed
+.ai-sync/
+
+# tool spew
+00000.log

@@ -1,0 +1,23 @@
+KOBRA 2 NEO / 0.4 NOZZLE / NUMAKERS PETG-HS 1.75 mm
+ONE combined job: ~9 h 33 min / 108 g. Have at least 150 g filament.
+
+Nozzle: 240 C first layer, then 235 C
+Bed: 80 C throughout
+Layer: 0.16 mm; first layer 0.24 mm
+Walls: 5; top/bottom: 6 layers; top minimum thickness 1 mm
+Infill: 40% crosshatch
+Supports / raft / ironing: OFF
+Brim: 8 mm outer; 0.15 mm gap (some brims may join)
+Speed mm/s: first 20; outer 40; inner 60; infill 80; top 30; bridge 25
+Acceleration mm/s2: first 500; outer 800; normal 1000; travel 1500
+Retraction: 1 mm at 35 mm/s; Z-hop 0.2 mm
+Fan: OFF first 3 layers; 30-50% later; bridges 50%
+Flow: 100%; volumetric limit: 8 mm3/s (uncalibrated starting settings)
+Orca hole compensation: +0.10 mm radial
+Scale: 100%, MILLIMETRES. Keep flat. Print BY LAYER.
+
+Auto Level with actual sheet installed before using G-code; verify first layer.
+Use owner's suitable textured PEI. Smooth PEI needs PETG separation layer.
+Dry wet PETG with controlled dryer per spool guidance; keep sealed afterwards.
+Do not auto-orient, scale, enable supports or use sequential/by-object mode.
+These settings are shared by ALL parts. No different wall settings required.
