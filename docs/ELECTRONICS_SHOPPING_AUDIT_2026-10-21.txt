@@ -1,0 +1,53 @@
+BRAILLIX ELECTRONICS SHOPPING AUDIT - 21 OCTOBER 2026
+Scope: TWO muscle cells + ONE ESP32 brain pod. Inventory is records/user statements, not a physical stock count. Nothing ordered or added to cart.
+
+IMPORTANT ARCHITECTURE CORRECTION
+The 20 October project log records selection of 5V-powered MCP23017 breakout modules and one bidirectional I2C logic-level shifter at the brain. This supersedes the 18 October bench card's 3.3V MCP supply scheme for this module build. The custom PCB is an alternative, not an additional board to buy alongside each breakout.
+A level shifter changes SIGNAL voltage; it is not a voltage regulator. The existing regulated 5V adapter powers cells. ESP32 DevKit supplies the shifter's low-voltage reference from its 3V3 pin. No extra AMS1117 board is needed for this selected architecture.
+Hall A3144 supply is5V. Its output pull-up goes to5V when feeding the LOCAL 5V MCP input; it goes to3.3V only when feeding ESP32 directly or a3.3V MCP. Never connect the5V-pulled-up Hall signal directly to ESP32. Earlier chat advice to always pull up to3.3V omitted this architecture distinction. MCP GPIO high threshold can be0.8VDD, so3.3V is not guaranteed high at5V supply.
+Use distinct MCP addresses0x20/0x21; check board jumpers/reset. Check existing I2C pullups before adding more in parallel. Start short-bus bring-up at100kHz; this is not proof all dock lengths/hot-plugging will work. Power off before docking during prototype testing.
+
+CORE PURCHASE / STOCK CHECK
+1. MCP23017 assembled breakout: TWO total. Prior fit candidate is7Semi BO-10180,31x20x7.14mm; a different board needs fit review. No bare SOIC purchase needed.
+2. Bidirectional MOSFET I2C level shifter: ONE installed, buy TWO if convenient (one spare). Robocraze4channel board listedRs20 each. Fit and pin labels checked at assembly. Do not substitute a resistor divider or TXB push-pull translator.
+3. 5V28BYJ-48 + ULN2003 driver: TWO complete sets total. Historical inventory has onlyONE set; if unchanged, addONE matching5V set. Check shaft and driver dimensions against the measured original. No12V variant or unrelated motor upgrade.
+4. Bare confirmed non-latching A3144: TWO installed, aim forFOUR total including spares. User reportsA3144EUA marking on existing module; count that as one only if successfully salvaged/tested. BuyTHREE more if using it, otherwiseFOUR. Robocraze bare 'Hall effect sensor' page describesRM0435latch; do not substitute that. Module page contradictory; not a reliable bare-part procurement source.
+5. Existing4.7k resistors: user hasTHREE, one measured4.63k. Two suffice for Hall pullups, one spare; not a complete bus/spares stock. Buy small4.7k/10k/1k assortment if cheap. Suggested stock totals10each;330ohm optional for LEDs. Not all are installed. Quarter-watt through-hole is fine for these signal roles. Robocraze150resistor/30value box listedRs45; confirm included values.
+6. 100nF ceramic capacitors (104), >=16V: buy10 if absent. Two for Hall supply bypass, extras for local supply decoupling if modules lack it. Keep leads short. Do not automatically duplicate every onboard capacitor.
+7. 100-220uF electrolytic capacitors,10V or16V: buy3-4 as prototype supply-filtering stock. Candidate one per motor-driver supply and one brain; actual fitting and final value depend on droop, inrush and existing capacitance. Observe polarity; these do not repair inadequate power wiring.
+8. Pogo contacts: TWO complete mating interfaces minimum for brain->cell1->cell2. To populate both faces of both muscles plus one brain face requiresFIVE connector halves, of correct mating types; packs sold as pairs may requireTHREE pairs. Check actual stock, contact current rating, polarity, pitch and mounting, not just pin count. Do not place a blind generic connector order.
+9. Power: older records show5V3A regulated adapter plus inline jack already owned. Reuse after output/polarity check. Motor current must not flow through ESP32 regulator. Verify far-cell voltage under simultaneous motor load. Do not power DevKit from external5V and USB simultaneously unless its power-path isolation is established.
+10. Brain navigation buttons: THREE6x6x5mm recorded owned; verify actual stock/fit. No need for new button boards, extra ESP32s, relays or mux for two MCPs.
+
+ASSEMBLY CONSUMABLES - BUY ONLY IF ABSENT
+- Flexible stranded copper wire:22-24AWG for short5V/GND runs;26-28AWG signal wires. Red/black plus three signal colours. Verify terminal compatibility. Thin Dupont jumpers are for bench signals, not the permanent shared motor-power spine.
+- Heatshrink assortment including1-3mm for sensor legs; small cable ties, insulation sheet/Kapton.
+- Flux tub already selected; solder wire; solder wick and/or solder sucker (particularly useful to remove the Hall sensor). Iron tip cleaner and a board holder if absent.
+- Small perfboard for distribution/strain-relieved connections, optional prewired detachable connectors for service access after checking pitch/space. Not necessary to buy both screw terminals and every connector style.
+- Optional correctly-rated inline power switch and input fuse/holder after supply/contact/load selection; these need physical mounting and rating selection, not arbitrary parts added to cart.
+
+AUDIO FOR BRAIN POD
+Recommended cheap first step: ONE active buzzer module; optional second spare. Robocraze active moduleRs27,3.3-5V,34.28x13.29x11.5mm. Suitable for ready/error/button beep patterns; not speech or variable musical pitch. Verify onboard drive circuit and3.3V trigger before connection. Supply it from a power rail, not by sourcing its load current fromGPIO. If bare buzzer instead, select a proper transistor driver and protection appropriate to piezo versus magnetic type; do not assume every cheap buzzer is identical.
+CheapRs14'3.3V small piezo' page has conflicting9V image wording, so it is not the preferred confirmed selection. PassiveRs29module listed soldout.
+Voice alternative: MP3-TF-16P/DFPlayer-style boardRs98 + compatible speaker + microSD(FAT32,within32GB) + wiring. Plays prepared recordings, not automatic arbitrary text-to-speech. Speaker/SD not included in that board price. Robocraze8ohm0.5W40mm speakerRs54listed soldout and needs power limiting with stronger amplifier; not a recommended unqualified pairing. Prefer appropriately rated compact speaker and check dimensions before purchase. True ESP32-generated/streamed speech alternative isMAX98357A I2S amplifier plus rated speaker; software/audio storage still required. No speaker directly onESP32GPIO. Differential speaker outputs must not be grounded.
+Pod CAD has ESP32,buttons,dock and wiring but no qualified speaker mounting/acoustic grille. Neither buzzer nor speaker fit has been collision-checked with current assembled wiring. Full speaker costs space, firmware and mounting changes as well as money. Buzzer is the practical low-cost option now; do not buy a large speaker just because it is cheap.
+
+DO NOT CLAIM EVERYTHING COMPLETE
+- Actual delivered module links/variants and purchase counts remain to be confirmed.
+- Existing taller muscle candidate is conditional on actual driver dimensions/wiring; Hall-slide candidate sensor retention and printing fit unverified.
+- Two-cell firmware needs integration with MCP address selection, step timing, Hall edge homing and fault timeout. Buying boards does not implement it.
+- Springs and hardware are mechanical prerequisites, separately unresolved; electronics completeness is not full mechanism readiness.
+- Older docs/ELECTRONICS_BOM.md has obsolete'no resistors/no chips'claims; do not shop from it as current two-cell BOM.
+
+SOURCES checked21Oct2026 (prices excl shipping, subject to checkout changes)
+Local: .ai-sync/context.md20Oct selections; docs/ELECTRONICS_BOM.md historical inventory; docs/WIRING_BENCH_CARD.md older architecture; electronics/fit_checks/7semi_mcp23017/result.json; brainpodCAD.
+https://robocraze.com/products/4-channel-3-3v-5v-bi-directional-logic-level-converter
+https://robocraze.com/products/active-buzzer-module
+https://robocraze.com/products/resistor-box
+https://robocraze.com/products/dfplayer-mini-mp3-module
+https://robocraze.com/collections/speakers
+https://robocraze.com/products/hall-effect-sensor
+https://7semi.com/7semi-mcp23017-i2c-to-16-io-expander-breakout/?setCurrencyId=1
+https://7semi.com/content/datasheets/BSS138-Breakout.pdf
+https://ww1.microchip.com/downloads/en/DeviceDoc/20001952C.pdf
+https://www.analog.com/en/products/max98357a.html

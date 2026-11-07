@@ -1,0 +1,277 @@
+{
+  "overlap_volumes_mm3": {
+    "cam_base": 0.0,
+    "cam_comb": 0.0,
+    "tile_top": 0.0,
+    "base_shell": 0.0,
+    "comb_base": 0.0,
+    "heads_top": 0.0,
+    "heads_base": 0.0,
+    "retainer_base": 0.0,
+    "magnet_sweep_base": 0.0,
+    "magnet_sweep_comb": 0.0,
+    "comb_arms_0": 5.562001119907104e-05,
+    "top_tile_arms_0": 0.0,
+    "heads_arms_0": 0.0,
+    "comb_arms_0.25": 0.0,
+    "top_tile_arms_0.25": 0.0,
+    "heads_arms_0.25": 0.0,
+    "comb_arms_0.5": 0.0,
+    "top_tile_arms_0.5": 0.0,
+    "heads_arms_0.5": 0.0
+  },
+  "meshes": {
+    "arm_1.stl": {
+      "watertight": true,
+      "consistent_winding": true,
+      "components": 1,
+      "bounds": [
+        [
+          -1.100000023841858,
+          0.0,
+          -0.6000000238418579
+        ],
+        [
+          15.999324798583984,
+          12.19897174835205,
+          1.600000023841858
+        ]
+      ],
+      "sha256": "08e0586e107a88ffbd6efe8a15e955acd95f98e8e90060a347d7de203476466e"
+    },
+    "arm_2.stl": {
+      "watertight": true,
+      "consistent_winding": true,
+      "components": 1,
+      "bounds": [
+        [
+          -1.100000023841858,
+          0.0,
+          -0.6000000238418579
+        ],
+        [
+          19.299999237060547,
+          12.19897174835205,
+          1.600000023841858
+        ]
+      ],
+      "sha256": "4a2ccafc59ab0f138f8eeb074e3e470167314c2712deae2812813c777c3a32db"
+    },
+    "arm_3.stl": {
+      "watertight": true,
+      "consistent_winding": true,
+      "components": 1,
+      "bounds": [
+        [
+          -1.100000023841858,
+          0.0,
+          -0.6000000238418579
+        ],
+        [
+          19.399145126342773,
+          12.19897174835205,
+          1.600000023841858
+        ]
+      ],
+      "sha256": "982bea8c2f0ffd9352afd8c8aac59cd83944c32b45cf783b88f0adb62a683cd2"
+    },
+    "arm_4.stl": {
+      "watertight": true,
+      "consistent_winding": true,
+      "components": 1,
+      "bounds": [
+        [
+          -1.100000023841858,
+          0.0,
+          -0.6000000238418579
+        ],
+        [
+          14.29944896697998,
+          12.19897174835205,
+          1.600000023841858
+        ]
+      ],
+      "sha256": "2e8e3bf16d260027c4df98d84c8131a441bb2d284408c84c42d97a2813db3bad"
+    },
+    "arm_5.stl": {
+      "watertight": true,
+      "consistent_winding": true,
+      "components": 1,
+      "bounds": [
+        [
+          -1.100000023841858,
+          0.0,
+          -0.6000000238418579
+        ],
+        [
+          14.199999809265137,
+          12.19897174835205,
+          1.600000023841858
+        ]
+      ],
+      "sha256": "f4252cca95b75e2896e847aacf059c7e4234babddf94918e8c504eb34fd9aad9"
+    },
+    "arm_6.stl": {
+      "watertight": true,
+      "consistent_winding": true,
+      "components": 1,
+      "bounds": [
+        [
+          -1.100000023841858,
+          0.0,
+          -0.6000000238418579
+        ],
+        [
+          21.099077224731445,
+          12.19897174835205,
+          1.600000023841858
+        ]
+      ],
+      "sha256": "71b03d35e3434ddcc9aeb0ed7f9c1aa88e7d0d2e50e33c2857ad19815b06356d"
+    },
+    "base_plate.stl": {
+      "watertight": true,
+      "consistent_winding": true,
+      "components": 1,
+      "bounds": [
+        [
+          -29.0,
+          -28.0,
+          0.0
+        ],
+        [
+          29.0,
+          28.0,
+          13.0
+        ]
+      ],
+      "sha256": "31a1e9678760e8925ef150d263c4f6b43cd8a3bb1bcb69aabae8d9a69d0ae8ac"
+    },
+    "braille_cam.stl": {
+      "watertight": true,
+      "consistent_winding": true,
+      "components": 1,
+      "bounds": [
+        [
+          -24.200000762939453,
+          -24.200000762939453,
+          0.0
+        ],
+        [
+          24.200000762939453,
+          24.200000762939453,
+          9.0
+        ]
+      ],
+      "sha256": "ab464886cbd9c943d0ec5cdb05db428e2bcb551a414eae99afce7d019b69c0fa"
+    },
+    "dot_insert.stl": {
+      "watertight": true,
+      "consistent_winding": true,
+      "components": 1,
+      "bounds": [
+        [
+          -7.5,
+          -7.5,
+          0.0
+        ],
+        [
+          7.5,
+          7.5,
+          3.200000047683716
+        ]
+      ],
+      "sha256": "89db8ef535bceec3b53f1f8fe3a18fd6e1c7f2917a802f16adec41fc99f840df"
+    },
+    "hall_retainer.stl": {
+      "watertight": true,
+      "consistent_winding": true,
+      "components": 1,
+      "bounds": [
+        [
+          -8.25,
+          14.75,
+          0.0
+        ],
+        [
+          8.25,
+          27.75,
+          1.2999999523162842
+        ]
+      ],
+      "sha256": "cc64a6bb77d982c52d91bef2312c48aec943983f52e9c3e1423b9bb068dcc3dc"
+    },
+    "linkage_comb.stl": {
+      "watertight": true,
+      "consistent_winding": true,
+      "components": 1,
+      "bounds": [
+        [
+          -27.0,
+          -27.0,
+          1.0
+        ],
+        [
+          27.0,
+          27.0,
+          3.7899999618530273
+        ]
+      ],
+      "sha256": "b7e933fd2cc73ad1bddb0226c9e6420454a0fd707927ab3b0a35a207e3868312"
+    },
+    "outer_box.stl": {
+      "watertight": true,
+      "consistent_winding": true,
+      "components": 1,
+      "bounds": [
+        [
+          -34.0,
+          -34.0,
+          0.0
+        ],
+        [
+          34.0,
+          34.0,
+          54.0
+        ]
+      ],
+      "sha256": "d88f239761832cbe78c4f08980578ccdec597bd91ebc467183f61581ed0e9f68"
+    },
+    "print_resin_1_muscle_cell.stl": {
+      "watertight": true,
+      "consistent_winding": true,
+      "components": 9,
+      "bounds": [
+        [
+          -24.200000762939453,
+          -26.94985580444336,
+          -2.3841858265427618e-08
+        ],
+        [
+          139.0990753173828,
+          42.5,
+          9.0
+        ]
+      ],
+      "sha256": "9963dfde86009cf80faf10734c79964071a0f4031f4ac7076bb6ef9eab7b095b"
+    },
+    "top_plate.stl": {
+      "watertight": true,
+      "consistent_winding": true,
+      "components": 1,
+      "bounds": [
+        [
+          -34.0,
+          -34.0,
+          0.0
+        ],
+        [
+          34.0,
+          34.0,
+          4.592613220214844
+        ]
+      ],
+      "sha256": "b7e9730f1759b7f07c8945f45a0c1bef152d0ae68adecaae5db46b7015cc33e2"
+    }
+  }
+}

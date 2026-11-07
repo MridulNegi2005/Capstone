@@ -1,31 +1,8 @@
-// =========================================================
-// BRAILLIX LINKAGE COMB — anti-rotation guide
-//
-// WHY THIS EXISTS. A comb was deleted on 2026-06-04 with the note "linkages are
-// constrained at BOTH ends ... a separate comb guide is unnecessary". They are
-// not: the foot only RESTS on the cam, so nothing resists tangential load.
-// Disproved by hand on 2026-08-24 — on a ramp the cam drags the linkage round
-// the disc instead of lifting it.
-//
-// WHERE IT GRIPS. The FOOT and lower riser, at track radius. The upper riser is
-// already located by the nub in the resin dot insert, so a second constraint out
-// at r=12.8..21.3 is the longest lever available, and out there the six feet are
-// 60deg apart rather than converging on the dot cluster.
-//
-// CLOSED POCKETS, not open channels. An open radial slot holds the foot
-// tangentially but lets it slide along the arm, so the linkage can still yaw.
-// Four walls locate the foot completely. Assembly is unaffected: the arm sits at
-// arm_y and the comb tops out below it, so a linkage lowers straight in.
-//
-// HOW IT IS HELD. The square skirt rests on the base-plate top face, outside the
-// cam pocket. A spigot under the middle drops into that pocket and centres the
-// part; four pegs stop it turning. The middle is relieved so nothing touches the
-// rotating cam.
-//
-// ORIENTATION. One small raised dot near the top-left corner (-X, +Y). Nothing
-// else on the part is proud, so it reads by eye or by fingertip in one touch.
-// =========================================================
-
+// R2 FULL COMB: continuous 2.3mm plate; open foot guides, central arm opening.
+// Rests on base top. Four M2x5 pan-head screws and flat washers hold it down.
+// No centring spigot and no locating pegs. Four screws enter blind PETG pilots.
+// Orient the raised dot toward -X,+Y. Start all screws before tightening evenly.
+// Never use screws to flatten a warped resin part. No countersinks.
 include <mech_layout.scad>
 
 assert(!is_undef(foot_len) && !is_undef(arm_y) && !is_undef(foot_w)
@@ -78,7 +55,7 @@ standoff_d   = standoff_diameter;
 standoff_fit = 0.8;     // 0.4/side, generous - this is clearance, not a fit
 
 peg_xy = comb_peg_xy;
-peg_d  = 2.2;
+peg_d  = 2.4; // M2 clearance; legacy variable name
 
 mark_d   = 1.6;    // orientation dot
 mark_h   = 0.5;
@@ -95,23 +72,25 @@ module rounded_square(side, r, h) {
 module foot_pocket(d) {
     rotate([0, 0, dot_phase_of(d)])
         translate([track_r(dot_track_of(d)) - pocket_l/2, -pocket_w/2, clear_z - 0.1])
-            cube([pocket_l, pocket_w, comb_h + 0.2]);
+            cube([pocket_l, pocket_w, comb_top - (clear_z - 0.1) + 0.2]);
 }
 
 module orientation_dot() {
-    translate([-comb_side/2 + mark_pos, comb_side/2 - mark_pos, comb_top - 0.01])
+    translate([-comb_side/2 + mark_pos, comb_side/2 - 1.5, comb_top - 0.01])
         cylinder(d = mark_d, h = mark_h);
 }
 
+
+// Continuous perimeter, six radial guides, and diagonal locating-peg ribs.
+// Guide fits are unchanged: try a coupon before selecting FDM for this part.
 module linkage_comb() {
     difference() {
         union() {
-            translate([0, 0, rest_z]) rounded_square(comb_side, corner_r, comb_h);
+            translate([0,0,rest_z]) rounded_square(comb_side,corner_r,comb_h);
             orientation_dot();
         }
         // relieve the underside over the cam so nothing touches the bumps
-        translate([0, 0, rest_z - 0.1])
-            cylinder(r = spigot_r, h = clear_z - rest_z + 0.1);
+        // No negative-height relief: the blank starts above the 0.5mm bumps.
         // central bore — the six arms converge here
         translate([0, 0, rest_z - 0.1]) cylinder(r = bore_r, h = comb_h + 0.2);
         for (d = [1:6]) foot_pocket(d);

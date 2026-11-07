@@ -67,8 +67,8 @@ include <mech_layout.scad>   // dot positions, arm geometry, spring seat positio
 // ever ran front/back — and its skirt stopped at x=±30, leaving a bare 1mm lip with
 // a hard step at each corner. The skirt's only job was locating the cap, which the
 // four M2.5 screws already do, so it was redundant as well as ugly. Square it off.
-plate_length    = 68.0;   // X — flush with box outer (±34)
-plate_width     = 68.0;   // Y — flush with box outer (±34)
+plate_length = 68;   // X — flush with box outer (±34)
+plate_width = 68;   // Y — flush with box outer (±34)
 plate_thickness = 4.0;    // Z — cap thickness (3mm spring pocket + 1mm floor)
 corner_radius   = 3.0;    // matches box outer fillet
 // finger_pad_depth comes from mech_layout.scad (the linkage height depends on it)

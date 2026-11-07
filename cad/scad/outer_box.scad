@@ -3,8 +3,8 @@ include <stack_options.scad>
 include <motor_spec.scad>
 include <dock_interface.scad>
 
-shell_length      = 68;
-shell_width       = 68;
+shell_length = 68;
+shell_width = 68;
 // =========================================================
 // v8.5 - THE MOTOR NOW SITS ON THE BOX FLOOR. STACK DROPPED 14mm.
 //
@@ -24,7 +24,7 @@ shell_width       = 68;
 // Every gap above the motor is unchanged, so the tower simply translated down.
 // link_total_h stays 12.2mm and the already-ordered resin linkages stay valid.
 // =========================================================
-shell_height      = 46.5 + stack_repair_raise;   // v8.8: +2.5, hub_h 4 -> 6.5
+shell_height = 58;   // v8.8: +2.5, hub_h 4 -> 6.5
 // v6.2: total height stays 58 = 54mm walls + 4mm over-cap (top_plate) sitting on top.
 // Only the OUTER shell extrusion is shortened to wall_top_h; every other feature
 // (mag_z, chevron at shell_height-22, ledge, bosses, cavity) still references
@@ -35,8 +35,8 @@ wall_thickness    = 4;
 assert(wall_thickness == dock_wall_t,
        "Cell wall and shared dock receiver wall thickness have drifted");
 floor_thickness   = 4;
-internal_length   = 60;
-internal_width    = 60;
+internal_length = 60;
+internal_width = 60;
 // v8.0: 16 -> 14. THE 2mm STACK ERROR, FIXED.
 // The mid-plate cannot sit level with its 2mm ledge — its edge (29.75) is wider
 // than the ledge opening (28.5), so it rests ON TOP of it. The old arithmetic
@@ -55,7 +55,7 @@ elec_pocket_h     = 14;
 // Sizes come from motor_spec.scad. The cup stands on the box floor, so it prints
 // vertically with no supports - the reason it is here and not hanging off the
 // base plate, which would print in mid-air.
-motor_seat_z      = floor_thickness;   // 4 - the can bottom rests on the floor itself
+motor_seat_z = 15.5;   // 4 - the can bottom rests on the floor itself
 motor_cup_bore    = motor_can_dia + 1.4;               // 0.7mm/side around the can
 motor_cup_od      = motor_cup_bore + 5.0;              // 2.5mm wall
 motor_cup_top     = motor_seat_z + 8;                  // 8mm of grip on the can
@@ -76,8 +76,8 @@ motor_wire_notch_w = motor_wire_block_w + 2.0;
 // analysis script that HARD-CODED elec_pocket_h = 16 instead of reading the file.
 // Ironic, given how much of this project's history is duplicated-constant bugs.
 // If you re-derive this stack, read every value from source. Do not trust prose.
-base_plate_z      = 29.5;  // 4(floor) + 19(motor) + 2(boss) + 6.5(hub) - 3(pocket) + 1
-boss_height       = 25.5;  // boss top = z29.5 = base_plate bottom
+base_plate_z = 41;  // 4(floor) + 19(motor) + 2(boss) + 6.5(hub) - 3(pocket) + 1
+boss_height = 37;  // boss top = z29.5 = base_plate bottom
 
 // Magnetic snap — NeFeB disc glue-in pockets
 // v6.1: real magnets measured 8mm dia × 1mm thick (CAD previously assumed 3×2).
@@ -179,9 +179,9 @@ module floor_wire_gutters() {
     // extend 0.1 below floor to avoid coplanar
     gutter_w = 7;
     gutter_d = 2.5;
-    translate([-18, -20, floor_thickness - 0.1])
+    translate([-18, -20, floor_thickness - 0.2])
         cube([gutter_w, 40, gutter_d + 0.1]);
-    translate([18 - gutter_w, -20, floor_thickness - 0.1])
+    translate([18 - gutter_w, -20, floor_thickness - 0.2])
         cube([gutter_w, 40, gutter_d + 0.1]);
 }
 
@@ -266,8 +266,7 @@ union() {
             rounded_box(internal_length, internal_width, shell_height, 1.0);
 
         // 16mm Deep Electronics Pocket (extends 0.1 below floor to avoid coplanar)
-        translate([0, 0, floor_thickness - 0.1 + (elec_pocket_h + 0.1)/2])
-            cube([36, 46, elec_pocket_h + 0.1], center=true);
+        // Floor-mounted motor: obsolete under-motor electronics recess removed.
 
         // Floor wire gutters (subtracted from pocket floor)
         floor_wire_gutters();
@@ -370,16 +369,19 @@ union() {
     muscle_board_bosses();
 
     // Wire hooks (motor wire bundle + pogo bundles)
-    cable_hook(-14, -20, floor_thickness);
+    // board clearance
     cable_hook(-14,  20, floor_thickness);
-    cable_hook( 14, -20, floor_thickness);
-    cable_hook( 14,  20, floor_thickness);
+    // board clearance
+    // board clearance
 
     // Bottom-edge orientation ridge — v6.1 rebuilt.
     // The old r=0.8 sphere hull sat at y=-32.5, INSIDE the 4mm wall — it never
     // appeared on the print at all. New: 45°-diamond ridge ON the outer front face,
     // ~1.4mm proud × 20mm long. Self-supporting on a vertical wall (both faces 45°).
-    translate([0, -shell_width/2, 5])
+    translate([0, -shell_width/2 + 1.42, 5])
         rotate([45, 0, 0])
         cube([20, 2, 2], center=true);
 }
+
+include <board_cradle.scad>
+board_cradle();

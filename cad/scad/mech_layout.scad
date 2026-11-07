@@ -61,14 +61,14 @@ function track_r(t) = inner_radius + t * (track_width + track_gap) + track_width
 // =========================================================
 cam_disc_dia        = 2 * (inner_radius + tracks_n * (track_width + track_gap));
 cam_pocket_diameter = cam_disc_dia + 1.6;   // 0.8mm clearance per side
-cam_pocket_depth    = 3;
+cam_pocket_depth = 3.4;
 
 base_length = 58;      // X - set by the motor ear holes, unchanged
 // Y: must clear the cam pocket with real wall on both sides, and still fit the
 // 60mm cavity. (56 - 50)/2 = 3mm of plate either side of the pocket.
 base_width  = 56;
 
-standoff_x        = 26.0;
+standoff_x = 26;
 standoff_y        = 21.0;
 standoff_diameter = 6.0;
 
@@ -153,38 +153,10 @@ function track_phase(t) =
                         dot_phase[5];
 //  track 0->0deg  1->60  2->120  3->180  4->240  5->300
 
-// --- HOMING MAGNET + HALL SENSOR (v7.5) ---
-// SHARED by braille_cam.scad (cuts the pocket) and base_plate.scad (places the
-// sensor under it). These used to be declared twice, in two files, and drifted:
-// the cam had the magnet at r=17.35 while the base plate had the sensor at y=20.
-//
-// WHY THE MAGNET IS 1mm THICK, NOT 2mm:
-// the disc floor is only disk_base_thickness = 2.0mm. A 2mm-deep pocket removed
-// the ENTIRE floor — a through-hole, not a pocket. At r=17.35 +/-1.6 it spanned
-// r = 15.75..18.95, cratering tracks 2, 3 AND 4. A linkage foot crossing that
-// hole once per revolution drops in and jams the mechanism.
-// A 1mm magnet in a 1.2mm pocket leaves 0.8mm of floor under the track. The
-// magnet still sits flush with the disc underside, so coupling is unchanged.
-//
-// WHY IT CANNOT SIMPLY MOVE INBOARD (the other obvious fix):
-// the sensor has to sit under the magnet, in the base plate. The motor can
-// (dia 29 at x=-8) occupies y = +/-12.1 at x=0, so the sensor must be at
-// r > ~14 to clear it. Tracks start at r=12 and the disc ends at r=22.1 with
-// only 0.1mm gaps between tracks. There is nowhere outside a track to put it.
-// Keeping the floor intact is the only fix. Do not "tidy" this back to 2mm.
-// 2026-09-01: 3mm -> 8mm. Mridul does not own 3x1mm magnets and does own 8x1mm,
-// which are the same ones the dock uses. Buying a second size for one pocket is
-// not worth it.
-//
-// CONSEQUENCE FOR FIRMWARE, and it matters: an 8mm magnet at r=17.35 subtends
-// 26 degrees, which is 4.7 states wide. Homing on the CENTRE of that window is
-// useless. Home by always rotating the SAME direction and latching the FIRST
-// edge of the field; an edge is repeatable to about one step.
-homing_mag_dia   = 8.0;    // MEASURED - the 8x1mm discs already on hand
-homing_mag_thk   = 1.0;    // 8x1mm, same part as the dock magnets
-homing_mag_fit   = 0.2;    // glue/print clearance, added to dia and thickness
-homing_mag_r     = 17.35;  // radius of the magnet centre on the disc
-homing_mag_angle = 90;     // +Y axis
+// Current magnet:3x1.5mm; mesh-backed cam pocket3.2x1.4, roof0.6.
+// Magnet projects0.1..0.2 below disc; verify actual switching and installed projection.
+homing_mag_dia=3; homing_mag_thk=1.5; homing_mag_fit=0.2;
+homing_mag_r=17.35; homing_mag_angle=90;
 
 // --- SHARED VERTICAL STACK (world z, mm from outer-box floor) ---
 cam_flat_z    = 33.5 + stack_repair_raise;   // v8.8: +2.5, hub_h 4 -> 6.5 (was 45 pre-v8.5)

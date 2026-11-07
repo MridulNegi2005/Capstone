@@ -1,0 +1,1 @@
+ONE MUSCLE CELL: upload print_resin_1_muscle_cell.stl once. Nine separate parts: cam1, arms6, tile1, comb1. Millimetres; 100% scale. No brain caps. Supplier must orient/support resin parts; this is not a ready-to-run resin machine file. See README for 3x1.5mm magnet projection and assembly checks.

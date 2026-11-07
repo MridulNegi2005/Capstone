@@ -149,24 +149,7 @@ module main_body() {
 motor_body_x_offset = -7.5;   // MEASURED M3: shaft-to-can centre offset
 
 module motor_features() {
-    // 1. Shaft clearance through-hole — STAYS at x=0 (cam disc centred here)
     cylinder(d=shaft_clearance, h=20, center=true);
-
-    // 2. Motor body seating pocket — measured offset -7.5mm (body centre ≠ shaft centre)
-    translate([motor_body_x_offset, 0, -0.1])
-        cylinder(d=motor_body_diameter, h=motor_seat_depth + 0.1);
-
-    // 3. Motor mounting ear pilots — same measured offset (ears fixed to body)
-    //    Left ear:  x = -7.5 - 34.7/2 = -24.85mm  (outside cam pocket → 5mm of thread)
-    //    Right ear: x = -7.5 + 34.7/2 = +9.85mm   (inside cam pocket  → 2mm of thread)
-    // Blind from BELOW so nothing breaks the cam-pocket floor at the left ear and
-    // nothing protrudes above the plate at the right ear. The right pilot does open
-    // into the cam pocket (only 2mm of material there) — harmless, because the
-    // tracks start at r=12 and no linkage foot ever travels over r=9.5.
-    for(sx = [-1, 1]) {
-        translate([sx * (motor_mount_spacing / 2) + motor_body_x_offset, 0, -0.1])
-            cylinder(d=motor_mount_pilot, h=motor_mount_pilot_depth + 0.1);
-    }
 }
 
 module cam_features() {
@@ -180,7 +163,7 @@ module cam_features() {
 // M11b equals the available 1.6mm recess exactly. This passes the geometric guard,
 // but leaves zero print tolerance: dry-fit and lightly clean/sand the pocket before
 // gluing. Do not deepen it without re-checking the remaining hall_floor_t.
-assert(hall_pocket_h >= hall_body_t,
+assert(hall_pocket_h + hall_underhang >= hall_body_t + 0.09,
        "Hall sensor is thicker than the base plate can recess it. Either reduce \
 hall_floor_t, or move the sensor outboard of the cam pocket and re-site the magnet.");
 
@@ -237,11 +220,21 @@ module base_plate() {
                 hall_sensor_island(stack_repair_raise, base_thickness);
             }
             motor_features();
+            // R2 blind pilots: from z=5 top down to z=1; never into cam pocket.
+            // M2x5 + 0.3..0.5mm washer + 2.3mm comb => 2.2..2.4mm engagement.
+            for(sx=[-1,1],sy=[-1,1]) translate([sx*comb_peg_xy,sy*comb_peg_xy,1])
+                cylinder(d=1.6,h=4.1,$fn=48);
+            // The top-post hole alone does not cut the separate plate body.
+            for(sx=[-1,1],sy=[-1,1]) translate([sx*standoff_x,sy*standoff_y,-0.1])
+                cylinder(d=2.9,h=base_thickness+0.2,$fn=40);
+            // Retainer pilots outside the cam pocket; M2 screws from underneath.
+            for(sx=[-1,1]) translate([sx*6,25.5,-0.1])
+                cylinder(d=1.6,h=3.2,$fn=24);
             cam_features();
             hall_sensor_pocket(stack_repair_raise, base_thickness, base_width);
         }
         standoffs();
-        comb_pegs();
+        // R2: four screw pilots replace the locating pegs.
     }
 }
 

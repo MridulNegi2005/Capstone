@@ -1,0 +1,1 @@
+UPLOAD ONCE: ONE muscle cell. Nine separate parts:1cam,6arms,1tile,1lightcomb with mergedcorners. mm,100%scale. Replaces solid-comb batch for this order; do not print both. Supplier must orient/support. Cam unchanged for3x1.5mm magnet; keep installedprojection<=0.2mm incladhesive. Lightcomb physicalstiffness and printfit untested.

@@ -191,7 +191,10 @@ module lid_screw_bosses() {
     for(sx = [-1, 1]) {
         translate([sx * lid_screw_x, 0, shell_h - 8])
             difference() {
-                cylinder(d=lid_boss_d, h=8, $fn=30);
+                union() {
+                    cylinder(d=lid_boss_d,h=8,$fn=30);
+                    translate([0,0,-3]) cylinder(d1=1.2,d2=lid_boss_d,h=3.05,$fn=30);
+                }
                 translate([0, 0, -1])
                     cylinder(d=lid_boss_tap, h=10, $fn=20);
                 // brass insert bore at the TOP, where the lid screw enters

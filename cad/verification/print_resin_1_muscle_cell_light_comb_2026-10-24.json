@@ -1,0 +1,10 @@
+{
+  "parts": 9,
+  "watertight": true,
+  "consistent_winding": true,
+  "volume_mm3": 8404.819619532833,
+  "previous_volume_mm3": 10204.617683055236,
+  "sha256": "f6adb2a33f501a00b90d6ee579f247de4dcd0c85f1812d0da91816b57dc27aa3",
+  "contents": "1 cam for3x1.5magnet,6arms,1tile,1lightcomb",
+  "physical_strength": "unverified"
+}

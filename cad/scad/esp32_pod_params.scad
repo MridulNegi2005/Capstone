@@ -21,8 +21,8 @@ include <dock_interface.scad>
 // physically would not go in. 68 makes the internal cavity 60 (+/-30) and, as a
 // bonus, makes the pod a 68x68x58 cube exactly matching a cell, so the docked
 // chain really is a uniform row of bricks. The +X dock face is unchanged.
-pod_length       = 68;     // X — depth (USB end to dock end)
-pod_width        = 68;     // Y — matches cell shell_width for uniform chain look
+pod_length = 68;     // X — depth (USB end to dock end)
+pod_width = 68;     // Y — matches cell shell_width for uniform chain look
 // v8.5: 58 -> 44, following the cell. The pod was never full - floor 3, wire tail
 // 5, header 8.5, board 1.6, tallest component ~4, clearance 3 and a 4mm lid come to
 // about 29mm. At 44 there is still 15mm spare.
@@ -35,7 +35,7 @@ lid_h            = pod_wall;   // 4mm lid
 
 // Internal cavity
 pod_int_length   = pod_length - 2 * pod_wall;  // 56mm
-pod_int_width    = pod_width  - 2 * pod_wall;  // 60mm
+pod_int_width = pod_width - 2 * pod_wall;  // 60mm
 
 // --- ESP32 DEVKIT V1 MOUNTING (horizontal on female header sockets) ---
 // Board: ~51.5 × 28mm, 15 pins/side, measured pin-row pitch 25.6mm (M21)
