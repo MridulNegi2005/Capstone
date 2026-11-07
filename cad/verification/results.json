@@ -149,10 +149,10 @@
         [
           29.0,
           28.0,
-          12.039999961853027
+          11.960000038146973
         ]
       ],
-      "sha256": "53254f322997fc1810ad0763aefa6d6eb135ef1e1c823565546bdd1d5a7d68ab"
+      "sha256": "9e738ea4c3d8cfef0530b3722a8290680008ff3d6c974d697d1d4b5f90b24ef7"
     },
     "braille_cam.stl": {
       "watertight": true,
@@ -206,7 +206,61 @@
           2.799999952316284
         ]
       ],
-      "sha256": "f699a3494e66d46300cca18958385a0fbb82a03d7f3e97a5250bc4653c1d04e9"
+      "sha256": "3078499d539d150659cc6f0d63978634c5e1a870a23acbaa824b19a8e492592e"
+    },
+    "finger_sheet_t072.stl": {
+      "watertight": true,
+      "consistent_winding": true,
+      "components": 1,
+      "bounds": [
+        [
+          -29.0,
+          -28.0,
+          0.0
+        ],
+        [
+          29.0,
+          28.0,
+          2.799999952316284
+        ]
+      ],
+      "sha256": "800cf6ed3d4166ffa7c4afe565ec2e5e65996b5a0745a4988a5067168a2e9851"
+    },
+    "finger_sheet_t088.stl": {
+      "watertight": true,
+      "consistent_winding": true,
+      "components": 1,
+      "bounds": [
+        [
+          -29.0,
+          -28.0,
+          0.0
+        ],
+        [
+          29.0,
+          28.0,
+          2.799999952316284
+        ]
+      ],
+      "sha256": "3078499d539d150659cc6f0d63978634c5e1a870a23acbaa824b19a8e492592e"
+    },
+    "finger_sheet_t104.stl": {
+      "watertight": true,
+      "consistent_winding": true,
+      "components": 1,
+      "bounds": [
+        [
+          -29.0,
+          -28.0,
+          0.0
+        ],
+        [
+          29.0,
+          28.0,
+          2.799999952316284
+        ]
+      ],
+      "sha256": "9094b24fbb233ee6026250683f0e758cd20e9351261545875aec9776d2c473e5"
     },
     "hall_retainer.stl": {
       "watertight": true,

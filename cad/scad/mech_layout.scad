@@ -350,8 +350,10 @@ insert_h      = 3.2;   // = reading surface height above the plate underside
 // directly above the foot, so the force goes straight into the cam and does not
 // tilt the arm in its guides. The posts are shortened by the frame thickness, so
 // the top plate and the reading surface do not move.
-finger_frame_t = 0.96;   // clamped frame, 6 layers at 0.16. Fixed for every variant.
-finger_t       = 0.80;   // tongue: 0.64 / 0.80 / 0.96 tune the force. Top flush with frame.
+finger_frame_t = 1.04;   // clamped frame: 0.24 first layer + 5 x 0.16. Fixed for every variant.
+finger_t       = 0.88;   // tongue: 0.72 / 0.88 / 1.04 tune the force. Top flush with frame.
+                         // Every value is 0.24 + n x 0.16, so the slicer cannot round it.
+                         // 0.88 is the default: after PETG relaxes it still gives ~0.08 N dot down.
 finger_w       = 3.0;
 finger_len     = 14.0;   // root to ridge centre
 finger_slot    = 0.8;    // cut around each tongue
