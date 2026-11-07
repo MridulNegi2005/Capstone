@@ -1,5 +1,5 @@
 KOBRA 2 NEO / 0.4 NOZZLE / NUMAKERS PETG-HS 1.75 mm
-ONE combined job: ~9 h 33 min / 108 g. Have at least 150 g filament.
+Print time and filament use: re-slice after the tall-box parts are final. The old value (9 h 33 min, 108 g) was for the old box.
 
 Nozzle: 240 C first layer, then 235 C
 Bed: 80 C throughout
@@ -14,6 +14,7 @@ Retraction: 1 mm at 35 mm/s; Z-hop 0.2 mm
 Fan: OFF first 3 layers; 30-50% later; bridges 50%
 Flow: 100%; volumetric limit: 8 mm3/s (uncalibrated starting settings)
 Orca hole compensation: +0.10 mm radial
+Precise Z height: ON (the top of each part lands at its exact CAD height)
 Scale: 100%, MILLIMETRES. Keep flat. Print BY LAYER.
 
 The start G-code runs Auto Level (G29) by itself before every print. Verify the first layer.
@@ -42,5 +43,14 @@ Do these steps before the print:
 
 STRINGS AND HAIRS: wet PETG causes them. Dry the spool at 65 C for 4 to 6 hours before the print.
 
-FINGER SHEETS: print them flat, ridges up, as in the STL. Do not turn them over.
-The bending lines must run along each tongue. Check this in the Orca preview.
+FINGER SHEETS: print all three files in the same job:
+  finger_sheet_t072.stl (soft), finger_sheet_t088.stl (normal), finger_sheet_t104.stl (stiff).
+Print them flat, ridges up, as in the STL. Do not turn them over.
+Each tongue is only 3 mm wide, so the printer makes it from wall lines only.
+These lines run along the tongue. This is the strong direction. Do not change the wall count.
+
+REMOVE THE PARTS ONLY WHEN THE BED IS COLD
+1. Let the bed cool below 35 C. This takes about 15 minutes.
+2. Take the flexible sheet off the printer. Bend the sheet gently. The parts come off.
+3. Do not pull the finger sheets off a hot bed. Hot PETG bends and stays bent.
+4. Do not use a scraper under the finger sheets. Peel them slowly from one corner.
