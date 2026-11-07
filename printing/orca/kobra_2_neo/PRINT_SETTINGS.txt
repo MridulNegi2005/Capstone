@@ -21,3 +21,23 @@ Use owner's suitable textured PEI. Smooth PEI needs PETG separation layer.
 Dry wet PETG with controlled dryer per spool guidance; keep sealed afterwards.
 Do not auto-orient, scale, enable supports or use sequential/by-object mode.
 These settings are shared by ALL parts. No different wall settings required.
+
+FIRST LAYER FIX (the last prints had bad bottoms and good tops)
+Cause: the nozzle was too high on the first layers. The lines did not press into the bed.
+Do these steps before the print:
+1. Let the bed cool. Clean the sheet with isopropyl alcohol and a clean tissue. Do not touch it after.
+2. Heat the bed to 80 C. Wait 5 minutes.
+3. Run Auto Level from the printer menu. Keep the same sheet on the bed.
+4. Start the print. Watch the first minute (the purge line and the brim).
+5. Look at the lines. Good lines are flat and touch each other with no gaps.
+6. If the lines are round, or you see gaps between them, the nozzle is too high.
+   Use Z-offset (baby-step) during the print. Lower it by 0.05 mm. Wait 10 seconds. Look again.
+7. If the lines are very thin, rough, or the nozzle scrapes the bed, the nozzle is too low.
+   Raise it by 0.05 mm.
+8. Stop when the lines are flat. Do not change other settings.
+9. Write down the Z-offset value. Use it for the next print.
+
+STRINGS AND HAIRS: wet PETG causes them. Dry the spool at 65 C for 4 to 6 hours before the print.
+
+FINGER SHEETS: print them flat, ridges up, as in the STL. Do not turn them over.
+The bending lines must run along each tongue. Check this in the Orca preview.
