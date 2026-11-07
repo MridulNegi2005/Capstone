@@ -18,7 +18,14 @@
     "heads_arms_0.25": 0.0,
     "comb_arms_0.5": 0.0,
     "top_tile_arms_0.5": 0.0,
-    "heads_arms_0.5": 0.0
+    "heads_arms_0.5": 0.0,
+    "sheet_top_tile": 0.0,
+    "sheet_base": 0.0,
+    "sheet_comb": 0.0,
+    "sheet_heads": 0.0,
+    "sheetflat_arms_0": 0.0,
+    "sheetflat_arms_0.25": 0.0,
+    "sheetflat_arms_0.5": 0.0
   },
   "meshes": {
     "arm_1.stl": {
@@ -142,10 +149,10 @@
         [
           29.0,
           28.0,
-          13.0
+          12.039999961853027
         ]
       ],
-      "sha256": "31a1e9678760e8925ef150d263c4f6b43cd8a3bb1bcb69aabae8d9a69d0ae8ac"
+      "sha256": "53254f322997fc1810ad0763aefa6d6eb135ef1e1c823565546bdd1d5a7d68ab"
     },
     "braille_cam.stl": {
       "watertight": true,
@@ -182,6 +189,24 @@
         ]
       ],
       "sha256": "89db8ef535bceec3b53f1f8fe3a18fd6e1c7f2917a802f16adec41fc99f840df"
+    },
+    "finger_sheet.stl": {
+      "watertight": true,
+      "consistent_winding": true,
+      "components": 1,
+      "bounds": [
+        [
+          -29.0,
+          -28.0,
+          0.0
+        ],
+        [
+          29.0,
+          28.0,
+          2.799999952316284
+        ]
+      ],
+      "sha256": "f699a3494e66d46300cca18958385a0fbb82a03d7f3e97a5250bc4653c1d04e9"
     },
     "hall_retainer.stl": {
       "watertight": true,
@@ -255,6 +280,24 @@
       ],
       "sha256": "9963dfde86009cf80faf10734c79964071a0f4031f4ac7076bb6ef9eab7b095b"
     },
+    "print_resin_1_muscle_cell_light_comb_2026-10-24.stl": {
+      "watertight": true,
+      "consistent_winding": true,
+      "components": 9,
+      "bounds": [
+        [
+          -24.200000762939453,
+          -27.0,
+          -2.3841858265427618e-08
+        ],
+        [
+          139.0990753173828,
+          42.5,
+          9.0
+        ]
+      ],
+      "sha256": "f6adb2a33f501a00b90d6ee579f247de4dcd0c85f1812d0da91816b57dc27aa3"
+    },
     "top_plate.stl": {
       "watertight": true,
       "consistent_winding": true,
@@ -271,7 +314,7 @@
           4.592613220214844
         ]
       ],
-      "sha256": "b7e9730f1759b7f07c8945f45a0c1bef152d0ae68adecaae5db46b7015cc33e2"
+      "sha256": "54d3ecc809a0e563fcb763dc5b4e14b505329839050f35699429eee4d5a62179"
     }
   }
 }

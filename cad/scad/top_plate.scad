@@ -49,6 +49,7 @@
 // travels up and down through the middle of it.
 // =========================================================
 
+use <finger_sheet.scad>
 include <mech_layout.scad>   // dot positions, arm geometry, spring seat positions
 
 // --- 1. PARAMETERS ---
@@ -131,33 +132,9 @@ module mounting_holes() {
 }
 
 // --- 3. MAIN ASSEMBLY ---
-
-difference() {
-    union() {
-        // A. Over-cap body — full box footprint (68×68), underside z=0, top z=4
-        rounded_rect(plate_length, plate_width, corner_radius, plate_thickness);
-    }
-
-    // B. Finger pad recess (ergonomic boundary on top face)
-    translate([0, 0, plate_thickness - finger_pad_depth])
-        rounded_rect(plate_length - 6, plate_width - 6, corner_radius, finger_pad_depth + 1);
-
-    // C. Pocket for the resin dot insert (dot_insert.scad)
-    insert_pocket();
-
-    // D. Mounting holes (4 corners, M2.5)
-    mounting_holes();
-}
-
-// --- 4. TACTILE FEATURES ---
-
-// Thumb ridge — bottom edge (closest to user's body, audit 5)
-// Relocated from left edge: ergonomic resting position for standard orientation
-translate([0, -plate_width/2 + 1.5, plate_thickness])
-    hull() {
-        translate([-4, 0, 0]) sphere(r=0.6, $fn=20);
-        translate([ 4, 0, 0]) sphere(r=0.6, $fn=20);
-    }
+// Built once, in top_plate() below. This file used to build the plate twice, at top
+// level and in the module, which is how an earlier bore fix reached only one copy.
+top_plate();
 
 // --- 5. SPRING SPEC (for BOM / sourcing) ---
 // OD:  2.0mm micro compression spring, 0.3mm stainless wire (STOCK SIZE)
@@ -185,6 +162,8 @@ module top_plate() {
             rounded_rect(plate_length - 6, plate_width - 6, corner_radius, finger_pad_depth + 1);
         insert_pocket();
         mounting_holes();
+        // Room for the finger-sheet tongues to flex up when a dot rises.
+        translate([0, 0, -0.01]) linear_extrude(finger_relief + 0.01) finger_relief2d();
     }
     // Thumb ridge — bottom edge
     translate([0, -plate_width/2 + 1.5, plate_thickness])

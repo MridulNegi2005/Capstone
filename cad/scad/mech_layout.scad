@@ -337,3 +337,36 @@ insert_h      = 3.2;   // = reading surface height above the plate underside
 // so the spring is THREADED over the dome by twisting it on (Mridul's own
 // "turn and turn" idea) — trivial interference for a steel coil, and it lets
 // the dot stay full braille size instead of being shrunk to clear the bore.
+
+// --- RETURN SPRING: PRINTED FINGER SHEET (2026-11-08) ---
+// Replaces the six coaxial coil springs. A 0.30 mm-wire coil spring at this size
+// needs about 85 mN*m from a 28BYJ-48 that gives about 30, so the cell stalls.
+// Each spring presses its foot onto the turning cam and drags like a brake pad.
+// The return force only has to bring a dot down; the cam, not the spring, holds
+// a raised dot against the reading finger. So a soft spring is correct.
+//
+// One flat PETG sheet sits on the four corner posts under the top plate. Six
+// tongues are cut into it. A ridge under each tongue tip presses on its arm's beam
+// directly above the foot, so the force goes straight into the cam and does not
+// tilt the arm in its guides. The posts are shortened by the frame thickness, so
+// the top plate and the reading surface do not move.
+finger_frame_t = 0.96;   // clamped frame, 6 layers at 0.16. Fixed for every variant.
+finger_t       = 0.80;   // tongue: 0.64 / 0.80 / 0.96 tune the force. Top flush with frame.
+finger_w       = 3.0;
+finger_len     = 14.0;   // root to ridge centre
+finger_slot    = 0.8;    // cut around each tongue
+finger_preload = 0.3;    // ridge pushes the beam this far below its free height
+finger_relief  = 1.0;    // top-plate pocket depth above each tongue
+finger_tip_in  = 1.5;    // ridge centre, measured from the foot toward the dot
+// [arm, tongue direction (deg, sheet plane)] from a clash search: every tongue at
+// full length, at least 6.3 mm of sheet between any two slots.
+finger_dirs    = [40, 120, 35, 45, 25, 30];
+
+beam_top_z     = cam_flat_z + arm_y + arm_h;        // arm beam top, dot down
+function finger_tip(d) =
+    let(f = foot_pos(d), a = (dot_pos(d) - f) / norm(dot_pos(d) - f)) f + a * finger_tip_in;
+function finger_axis(d) = [cos(finger_dirs[d - 1]), sin(finger_dirs[d - 1])];
+
+assert(finger_t <= finger_frame_t, "tongue is thicker than the clamped frame");
+assert(plate_under_z - finger_frame_t > beam_top_z + pin_lift + 0.4,
+       "finger frame would touch an arm beam with the dot up");

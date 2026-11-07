@@ -82,7 +82,9 @@ motor_mount_pilot_depth = stack_option_a ? base_thickness + 0.1
 // Stack above plate: 8mm standoff + 3mm top plate = 11mm
 // Linkage total height = 12mm, foot on cam bump (0.2mm below plate top) → nub at +0.8mm
 // (standoff_diameter comes from mech_layout.scad)
-standoff_height   = 8 + stack_repair_raise;
+// Shortened by the finger-sheet frame, which sits on the post tops under the top
+// plate. The top plate and the reading surface therefore stay where they were.
+standoff_height   = 8 + stack_repair_raise - finger_frame_t;
 // Option A raises the cam/linkage/top datums together by 4mm while the motor and
 // base underside stay fixed. The top plate underside therefore moves from local
 // z=13 to z=17, requiring 12mm posts instead of 8mm.
