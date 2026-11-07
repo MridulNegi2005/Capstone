@@ -16,7 +16,7 @@ Flow: 100%; volumetric limit: 8 mm3/s (uncalibrated starting settings)
 Orca hole compensation: +0.10 mm radial
 Scale: 100%, MILLIMETRES. Keep flat. Print BY LAYER.
 
-Auto Level with actual sheet installed before using G-code; verify first layer.
+The start G-code runs Auto Level (G29) by itself before every print. Verify the first layer.
 Use owner's suitable textured PEI. Smooth PEI needs PETG separation layer.
 Dry wet PETG with controlled dryer per spool guidance; keep sealed afterwards.
 Do not auto-orient, scale, enable supports or use sequential/by-object mode.
@@ -26,9 +26,12 @@ FIRST LAYER FIX (the last prints had bad bottoms and good tops)
 Cause: the nozzle was too high on the first layers. The lines did not press into the bed.
 Do these steps before the print:
 1. Let the bed cool. Clean the sheet with isopropyl alcohol and a clean tissue. Do not touch it after.
-2. Heat the bed to 80 C. Wait 5 minutes.
-3. Run Auto Level from the printer menu. Keep the same sheet on the bed.
-4. Start the print. Watch the first minute (the purge line and the brim).
+2. Remove old plastic from the nozzle tip. The nozzle touches the bed during Auto Level.
+3. Start the print. The printer heats the bed, then taps the bed at many points (Auto Level).
+   This takes a few minutes. Do not touch the printer during this time.
+   If the printer does not tap the bed, it uses the last saved Auto Level.
+   In that case, run Auto Level from the printer menu one time, then start the print again.
+4. Watch the first minute after Auto Level (the purge line and the brim).
 5. Look at the lines. Good lines are flat and touch each other with no gaps.
 6. If the lines are round, or you see gaps between them, the nozzle is too high.
    Use Z-offset (baby-step) during the print. Lower it by 0.05 mm. Wait 10 seconds. Look again.

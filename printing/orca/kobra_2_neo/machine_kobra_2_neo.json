@@ -4,7 +4,7 @@
   "from": "system",
   "instantiation": "true",
   "gcode_flavor": "marlin2",
-  "machine_start_gcode": "G21\nG90\nM83\nM140 S[first_layer_bed_temperature]\nM104 S140 ; reduce ooze while homing\nM190 S[first_layer_bed_temperature]\nG28\nM420 S1 ; enable saved mesh from printer Auto Level\nG1 Z5 F1200\nG1 X10 Y5 F3000\nM109 S[first_layer_temperature]\nG1 Z0.3 F600\nG92 E0\nG1 X60 Y5 E12 F600\nG92 E0\nG1 E-1 F2100\nG1 Z1 F600\nM117 Printing...\n",
+  "machine_start_gcode": "G21\nG90\nM83\nM140 S[first_layer_bed_temperature]\nM104 S140 ; reduce ooze while homing\nM190 S[first_layer_bed_temperature]\nG28\nG29 ; full Auto Level on the hot bed, every print (a few minutes)\nM420 S1 ; use the mesh; if G29 is not supported, this loads the saved one\nG1 Z5 F1200\nG1 X10 Y5 F3000\nM109 S[first_layer_temperature]\nG1 Z0.3 F600\nG92 E0\nG1 X60 Y5 E12 F600\nG92 E0\nG1 E-1 F2100\nG1 Z1 F600\nM117 Printing...\n",
   "machine_end_gcode": "M400\nM104 S0\nM140 S0\nM107\nG91\nM83\nG1 E-1 F2100\nG1 Z2 F600\nG90\nG1 X10 Y210 F3000\nM84\n",
   "extruder_colour": [
     "#FF4D4F"
