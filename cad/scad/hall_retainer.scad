@@ -10,7 +10,7 @@ module hall_retainer() {
             }
             for(sx=[-1,1]) translate([sx*6,25.5,0]) cylinder(d=4.5,h=1.3,$fn=32);
         }
-        for(sx=[-1,1]) translate([sx*6,25.5,-0.1]) cylinder(d=2.3,h=1.5,$fn=32);
+        for(sx=[-1,1]) translate([sx*6,25.5,-0.1]) cylinder(d=2.6,h=1.5,$fn=32);   // M2 clearance; still passes M2 if printed 0.3 small
     }
 }
 hall_retainer();
