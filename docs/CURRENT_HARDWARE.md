@@ -4,7 +4,7 @@
 `stl/print_resin_1_muscle_cell.stl`: 9 separate bodies = 1 cam + 6 different arms + 1 tile + 1 screw-retained R2 comb. No sprues, no button caps. Quantity ONE batch, not two batches. Millimetres, 100% scale. Supplier chooses resin orientation/supports; this layout is not a resin machine build file. Tough/ABS-like resin as previously specified; actual feature capability must be confirmed by supplier.
 
 ## Magnet installation — important
-3 mm diameter x 1.5 mm thick. Pocket diameter3.2, depth1.4; remaining cam floor0.6. Intentional magnet projection0.1 mm with no adhesive bed, up to0.2 mm with0.1 mm bed. Keep glue away from rotating surfaces; do not leave magnet proud more than0.2. Nominal base clearance then0.2 mm at worst modeled projection. Check by hand through a complete revolution before powering. Validate Hall switching and magnet polarity BEFORE permanent bonding. Small-magnet switching/force, resin shrinkage and wear are not verified by CAD.
+3 mm diameter x 1.5 mm thick. Pocket diameter 3.2 mm, depth 1.6 mm. The resin roof above the pocket is 0.4 mm under the lowest track. The magnet sits 0.1 mm below the cam underside. Use a thin layer of glue to make it flush. Nothing projects. Keep glue away from rotating surfaces. Turn the cam by hand through a complete revolution before you apply power. Check the Hall switching and the magnet polarity BEFORE the glue sets. CAD checks do not verify magnetic switching, resin shrinkage or wear.
 
 Cam is based on exact previously printed track mesh in assets/braille_cam.stl. Only the underside magnet pocket is filled and recut. This is intentionally a mesh-backed SCAD, preserving original cam phase, ramps, bore and hub. It is not a newly substituted parametric track generator.
 

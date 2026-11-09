@@ -13,5 +13,5 @@ module sheet_flat(v="finger_sheet"){intersection(){sheet(v);translate([-40,-40,5
 module heads(){for(x=[-19,19],y=[-19,19])translate([x,y,48.3]){cylinder(d=5,h=.5,$fn=48);translate([0,0,.5])cylinder(d=4,h=2,$fn=48);}}
 use <../scad/electronics_envelopes.scad>
 module others(){union(){shell();base();cam();translate([0,0,39.7])part("hall_retainer");}}
-module magnet_sweep(){translate([0,0,42.8])difference(){cylinder(r=18.85,h=1.5,$fn=192);translate([0,0,-.01])cylinder(r=15.85,h=1.52,$fn=192);}}
+module magnet_sweep(){translate([0,0,36.5+6.6])difference(){cylinder(r=18.85,h=1.5,$fn=192);translate([0,0,-.01])cylinder(r=15.85,h=1.52,$fn=192);}}
 intersection(){sheet_flat("finger_sheet_t088");arms(0);}
