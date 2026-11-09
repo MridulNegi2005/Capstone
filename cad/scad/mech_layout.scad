@@ -329,7 +329,7 @@ spring_recess_depth = 2.0;                       // counterbore into the dot ins
 insert_body   = 11.0;  // square body, passes through the plate
 insert_flange = 15.0;  // square flange, sits on the glue shelf
 insert_flange_h = 1.2; // flange thickness
-insert_fit    = 0.2;   // total clearance (0.1mm/side) for glue
+insert_fit    = 0.6;   // total clearance (0.3mm/side) for glue; FDM holes print up to 0.3 small
 insert_h      = 3.2;   // = reading surface height above the plate underside
 // body 0 -> 2.0, flange 2.0 -> 3.2; top is flush with the reading surface.
 
@@ -350,10 +350,10 @@ insert_h      = 3.2;   // = reading surface height above the plate underside
 // directly above the foot, so the force goes straight into the cam and does not
 // tilt the arm in its guides. The posts are shortened by the frame thickness, so
 // the top plate and the reading surface do not move.
-finger_frame_t = 1.04;   // clamped frame: 0.24 first layer + 5 x 0.16. Fixed for every variant.
-finger_t       = 0.88;   // tongue: 0.72 / 0.88 / 1.04 tune the force. Top flush with frame.
-                         // Every value is 0.24 + n x 0.16, so the slicer cannot round it.
-                         // 0.88 is the default: after PETG relaxes it still gives ~0.08 N dot down.
+finger_frame_t = 1.00;   // clamped frame: 5 x 0.2 layers. Fixed for every variant.
+finger_t       = 0.80;   // tongue: 0.8 / 1.0 tune the force. Top flush with frame.
+                         // Every value is a whole number of 0.2 mm (and 0.1 mm) layers,
+                         // the settings cheap print services offer, so the slicer cannot round it.
 finger_w       = 3.0;
 finger_len     = 14.0;   // root to ridge centre
 finger_slot    = 1.0;    // cut around each tongue: 2 x 0.5 first-layer lines, so it cannot fuse

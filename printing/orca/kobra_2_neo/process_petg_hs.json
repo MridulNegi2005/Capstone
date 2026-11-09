@@ -18,7 +18,7 @@
   "sparse_infill_density": "40%",
   "sparse_infill_pattern": "crosshatch",
   "initial_layer_line_width": "0.5",
-  "initial_layer_print_height": "0.24",
+  "initial_layer_print_height": "0.2",
   "initial_layer_speed": "20",
   "initial_layer_infill_speed": "20",
   "gap_infill_speed": "40",
@@ -69,7 +69,7 @@
   "compatible_printers": [
     "Anycubic Kobra 2 Neo 0.4 nozzle"
   ],
-  "layer_height": "0.16",
+  "layer_height": "0.2",
   "accel_to_decel_enable": "1",
   "accel_to_decel_factor": "50%",
   "alternate_extra_wall": "0",

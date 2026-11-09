@@ -19,30 +19,22 @@
     "comb_arms_0.5": 0.0,
     "top_tile_arms_0.5": 0.0,
     "heads_arms_0.5": 0.0,
-    "finger_sheet_t072_top_tile": 0.0,
-    "finger_sheet_t072_base": 0.0,
-    "finger_sheet_t072_comb": 0.0,
-    "finger_sheet_t072_heads": 0.0,
-    "finger_sheet_t072_tongues_up_0.95": 0.0,
-    "finger_sheet_t072_flat_arms_0": 0.0,
-    "finger_sheet_t072_flat_arms_0.25": 0.0,
-    "finger_sheet_t072_flat_arms_0.5": 0.0,
-    "finger_sheet_t088_top_tile": 0.0,
-    "finger_sheet_t088_base": 0.0,
-    "finger_sheet_t088_comb": 0.0,
-    "finger_sheet_t088_heads": 0.0,
-    "finger_sheet_t088_tongues_up_0.95": 0.0,
-    "finger_sheet_t088_flat_arms_0": 0.0,
-    "finger_sheet_t088_flat_arms_0.25": 0.0,
-    "finger_sheet_t088_flat_arms_0.5": 0.0,
-    "finger_sheet_t104_top_tile": 0.0,
-    "finger_sheet_t104_base": 0.0,
-    "finger_sheet_t104_comb": 0.0,
-    "finger_sheet_t104_heads": 0.0,
-    "finger_sheet_t104_tongues_up_0.95": 0.0,
-    "finger_sheet_t104_flat_arms_0": 0.0,
-    "finger_sheet_t104_flat_arms_0.25": 0.0,
-    "finger_sheet_t104_flat_arms_0.5": 0.0,
+    "finger_sheet_t080_top_tile": 0.0,
+    "finger_sheet_t080_base": 0.0,
+    "finger_sheet_t080_comb": 0.0,
+    "finger_sheet_t080_heads": 0.0,
+    "finger_sheet_t080_tongues_up_0.95": 0.0,
+    "finger_sheet_t080_flat_arms_0": 0.0,
+    "finger_sheet_t080_flat_arms_0.25": 0.0,
+    "finger_sheet_t080_flat_arms_0.5": 0.0,
+    "finger_sheet_t100_top_tile": 0.0,
+    "finger_sheet_t100_base": 0.0,
+    "finger_sheet_t100_comb": 0.0,
+    "finger_sheet_t100_heads": 0.0,
+    "finger_sheet_t100_tongues_up_0.95": 0.0,
+    "finger_sheet_t100_flat_arms_0": 0.0,
+    "finger_sheet_t100_flat_arms_0.25": 0.0,
+    "finger_sheet_t100_flat_arms_0.5": 0.0,
     "driver_others": 0.0,
     "driver_motor": 0.0,
     "mcp_others": 0.0,
@@ -174,10 +166,10 @@
         [
           29.0,
           28.0,
-          11.960000038146973
+          12.0
         ]
       ],
-      "sha256": "9e738ea4c3d8cfef0530b3722a8290680008ff3d6c974d697d1d4b5f90b24ef7"
+      "sha256": "c903d311364d55c6e39547256c7798736195250d3d9a1ec23fa47946a1213168"
     },
     "braille_cam.stl": {
       "watertight": true,
@@ -231,9 +223,9 @@
           2.799999952316284
         ]
       ],
-      "sha256": "021c3f416ad53dddbc2d9967f2cc624575e61f522296b61b052bd55cf9c3059d"
+      "sha256": "f2c17d52e473d4f8d0c4390c4889fecfe3f858b3cf7edf7846e6a2f16f2ff1a8"
     },
-    "finger_sheet_t072.stl": {
+    "finger_sheet_t080.stl": {
       "watertight": true,
       "consistent_winding": true,
       "components": 1,
@@ -249,9 +241,9 @@
           2.799999952316284
         ]
       ],
-      "sha256": "7966d666202790fec57a3f5609385c84304f91643f94042adce259f14010bb3c"
+      "sha256": "f2c17d52e473d4f8d0c4390c4889fecfe3f858b3cf7edf7846e6a2f16f2ff1a8"
     },
-    "finger_sheet_t088.stl": {
+    "finger_sheet_t100.stl": {
       "watertight": true,
       "consistent_winding": true,
       "components": 1,
@@ -267,25 +259,7 @@
           2.799999952316284
         ]
       ],
-      "sha256": "021c3f416ad53dddbc2d9967f2cc624575e61f522296b61b052bd55cf9c3059d"
-    },
-    "finger_sheet_t104.stl": {
-      "watertight": true,
-      "consistent_winding": true,
-      "components": 1,
-      "bounds": [
-        [
-          -29.0,
-          -28.0,
-          0.0
-        ],
-        [
-          29.0,
-          28.0,
-          2.799999952316284
-        ]
-      ],
-      "sha256": "e69d13bbc6230db3eee1d98467531cf30dd8d6979bcd947f382e56e5d4790be3"
+      "sha256": "b48deef19be6f6c4e53b77504413710100d3bf13171ce3b7e0497a8e6316b688"
     },
     "hall_retainer.stl": {
       "watertight": true,
@@ -339,7 +313,7 @@
           54.0
         ]
       ],
-      "sha256": "62d2ba48458cdfedb7d6cc8b242edc30703572801ccc5d297e11a43fd84e1d4f"
+      "sha256": "e1691183eae7106ea856f8e725a1e4e044f75715bbab08e34afdd67b2dcf3694"
     },
     "print_resin_1_muscle_cell.stl": {
       "watertight": true,
@@ -375,7 +349,7 @@
           9.0
         ]
       ],
-      "sha256": "f6adb2a33f501a00b90d6ee579f247de4dcd0c85f1812d0da91816b57dc27aa3"
+      "sha256": "bce030f7935b7ebe0280b29207e2b232cb8fb61e48823335ae503b120945ddd1"
     },
     "top_plate.stl": {
       "watertight": true,
@@ -393,7 +367,7 @@
           4.592613220214844
         ]
       ],
-      "sha256": "5dea720b3b5736c8b14f1d8e7ea45c8428226c15f8004ad8675bbac7513233ab"
+      "sha256": "f14be1f7a17032767167377e82e150ec1c5028353af4a059b8cba2a8aea17dfa"
     }
   }
 }

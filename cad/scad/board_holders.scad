@@ -8,7 +8,7 @@
 include <electronics_envelopes.scad>
 
 sled_t      = 1.2;     // base plate under every groove
-groove_w    = 2.0;     // PCB 1.6
+groove_w    = 2.2;     // PCB 1.6; still fits if the slot prints 0.3 narrow
 groove_d    = 3.0;
 bracket_len = 5.0;
 wall        = 2.0;

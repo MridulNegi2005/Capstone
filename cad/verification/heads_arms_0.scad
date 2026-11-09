@@ -9,7 +9,7 @@ module arms(h=0){for(i=[1:6])translate([0,0,45+h])import(str("../assets/assemble
 use <../scad/finger_sheet.scad>
 module sheet(v="finger_sheet"){translate([0,0,54])mirror([0,0,1])part(v);}
 module tongues_up(v,lift){translate([0,0,lift])intersection(){sheet(v);translate([0,0,40])linear_extrude(14.01)finger_relief2d(0);}}
-module sheet_flat(v="finger_sheet"){intersection(){sheet(v);translate([-40,-40,54-1.04-0.001])cube([80,80,1.2]);}}
+module sheet_flat(v="finger_sheet"){intersection(){sheet(v);translate([-40,-40,54-1.00-0.001])cube([80,80,1.2]);}}
 module heads(){for(x=[-19,19],y=[-19,19])translate([x,y,48.3]){cylinder(d=5,h=.5,$fn=48);translate([0,0,.5])cylinder(d=4,h=2,$fn=48);}}
 use <../scad/electronics_envelopes.scad>
 module others(){union(){shell();base();cam();translate([0,0,39.7])part("hall_retainer");}}

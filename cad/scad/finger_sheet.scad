@@ -22,7 +22,7 @@ module frame2d() {
         offset(r = 2) offset(delta = -2) square([base_length, base_width], center = true);
         circle(r = 5.0, $fn = 64);                                    // the dot cluster
         for (sx = [-1, 1], sy = [-1, 1])
-            translate([sx * standoff_x, sy * standoff_y]) circle(d = 2.9, $fn = 32);
+            translate([sx * standoff_x, sy * standoff_y]) circle(d = 3.2, $fn = 32);   // M2.5 clearance, same as the top plate
         for (d = [1:6]) slot2d(d);
     }
 }

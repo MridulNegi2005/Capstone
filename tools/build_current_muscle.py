@@ -8,7 +8,7 @@ for n in ['braille_cam','base_plate','top_plate','outer_box','hall_retainer','li
  (V/(n+'.log')).write_text(r.stdout+r.stderr)
  if 'ERROR:' in r.stderr or 'WARNING:' in r.stderr:raise RuntimeError(n+r.stderr)
  print(n,flush=True)
-for t in ['0.72','0.88','1.04']:
+for t in ['0.80','1.00']:
  n='finger_sheet_t'+t.replace('.','')
  r=subprocess.run([exe,'--backend=Manifold','--export-format','binstl','-D','finger_t='+t,'-o',str(T/(n+'.stl')),str(S/'finger_sheet.scad')],capture_output=True,text=True)
  if 'ERROR:' in r.stderr or 'WARNING:' in r.stderr:raise RuntimeError(n+r.stderr)

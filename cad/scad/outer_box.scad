@@ -56,7 +56,7 @@ elec_pocket_h     = 14;
 // Sizes come from motor_spec.scad. The cup stands on the box floor, so it prints
 // vertically with no supports - the reason it is here and not hanging off the
 // base plate, which would print in mid-air.
-motor_seat_z = 15.5;   // 4 - the can bottom rests on the floor itself
+motor_seat_z = 15.4;   // on the 0.2 mm layer grid. One sheet of printer paper (0.1 mm) under the can brings the motor to the 15.5 the stack is built on.
 motor_cup_bore    = motor_can_dia + 1.4;               // 0.7mm/side around the can
 motor_cup_od      = motor_cup_bore + 5.0;              // 2.5mm wall
 motor_cup_top     = motor_seat_z + 8;                  // 8mm of grip on the can

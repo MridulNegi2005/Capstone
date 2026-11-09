@@ -13,7 +13,7 @@ module arms(h=0){for(i=[1:6])translate([0,0,45+h])import(str("../assets/assemble
 use <../scad/finger_sheet.scad>
 module sheet(v="finger_sheet"){translate([0,0,54])mirror([0,0,1])part(v);}
 module tongues_up(v,lift){translate([0,0,lift])intersection(){sheet(v);translate([0,0,40])linear_extrude(14.01)finger_relief2d(0);}}
-module sheet_flat(v="finger_sheet"){intersection(){sheet(v);translate([-40,-40,54-1.04-0.001])cube([80,80,1.2]);}}
+module sheet_flat(v="finger_sheet"){intersection(){sheet(v);translate([-40,-40,54-1.00-0.001])cube([80,80,1.2]);}}
 module heads(){for(x=[-19,19],y=[-19,19])translate([x,y,48.3]){cylinder(d=5,h=.5,$fn=48);translate([0,0,.5])cylinder(d=4,h=2,$fn=48);}}
 use <../scad/electronics_envelopes.scad>
 module others(){union(){shell();base();cam();translate([0,0,39.7])part("hall_retainer");}}
@@ -23,7 +23,7 @@ module magnet_sweep(){translate([0,0,36.5+6.6])difference(){cylinder(r=18.85,h=1
 probes={'cam_base':'cam();base();','cam_comb':'cam();comb();','tile_top':'tile();top();','base_shell':'base();shell();','comb_base':'comb();base();','heads_top':'heads();union(){top();tile();}','heads_base':'heads();base();','retainer_base':'translate([0,0,39.7])part("hall_retainer");base();','magnet_sweep_base':'magnet_sweep();base();','magnet_sweep_comb':'magnet_sweep();comb();'}
 for z in [0,.25,.5]:
  for n,b in [('comb','comb();'),('top_tile','union(){top();tile();}'),('heads','heads();')]:probes[n+'_arms_'+str(z)]=b+f'arms({z});'
-for v in ['finger_sheet_t072','finger_sheet_t088','finger_sheet_t104']:
+for v in ['finger_sheet_t080','finger_sheet_t100']:
  probes.update({f'{v}_top_tile':f'sheet("{v}");union(){{top();tile();}}',f'{v}_base':f'sheet("{v}");base();',f'{v}_comb':f'sheet("{v}");comb();',f'{v}_heads':f'sheet("{v}");heads();',f'{v}_tongues_up_0.95':f'tongues_up("{v}",0.95);union(){{top();tile();}}'})
  for z in [0,.25,.5]:probes[f'{v}_flat_arms_{z}']=f'sheet_flat("{v}");arms({z});'
 probes.update({'driver_others':'driver_env();others();','driver_motor':'driver_env();motor_env();','mcp_others':'mcp_env();others();','mcp_motor':'mcp_env();motor_env();','mcp_driver':'mcp_env();driver_env();','motor_shell':'motor_env();shell();','motor_base':'motor_env();base();','motor_cam':'motor_env();cam();'})

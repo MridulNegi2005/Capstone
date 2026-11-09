@@ -37,29 +37,30 @@ Resin requirements:
 
 ### PETG parts (folder `petg/`, FDM)
 
-| File | Qty | Size (mm) | What it is |
-|---|---|---|---|
-| `box.stl` | 1 | 68 x 68 x 54 | Outer box. Holds the motor and the two circuit boards. |
-| `base_plate.stl` | 1 | 58 x 56 x 12 | Plate that holds the cam and the Hall sensor. |
-| `top_plate.stl` | 1 | 68 x 68 x 4.6 | Lid. The reading surface. |
-| `hall_retainer.stl` | 2 | 16.5 x 13 x 1.3 | Small clip for the Hall sensor (one spare). |
-| `finger_sheet_072_soft.stl` | 1 | 58 x 56 x 2.8 | Flat spring sheet, soft. |
-| `finger_sheet_088_normal.stl` | 2 | 58 x 56 x 2.8 | Flat spring sheet, normal (one spare). |
-| `finger_sheet_104_stiff.stl` | 1 | 58 x 56 x 2.8 | Flat spring sheet, stiff. |
+All PETG parts go in one job with one quality setting: **0.20 mm layers, first layer 0.20 mm**.
+This is the cheapest setting, and the finger sheets need it (see the rules below).
+
+| File | Qty | Size (mm) | Walls | Infill | What it is |
+|---|---|---|---|---|---|
+| `box.stl` | 1 | 68 x 68 x 54 | 4 | 15% | Outer box. Holds the motor and the two circuit boards. |
+| `base_plate.stl` | 1 | 58 x 56 x 12 | 4 | 20% | Plate that holds the cam and the Hall sensor. |
+| `top_plate.stl` | 1 | 68 x 68 x 4.6 | 3 | 20% | Lid and reading surface. Use 5 top layers. |
+| `hall_retainer.stl` | 2 | 16.5 x 13 x 1.3 | - | 100% | Small clip for the Hall sensor (one spare). |
+| `finger_sheet_080_normal.stl` | 2 | 58 x 56 x 2.8 | 5 | 100% | Flat spring sheet, normal (one spare). |
+| `finger_sheet_100_stiff.stl` | 2 | 58 x 56 x 2.8 | 5 | 100% | Flat spring sheet, stiff (one spare). |
+
+Use 4 top and 4 bottom layers on all parts unless the table says different. Use the default pattern for infill.
 
 PETG requirements:
 
-- **MUST**: PETG. Not PLA. Not ABS.
+- **MUST**: PETG. Not PLA. Not ABS. Not TPU.
 - **MUST**: print each part in the orientation of the file. The flat face at z = 0 goes on the bed. No supports.
-- **MUST** for the three finger sheet files: layer heights that put these heights exactly on a layer top:
-  0.72, 0.88 and 1.04 mm. Accept one of these two layer settings:
-  - first layer 0.24 mm, all other layers 0.16 mm (preferred);
-  - all layers 0.08 mm.
-
-  A 0.20 mm layer setting is not acceptable for the finger sheets. The spring force changes with the
-  thickness cubed, so a rounded thickness gives the wrong force.
-- **MUST** for the finger sheets: 5 walls (perimeters) or more. The 3 mm wide tongues must be all wall lines.
-- Other parts: 0.16 to 0.20 mm layers, 5 walls, 40% infill.
+- **MUST**: layer height 0.20 mm and first layer height 0.20 mm for the finger sheets. The tongues are 0.8 mm and
+  1.0 mm thick, which is exactly 4 and 5 layers. Any other layer setting rounds the thickness, and the spring force
+  changes with the thickness cubed. If the service cannot confirm a 0.20 mm first layer, stop and ask the owner.
+- **MUST**: no automatic repair, no hole compensation, no scaling. The files are clean, closed solids. A service
+  checker can show a "non-manifold" warning on `box.stl`; the file is a single closed solid and the warning is false.
+  If the service forces a repair, check that the volume does not change (box: 88.2 cm3).
 - Ask the service to remove the finger sheets from the bed only when the bed is cold. Hot PETG bends and stays bent.
 - Any colour is acceptable. Use one colour for all PETG parts if that is cheaper.
 
@@ -71,7 +72,7 @@ service name, material and grade, layer setting for the finger sheets, price per
 ## Parts that are not in this order
 
 The owner buys or has these parts. They are not printed:
-the 28BYJ-48 motor, the ULN2003 driver module, the 7Semi MCP23017 breakout, the A3144 Hall sensor,
+the 28BYJ-48 motor (put one sheet of printer paper under it in the box), the ULN2003 driver module, the 7Semi MCP23017 breakout, the A3144 Hall sensor,
 3 x 1.5 mm magnets, M2.5 screws and brass heat-set inserts, M2 screws.
 
 ## Source and checks

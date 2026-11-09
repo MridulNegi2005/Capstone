@@ -2,7 +2,7 @@
 include <mech_layout.scad>
 assert(stack_repair_raise == 0, "Candidate only supports the default motor stack");
 hall_body_w=4.1; hall_body_d=3.1; hall_body_t=1.6;
-hall_fit=0.4; hall_floor_t=0.4; hall_air_gap=0.4;
+hall_fit=0.8; hall_floor_t=0.4; hall_air_gap=0.4;
 hall_wire_w=4; hall_wire_d=0.8;
 hall_pocket_x=homing_mag_r*cos(homing_mag_angle);
 hall_pocket_y=homing_mag_r*sin(homing_mag_angle);

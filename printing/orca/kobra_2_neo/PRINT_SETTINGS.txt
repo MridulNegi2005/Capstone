@@ -3,7 +3,7 @@ Print time and filament use: re-slice after the tall-box parts are final. The ol
 
 Nozzle: 240 C first layer, then 235 C
 Bed: 80 C throughout
-Layer: 0.16 mm; first layer 0.24 mm
+Layer: 0.2 mm; first layer 0.2 mm (the finger sheets need whole 0.2 mm layers)
 Walls: 5; top/bottom: 6 layers; top minimum thickness 1 mm
 Infill: 40% crosshatch
 Supports / raft / ironing: OFF
@@ -43,8 +43,8 @@ Do these steps before the print:
 
 STRINGS AND HAIRS: wet PETG causes them. Dry the spool at 65 C for 4 to 6 hours before the print.
 
-FINGER SHEETS: print all three files in the same job:
-  finger_sheet_t072.stl (soft), finger_sheet_t088.stl (normal), finger_sheet_t104.stl (stiff).
+FINGER SHEETS: print both files in the same job:
+  finger_sheet_t080.stl (normal) and finger_sheet_t100.stl (stiff).
 Print them flat, ridges up, as in the STL. Do not turn them over.
 Each tongue is only 3 mm wide, so the printer makes it from wall lines only.
 These lines run along the tongue. This is the strong direction. Do not change the wall count.
