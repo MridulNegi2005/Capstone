@@ -19,13 +19,42 @@
     "comb_arms_0.5": 0.0,
     "top_tile_arms_0.5": 0.0,
     "heads_arms_0.5": 0.0,
-    "sheet_top_tile": 0.0,
-    "sheet_base": 0.0,
-    "sheet_comb": 0.0,
-    "sheet_heads": 0.0,
-    "sheetflat_arms_0": 0.0,
-    "sheetflat_arms_0.25": 0.0,
-    "sheetflat_arms_0.5": 0.0
+    "finger_sheet_t072_top_tile": 0.0,
+    "finger_sheet_t072_base": 0.0,
+    "finger_sheet_t072_comb": 0.0,
+    "finger_sheet_t072_heads": 0.0,
+    "finger_sheet_t072_tongues_up_0.95": 0.0,
+    "finger_sheet_t072_flat_arms_0": 0.0,
+    "finger_sheet_t072_flat_arms_0.25": 0.0,
+    "finger_sheet_t072_flat_arms_0.5": 0.0,
+    "finger_sheet_t088_top_tile": 0.0,
+    "finger_sheet_t088_base": 0.0,
+    "finger_sheet_t088_comb": 0.0,
+    "finger_sheet_t088_heads": 0.0,
+    "finger_sheet_t088_tongues_up_0.95": 0.0,
+    "finger_sheet_t088_flat_arms_0": 0.0,
+    "finger_sheet_t088_flat_arms_0.25": 0.0,
+    "finger_sheet_t088_flat_arms_0.5": 0.0,
+    "finger_sheet_t104_top_tile": 0.0,
+    "finger_sheet_t104_base": 0.0,
+    "finger_sheet_t104_comb": 0.0,
+    "finger_sheet_t104_heads": 0.0,
+    "finger_sheet_t104_tongues_up_0.95": 0.0,
+    "finger_sheet_t104_flat_arms_0": 0.0,
+    "finger_sheet_t104_flat_arms_0.25": 0.0,
+    "finger_sheet_t104_flat_arms_0.5": 0.0,
+    "sled_shell": 0.0,
+    "sled_motor": 0.0,
+    "driver_others": 0.0,
+    "driver_motor": 0.0,
+    "driver_sled": 0.0,
+    "mcp_others": 0.0,
+    "mcp_motor": 0.0,
+    "mcp_sled": 0.0,
+    "mcp_driver": 0.0,
+    "motor_shell": 0.0,
+    "motor_base": 0.0,
+    "motor_cam": 0.0
   },
   "meshes": {
     "arm_1.stl": {
@@ -190,6 +219,24 @@
       ],
       "sha256": "89db8ef535bceec3b53f1f8fe3a18fd6e1c7f2917a802f16adec41fc99f840df"
     },
+    "electronics_sled.stl": {
+      "watertight": true,
+      "consistent_winding": true,
+      "components": 1,
+      "bounds": [
+        [
+          -17.399999618530273,
+          -26.260000228881836,
+          4.0
+        ],
+        [
+          19.0,
+          19.700000762939453,
+          8.199999809265137
+        ]
+      ],
+      "sha256": "649abbf428dcddc0257384fd121b2a6510212ec5ce460889bf1d9f763c6fcc67"
+    },
     "finger_sheet.stl": {
       "watertight": true,
       "consistent_winding": true,
@@ -206,7 +253,7 @@
           2.799999952316284
         ]
       ],
-      "sha256": "3078499d539d150659cc6f0d63978634c5e1a870a23acbaa824b19a8e492592e"
+      "sha256": "021c3f416ad53dddbc2d9967f2cc624575e61f522296b61b052bd55cf9c3059d"
     },
     "finger_sheet_t072.stl": {
       "watertight": true,
@@ -224,7 +271,7 @@
           2.799999952316284
         ]
       ],
-      "sha256": "800cf6ed3d4166ffa7c4afe565ec2e5e65996b5a0745a4988a5067168a2e9851"
+      "sha256": "7966d666202790fec57a3f5609385c84304f91643f94042adce259f14010bb3c"
     },
     "finger_sheet_t088.stl": {
       "watertight": true,
@@ -242,7 +289,7 @@
           2.799999952316284
         ]
       ],
-      "sha256": "3078499d539d150659cc6f0d63978634c5e1a870a23acbaa824b19a8e492592e"
+      "sha256": "021c3f416ad53dddbc2d9967f2cc624575e61f522296b61b052bd55cf9c3059d"
     },
     "finger_sheet_t104.stl": {
       "watertight": true,
@@ -260,7 +307,7 @@
           2.799999952316284
         ]
       ],
-      "sha256": "9094b24fbb233ee6026250683f0e758cd20e9351261545875aec9776d2c473e5"
+      "sha256": "e69d13bbc6230db3eee1d98467531cf30dd8d6979bcd947f382e56e5d4790be3"
     },
     "hall_retainer.stl": {
       "watertight": true,
@@ -314,7 +361,7 @@
           54.0
         ]
       ],
-      "sha256": "d88f239761832cbe78c4f08980578ccdec597bd91ebc467183f61581ed0e9f68"
+      "sha256": "8b10d627f36aad8aaea1c69c4fae169bcaa09b5ad302bb8123f3866cfc970efd"
     },
     "print_resin_1_muscle_cell.stl": {
       "watertight": true,
@@ -368,7 +415,7 @@
           4.592613220214844
         ]
       ],
-      "sha256": "54d3ecc809a0e563fcb763dc5b4e14b505329839050f35699429eee4d5a62179"
+      "sha256": "5dea720b3b5736c8b14f1d8e7ea45c8428226c15f8004ad8675bbac7513233ab"
     }
   }
 }

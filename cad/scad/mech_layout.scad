@@ -356,9 +356,9 @@ finger_t       = 0.88;   // tongue: 0.72 / 0.88 / 1.04 tune the force. Top flush
                          // 0.88 is the default: after PETG relaxes it still gives ~0.08 N dot down.
 finger_w       = 3.0;
 finger_len     = 14.0;   // root to ridge centre
-finger_slot    = 0.8;    // cut around each tongue
+finger_slot    = 1.0;    // cut around each tongue: 2 x 0.5 first-layer lines, so it cannot fuse
 finger_preload = 0.3;    // ridge pushes the beam this far below its free height
-finger_relief  = 1.0;    // top-plate pocket depth above each tongue
+finger_relief  = 1.6;    // top-plate pocket over each tongue. Tongue end rises 0.90 with the dot up.
 finger_tip_in  = 1.5;    // ridge centre, measured from the foot toward the dot
 // [arm, tongue direction (deg, sheet plane)] from a clash search: every tongue at
 // full length, at least 6.3 mm of sheet between any two slots.
