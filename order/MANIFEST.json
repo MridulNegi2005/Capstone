@@ -1,0 +1,172 @@
+{
+  "resin/cam.stl": {
+    "quantity": 1,
+    "size_mm": [
+      48.4,
+      48.4,
+      9.0
+    ],
+    "volume_cm3": 4.24,
+    "sha256": "ab464886cbd9c943d0ec5cdb05db428e2bcb551a414eae99afce7d019b69c0fa"
+  },
+  "resin/comb_light.stl": {
+    "quantity": 1,
+    "size_mm": [
+      54.0,
+      54.0,
+      2.79
+    ],
+    "volume_cm3": 3.34,
+    "sha256": "c61ff25e1c5d64825ff11ad28fda018ef48431554064e137ea9b1a7c4b7d3f21"
+  },
+  "resin/dot_tile.stl": {
+    "quantity": 1,
+    "size_mm": [
+      15.0,
+      15.0,
+      3.2
+    ],
+    "volume_cm3": 0.45,
+    "sha256": "89db8ef535bceec3b53f1f8fe3a18fd6e1c7f2917a802f16adec41fc99f840df"
+  },
+  "resin/arm_1.stl": {
+    "quantity": 1,
+    "size_mm": [
+      17.1,
+      12.2,
+      2.2
+    ],
+    "volume_cm3": 0.06,
+    "sha256": "08e0586e107a88ffbd6efe8a15e955acd95f98e8e90060a347d7de203476466e"
+  },
+  "resin/arm_2.stl": {
+    "quantity": 1,
+    "size_mm": [
+      20.4,
+      12.2,
+      2.2
+    ],
+    "volume_cm3": 0.07,
+    "sha256": "4a2ccafc59ab0f138f8eeb074e3e470167314c2712deae2812813c777c3a32db"
+  },
+  "resin/arm_3.stl": {
+    "quantity": 1,
+    "size_mm": [
+      20.5,
+      12.2,
+      2.2
+    ],
+    "volume_cm3": 0.07,
+    "sha256": "982bea8c2f0ffd9352afd8c8aac59cd83944c32b45cf783b88f0adb62a683cd2"
+  },
+  "resin/arm_4.stl": {
+    "quantity": 1,
+    "size_mm": [
+      15.4,
+      12.2,
+      2.2
+    ],
+    "volume_cm3": 0.05,
+    "sha256": "2e8e3bf16d260027c4df98d84c8131a441bb2d284408c84c42d97a2813db3bad"
+  },
+  "resin/arm_5.stl": {
+    "quantity": 1,
+    "size_mm": [
+      15.3,
+      12.2,
+      2.2
+    ],
+    "volume_cm3": 0.05,
+    "sha256": "f4252cca95b75e2896e847aacf059c7e4234babddf94918e8c504eb34fd9aad9"
+  },
+  "resin/arm_6.stl": {
+    "quantity": 1,
+    "size_mm": [
+      22.2,
+      12.2,
+      2.2
+    ],
+    "volume_cm3": 0.07,
+    "sha256": "71b03d35e3434ddcc9aeb0ed7f9c1aa88e7d0d2e50e33c2857ad19815b06356d"
+  },
+  "petg/box.stl": {
+    "quantity": 1,
+    "size_mm": [
+      68.0,
+      68.0,
+      54.0
+    ],
+    "volume_cm3": 87.32,
+    "sha256": "8b10d627f36aad8aaea1c69c4fae169bcaa09b5ad302bb8123f3866cfc970efd"
+  },
+  "petg/base_plate.stl": {
+    "quantity": 1,
+    "size_mm": [
+      58.0,
+      56.0,
+      11.96
+    ],
+    "volume_cm3": 9.82,
+    "sha256": "9e738ea4c3d8cfef0530b3722a8290680008ff3d6c974d697d1d4b5f90b24ef7"
+  },
+  "petg/top_plate.stl": {
+    "quantity": 1,
+    "size_mm": [
+      68.0,
+      68.0,
+      4.59
+    ],
+    "volume_cm3": 14.05,
+    "sha256": "5dea720b3b5736c8b14f1d8e7ea45c8428226c15f8004ad8675bbac7513233ab"
+  },
+  "petg/hall_retainer.stl": {
+    "quantity": 2,
+    "size_mm": [
+      16.5,
+      13.0,
+      1.3
+    ],
+    "volume_cm3": 0.08,
+    "sha256": "cc64a6bb77d982c52d91bef2312c48aec943983f52e9c3e1423b9bb068dcc3dc"
+  },
+  "petg/electronics_sled.stl": {
+    "quantity": 1,
+    "size_mm": [
+      36.4,
+      45.96,
+      4.2
+    ],
+    "volume_cm3": 0.93,
+    "sha256": "649abbf428dcddc0257384fd121b2a6510212ec5ce460889bf1d9f763c6fcc67"
+  },
+  "petg/finger_sheet_072_soft.stl": {
+    "quantity": 1,
+    "size_mm": [
+      58.0,
+      56.0,
+      2.8
+    ],
+    "volume_cm3": 2.99,
+    "sha256": "7966d666202790fec57a3f5609385c84304f91643f94042adce259f14010bb3c"
+  },
+  "petg/finger_sheet_088_normal.stl": {
+    "quantity": 2,
+    "size_mm": [
+      58.0,
+      56.0,
+      2.8
+    ],
+    "volume_cm3": 3.03,
+    "sha256": "021c3f416ad53dddbc2d9967f2cc624575e61f522296b61b052bd55cf9c3059d"
+  },
+  "petg/finger_sheet_104_stiff.stl": {
+    "quantity": 1,
+    "size_mm": [
+      58.0,
+      56.0,
+      2.8
+    ],
+    "volume_cm3": 3.07,
+    "sha256": "e69d13bbc6230db3eee1d98467531cf30dd8d6979bcd947f382e56e5d4790be3"
+  }
+}
