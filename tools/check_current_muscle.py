@@ -16,7 +16,6 @@ module tongues_up(v,lift){translate([0,0,lift])intersection(){sheet(v);translate
 module sheet_flat(v="finger_sheet"){intersection(){sheet(v);translate([-40,-40,54-1.04-0.001])cube([80,80,1.2]);}}
 module heads(){for(x=[-19,19],y=[-19,19])translate([x,y,48.3]){cylinder(d=5,h=.5,$fn=48);translate([0,0,.5])cylinder(d=4,h=2,$fn=48);}}
 use <../scad/electronics_envelopes.scad>
-module sled(){part("electronics_sled");}
 module others(){union(){shell();base();cam();translate([0,0,39.7])part("hall_retainer");}}
 module magnet_sweep(){translate([0,0,42.8])difference(){cylinder(r=18.85,h=1.5,$fn=192);translate([0,0,-.01])cylinder(r=15.85,h=1.52,$fn=192);}}
 '''
@@ -27,7 +26,7 @@ for z in [0,.25,.5]:
 for v in ['finger_sheet_t072','finger_sheet_t088','finger_sheet_t104']:
  probes.update({f'{v}_top_tile':f'sheet("{v}");union(){{top();tile();}}',f'{v}_base':f'sheet("{v}");base();',f'{v}_comb':f'sheet("{v}");comb();',f'{v}_heads':f'sheet("{v}");heads();',f'{v}_tongues_up_0.95':f'tongues_up("{v}",0.95);union(){{top();tile();}}'})
  for z in [0,.25,.5]:probes[f'{v}_flat_arms_{z}']=f'sheet_flat("{v}");arms({z});'
-probes.update({'sled_shell':'sled();shell();','sled_motor':'sled();motor_env();','driver_others':'driver_env();others();','driver_motor':'driver_env();motor_env();','driver_sled':'driver_env();sled();','mcp_others':'mcp_env();others();','mcp_motor':'mcp_env();motor_env();','mcp_sled':'mcp_env();sled();','mcp_driver':'mcp_env();driver_env();','motor_shell':'motor_env();shell();','motor_base':'motor_env();base();','motor_cam':'motor_env();cam();'})
+probes.update({'driver_others':'driver_env();others();','driver_motor':'driver_env();motor_env();','mcp_others':'mcp_env();others();','mcp_motor':'mcp_env();motor_env();','mcp_driver':'mcp_env();driver_env();','motor_shell':'motor_env();shell();','motor_base':'motor_env();base();','motor_cam':'motor_env();cam();'})
 def check(item):
  n,b=item;p=V/(n+'.scad');p.write_text(h+'intersection(){'+b+'}');o=V/(n+'.stl');r=subprocess.run([exe,'--backend=Manifold','-o',str(o),str(p)],capture_output=True,text=True);(V/(n+'.log')).write_text(r.stderr)
  if 'ERROR:' in r.stderr or 'WARNING:' in r.stderr:raise RuntimeError(r.stderr)

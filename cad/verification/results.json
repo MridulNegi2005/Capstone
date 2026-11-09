@@ -43,14 +43,10 @@
     "finger_sheet_t104_flat_arms_0": 0.0,
     "finger_sheet_t104_flat_arms_0.25": 0.0,
     "finger_sheet_t104_flat_arms_0.5": 0.0,
-    "sled_shell": 0.0,
-    "sled_motor": 0.0,
     "driver_others": 0.0,
     "driver_motor": 0.0,
-    "driver_sled": 0.0,
     "mcp_others": 0.0,
     "mcp_motor": 0.0,
-    "mcp_sled": 0.0,
     "mcp_driver": 0.0,
     "motor_shell": 0.0,
     "motor_base": 0.0,
@@ -219,24 +215,6 @@
       ],
       "sha256": "89db8ef535bceec3b53f1f8fe3a18fd6e1c7f2917a802f16adec41fc99f840df"
     },
-    "electronics_sled.stl": {
-      "watertight": true,
-      "consistent_winding": true,
-      "components": 1,
-      "bounds": [
-        [
-          -17.399999618530273,
-          -26.260000228881836,
-          4.0
-        ],
-        [
-          19.0,
-          19.700000762939453,
-          8.199999809265137
-        ]
-      ],
-      "sha256": "649abbf428dcddc0257384fd121b2a6510212ec5ce460889bf1d9f763c6fcc67"
-    },
     "finger_sheet.stl": {
       "watertight": true,
       "consistent_winding": true,
@@ -361,7 +339,7 @@
           54.0
         ]
       ],
-      "sha256": "8b10d627f36aad8aaea1c69c4fae169bcaa09b5ad302bb8123f3866cfc970efd"
+      "sha256": "62d2ba48458cdfedb7d6cc8b242edc30703572801ccc5d297e11a43fd84e1d4f"
     },
     "print_resin_1_muscle_cell.stl": {
       "watertight": true,

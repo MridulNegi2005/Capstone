@@ -39,11 +39,10 @@ Resin requirements:
 
 | File | Qty | Size (mm) | What it is |
 |---|---|---|---|
-| `box.stl` | 1 | 68 x 68 x 54 | Outer box. Holds the motor and the electronics. |
+| `box.stl` | 1 | 68 x 68 x 54 | Outer box. Holds the motor and the two circuit boards. |
 | `base_plate.stl` | 1 | 58 x 56 x 12 | Plate that holds the cam and the Hall sensor. |
 | `top_plate.stl` | 1 | 68 x 68 x 4.6 | Lid. The reading surface. |
 | `hall_retainer.stl` | 2 | 16.5 x 13 x 1.3 | Small clip for the Hall sensor (one spare). |
-| `electronics_sled.stl` | 1 | 36 x 46 x 4.2 | Holder for the two circuit boards. |
 | `finger_sheet_072_soft.stl` | 1 | 58 x 56 x 2.8 | Flat spring sheet, soft. |
 | `finger_sheet_088_normal.stl` | 2 | 58 x 56 x 2.8 | Flat spring sheet, normal (one spare). |
 | `finger_sheet_104_stiff.stl` | 1 | 58 x 56 x 2.8 | Flat spring sheet, stiff. |

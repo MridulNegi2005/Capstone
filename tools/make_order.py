@@ -15,7 +15,6 @@ PETG = [("box.stl", S / "outer_box.stl", 1),
         ("base_plate.stl", S / "base_plate.stl", 1),
         ("top_plate.stl", S / "top_plate.stl", 1),
         ("hall_retainer.stl", S / "hall_retainer.stl", 2),
-        ("electronics_sled.stl", S / "electronics_sled.stl", 1),
         ("finger_sheet_072_soft.stl", S / "finger_sheet_t072.stl", 1),
         ("finger_sheet_088_normal.stl", S / "finger_sheet_t088.stl", 2),
         ("finger_sheet_104_stiff.stl", S / "finger_sheet_t104.stl", 1)]

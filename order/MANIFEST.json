@@ -96,8 +96,8 @@
       68.0,
       54.0
     ],
-    "volume_cm3": 87.32,
-    "sha256": "8b10d627f36aad8aaea1c69c4fae169bcaa09b5ad302bb8123f3866cfc970efd"
+    "volume_cm3": 88.32,
+    "sha256": "62d2ba48458cdfedb7d6cc8b242edc30703572801ccc5d297e11a43fd84e1d4f"
   },
   "petg/base_plate.stl": {
     "quantity": 1,
@@ -128,16 +128,6 @@
     ],
     "volume_cm3": 0.08,
     "sha256": "cc64a6bb77d982c52d91bef2312c48aec943983f52e9c3e1423b9bb068dcc3dc"
-  },
-  "petg/electronics_sled.stl": {
-    "quantity": 1,
-    "size_mm": [
-      36.4,
-      45.96,
-      4.2
-    ],
-    "volume_cm3": 0.93,
-    "sha256": "649abbf428dcddc0257384fd121b2a6510212ec5ce460889bf1d9f763c6fcc67"
   },
   "petg/finger_sheet_072_soft.stl": {
     "quantity": 1,

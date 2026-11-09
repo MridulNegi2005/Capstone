@@ -2,7 +2,7 @@
 include <stack_options.scad>
 include <motor_spec.scad>
 include <dock_interface.scad>
-use <electronics_sled.scad>
+use <board_holders.scad>
 
 shell_length = 68;
 shell_width = 68;
@@ -367,8 +367,8 @@ union() {
         }
     }
 
-    // locating pegs for the separate electronics sled
-    sled_floor_pegs();
+    // standing holders for the driver and the expander boards
+    board_holders();
 
     // Muscle board mounting bosses
     muscle_board_bosses();
