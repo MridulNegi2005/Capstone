@@ -2,6 +2,7 @@
 include <stack_options.scad>
 include <motor_spec.scad>
 include <dock_interface.scad>
+use <electronics_sled.scad>
 
 shell_length = 68;
 shell_width = 68;
@@ -301,6 +302,7 @@ union() {
         // Replaces the braille 'F' (1.5mm dots — FDM-unprintable, came out as mush).
         // Band ~3mm perpendicular width, 1.2mm deep, 16mm wide: unmissable by touch.
         front_chevron_groove();
+
     }
 
     // --- MOTOR CUP (v8.4) — replaces the mid-plate and its ledge ---
@@ -365,6 +367,9 @@ union() {
         }
     }
 
+    // locating pegs for the separate electronics sled
+    sled_floor_pegs();
+
     // Muscle board mounting bosses
     muscle_board_bosses();
 
@@ -382,6 +387,3 @@ union() {
         rotate([45, 0, 0])
         cube([20, 2, 2], center=true);
 }
-
-include <board_cradle.scad>
-board_cradle();
