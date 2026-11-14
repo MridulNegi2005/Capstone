@@ -26,9 +26,17 @@ import os
 import re
 import sys
 
+import numpy as np
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MECH = os.path.join(ROOT, "cad", "scad", "mech_layout.scad")
-CAM = os.path.join(ROOT, "cad", "scad", "braille_cam.scad")
+BOX = os.path.join(ROOT, "cad", "scad", "outer_box.scad")
+# The cam is a frozen resin mesh now (cad/assets/braille_cam.stl), and
+# braille_cam.scad only imports it - the parametric constants that used to live
+# there no longer exist anywhere in the CAD. The lift profile is ray-cast from
+# that mesh by tools/sim/cam_torque.py, so it is the printed part, measured.
+PROFILE = os.path.join(ROOT, "tools", "sim", "cam_profile.npy")
+PROFILE_SAMPLES = 1024
 # Two copies on purpose: sim/ is the canonical artefact, sim/3d/ is what the
 # page actually fetches. Writing only the first left the browser reading a
 # stale file — the same duplicated-constant drift this script exists to stop.
@@ -84,7 +92,7 @@ def int_array(src, name, where):
     return [int(v) for v in re.findall(r"-?\d+", m.group(1))]
 
 
-mech, cam = read(MECH), read(CAM)
+mech, box = read(MECH), read(BOX)
 
 # --- geometry straight out of the CAD ---
 col_spacing = scalar(mech, "col_spacing", MECH)
@@ -102,35 +110,29 @@ link_total_h = reading_surface_z - cam_flat_z
 dot_track = int_array(mech, "dot_track", MECH)
 dot_phase = int_array(mech, "dot_phase", MECH)
 
-states = int(scalar(cam, "states", CAM))
-dots = int(scalar(cam, "dots", CAM))
-ramp_frac = scalar(cam, "angular_ramp_fraction", CAM)
-disk_base_thickness = scalar(cam, "disk_base_thickness", CAM)
+prof = np.load(PROFILE)
+dots = prof.shape[0]
+states = 2 ** dots                       # every pattern six dots can make
+if prof.shape[1] % PROFILE_SAMPLES:
+    sys.exit(f"FAIL: profile has {prof.shape[1]} samples, not a multiple of {PROFILE_SAMPLES}")
+profile = np.round(prof[:, ::prof.shape[1] // PROFILE_SAMPLES], 4)
+
+# THE TALL BOX. mech_layout.scad still describes the 46.5mm stack - its
+# stack_repair_raise option only allows 0 or 4 - while outer_box.scad is the
+# 58mm box. Everything above the floor translated up together, and the top
+# plate always closes the shell, so the shift is shell_height - plate_top_z.
+# The finger sheet uses the same 11.5mm (`54 - plate_under_z` in make_viewer).
+shell_height = scalar(box, "shell_height", BOX)
+base_plate_z = scalar(box, "base_plate_z", BOX)
+tall_raise = shell_height - plate_top_z
+cam_flat_z += tall_raise
+plate_under_z += tall_raise
+plate_top_z += tall_raise
+reading_surface_z += tall_raise
 
 # --- derived ---
 track_r = [inner_radius + t * (track_width + track_gap) + track_width / 2
            for t in range(dots)]
-
-# R-07: every track gets the widest ramp its OWN arc allows, so the six ramps
-# differ. angular_ramp_fraction is only the fallback when use_auto_ramp is off.
-# Sizing all six from one number is exactly what R-07 exists to undo, so the
-# simulator has to carry the per-track figures rather than a single global.
-_auto = re.search(r"^\s*use_auto_ramp\s*=\s*(true|false)", cam, re.M)
-use_auto_ramp = (_auto.group(1) == "true") if _auto else False
-foot_roll_r = scalar(mech, "foot_roll_r", MECH)
-dwell_tol = scalar(cam, "dwell_tol", CAM)
-foot_flat_arc = 2 * (foot_roll_r * math.tan(math.radians(15)) + dwell_tol)
-
-
-def ramp_frac_of(t):
-    """braille_cam.scad ramp_fraction_of() - keep these two in step."""
-    if not use_auto_ramp:
-        return ramp_frac
-    arc = 2 * math.pi * track_r[t] / states
-    return max(0.05, min(0.98, (arc - foot_flat_arc) / arc))
-
-
-ramp_angle = [(360.0 / states) * ramp_frac_of(t) for t in range(dots)]
 
 
 def dot_pos(d):
@@ -171,28 +173,59 @@ if len(seen) != states:
     sys.exit(f"FAIL: encoding is not a bijection ({len(seen)}/{states})")
 print(f"  all {states} states round-trip uniquely   OK")
 
+# The printed cam must actually implement the encoding. At the centre of every
+# state's flat dwell each track sits either fully up or fully down, and which one
+# is the Gray-coded bit. Checked against the MEASURED mesh, so this is the part
+# in hand, not the model of it.
+def gray_bit(i, b):
+    return ((i >> b) & 1) ^ ((i >> (b + 1)) & 1)
+
+
+track_phase = [dot_phase[dot_track.index(t)] for t in range(dots)]
+n = profile.shape[1]
+bad = 0
+for slc in range(states):
+    centre = -(slc + 0.5) * 360.0 / states          # disc angle, blender_z_sign -1
+    for d in range(1, 7):
+        t = dot_track[d - 1]
+        k = ((dot_phase[d - 1] - centre) % 360 + 360) % 360
+        got = profile[t][int(round(k / 360 * n)) % n]
+        want = pin_lift * gray_bit(slc, dots - 1 - t)
+        if abs(got - want) > 0.02:
+            bad += 1
+if bad:
+    sys.exit(f"FAIL: {bad}/{states * 6} state centres disagree with the Gray encoding")
+lift_max = float(profile.max())
+if abs(lift_max - pin_lift) > 0.01:
+    sys.exit(f"FAIL: measured cam lift {lift_max:.3f} != pin_lift {pin_lift}")
+print(f"  measured cam: all {states * 6} state centres match the Gray encoding   OK")
+print(f"  measured lift {lift_max:.3f} == pin_lift {pin_lift}   OK")
+
 steps_per_rev = 4096
 params = {
     "_comment": "GENERATED by sim/extract_params.py — do not hand-edit. "
-                "Re-run after any change to mech_layout.scad or braille_cam.scad.",
-    "_source": ["cad/scad/mech_layout.scad", "cad/scad/braille_cam.scad"],
+                "Re-run after any change to mech_layout.scad, outer_box.scad "
+                "or tools/sim/cam_profile.npy.",
+    "_source": ["cad/scad/mech_layout.scad", "cad/scad/outer_box.scad",
+                "tools/sim/cam_profile.npy"],
 
     "cell": {"col_spacing": col_spacing, "row_spacing": row_spacing,
              "dot_pos": {str(d): dot_pos(d) for d in range(1, 7)}},
 
     "cam": {"states": states, "dots": dots,
             "slice_angle": 360.0 / states,
-            "angular_ramp_fraction": ramp_frac,
-            "use_auto_ramp": use_auto_ramp,
-            "foot_flat_arc": foot_flat_arc,
-            "ramp_angle": ramp_angle,          # PER TRACK since R-07
             "inner_radius": inner_radius, "track_width": track_width,
             "track_gap": track_gap, "track_r": track_r,
-            "disk_base_thickness": disk_base_thickness, "pin_lift": pin_lift,
+            "pin_lift": pin_lift,
             "dot_track": dot_track, "dot_phase": dot_phase,
-            "track_phase": [dot_phase[dot_track.index(t)] for t in range(dots)]},
+            "track_phase": track_phase,
+            # lift (mm) per TRACK, sampled evenly over one turn of the disc.
+            # Index with (dot_phase - disc angle). Measured from the resin mesh.
+            "profile": profile.tolist()},
 
-    "stack": {"cam_flat_z": cam_flat_z, "plate_under_z": plate_under_z,
+    "stack": {"shell_height": shell_height, "tall_raise": tall_raise,
+              "base_plate_z": base_plate_z,
+              "cam_flat_z": cam_flat_z, "plate_under_z": plate_under_z,
               "plate_top_z": plate_top_z,
               "reading_surface_z": reading_surface_z,
               "link_total_h": link_total_h},
@@ -222,7 +255,7 @@ for _out in OUTS:
     with open(_out, "w", encoding="utf-8") as f:
         json.dump(params, f, indent=2)
 
-print(f"\ntrack_r  {[round(r, 2) for r in track_r]}")
-print(f"ramp_deg {[round(a, 3) for a in ramp_angle]}   "
-      f"({'auto, per track' if use_auto_ramp else 'manual, flat'})")
+print(f"\nstack    shell {shell_height}  raise {tall_raise}  cam_flat {cam_flat_z}  "
+      f"base {base_plate_z}  plate_under {plate_under_z}")
+print(f"profile  {profile.shape[0]} tracks x {profile.shape[1]} samples")
 print("wrote    " + ", ".join(os.path.relpath(o, ROOT) for o in OUTS))

@@ -47,7 +47,7 @@ const PUNCT = {
   '!':[2,3,5], "'":[3], '-':[3,6],
 };
 
-let P, CAM, STACK, D2B, STATES, SLICE, RAMP, PIN_LIFT, CAM_FLAT, Z_SIGN, STEPS_PER_POS;
+let P, CAM, STACK, D2B, STATES, SLICE, PROFILE, PIN_LIFT, CAM_FLAT, Z_SIGN, STEPS_PER_POS;
 
 // Must match use_gray_order in cad/scad/braille_cam.scad and USE_GRAY_ORDER in
 // firmware/braille_cell/braille_cell.ino. All three or none.
@@ -65,48 +65,37 @@ const patternBit = (slice, track) => {
   const b = CAM.dots - 1 - track;
   return GRAY_ORDER ? grayBit(slice, b) : bitOf(slice, b);
 };
-const sCurve = t => (1 - Math.cos(t * Math.PI)) / 2;
-
-function heightFactor(aEff, track) {
-  aEff = ((aEff % 360) + 360) % 360;
-  const k = Math.floor(aEff / SLICE);
-  const ais = aEff - k * SLICE;
-  const vc = patternBit(k, track);
-  const vp = patternBit((k - 1 + STATES) % STATES, track);
-  const vn = patternBit((k + 1) % STATES, track);
-  // R-07 sizes each ramp from its OWN track's arc, so the six differ: 3.43 deg
-  // on the innermost up to 4.23 on the outermost. This used to be one global
-  // 1.125 for all six, which is both 3x too narrow AND the very uniformity R-07
-  // was written to remove — dots snapped up where the real cam eases them.
-  const ramp = RAMP[track];
-  const hr = ramp / 2;
-  if (ais < hr)             { const b = sCurve((ais + hr) / ramp);            return (1 - b) * vp + b * vc; }
-  if (ais > SLICE - hr)     { const b = sCurve((ais - (SLICE - hr)) / ramp);  return (1 - b) * vc + b * vn; }
-  return vc;
-}
-
 // TRAP: the cam's ramps are centred on SLICE BOUNDARIES. Aiming at pos*SLICE lands
-// mid-ramp and every dot sits halfway up — at state 0 all six read exactly 0.5.
-// The firmware has this bug today (breadboard_test.ino targets pos*4096/64 with no
-// +32). Half a slice further along is the middle of the flat dwell.
-// v8.2: the cam carries pattern gray(i) at slice i, so a pattern's angle is the
-// slice whose Gray value is that pattern — grayToBinary(pattern). Must match
-// use_gray_order in cad/scad/braille_cam.scad and USE_GRAY_ORDER in the firmware.
+// mid-ramp and every dot sits halfway up. Half a slice further along is the
+// middle of the flat dwell.
+// The cam carries pattern gray(i) at slice i, so a pattern's angle is the slice
+// whose Gray value is that pattern - grayToBinary(pattern). Must match
+// USE_GRAY_ORDER in the firmware; extract_params.py checks the printed cam.
 const stateToSlice = pos => GRAY_ORDER ? grayToBinary(pos) : pos;
 const camAngleForState = pos => Z_SIGN * (stateToSlice(pos) + 0.5) * SLICE;
 
-// A foot fixed at world angle dot_phase sits over disc-local (phase - rotation);
-// the carving already bakes in track_phase, so a_eff collapses to -rotation.
+// THE CAM IS THE PRINTED PART. The lift used to be a parametric model of the
+// track carving - s-curve ramps sized per track - because the CAD described the
+// cam that way. The cam is a frozen resin mesh now, and the profile in the
+// params is ray-cast from it (tools/sim/cam_profile.npy), so this reads the real
+// part. extract_params.py checks it against the Gray encoding at all 384 state
+// centres before it will write the file, and the old model agreed with it at
+// every one of them.
 function linkageLift(dot, camDeg) {
-  const track = CAM.dot_track[dot - 1];
-  const aEff = (CAM.dot_phase[dot - 1] - camDeg) - CAM.track_phase[track];
-  return heightFactor(aEff, track) * PIN_LIFT;
+  const row = PROFILE[CAM.dot_track[dot - 1]];
+  const n = row.length;
+  const a = (((CAM.dot_phase[dot - 1] - camDeg) % 360) + 360) % 360;
+  const f = a / 360 * n;
+  const i = Math.floor(f) % n;
+  const t = f - Math.floor(f);
+  return row[i] * (1 - t) + row[(i + 1) % n] * t;
 }
+
 
 const cellToPos = cell => cell.reduce((v, d) => v | (1 << D2B[d]), 0);
 
 // ---------------------------------------------------------------- scene
-const XRAY_PARTS = ['outer_box', 'top_plate', 'dot_insert', 'comb'];
+const XRAY_PARTS = ['outer_box', 'top_plate', 'dot_insert', 'comb', 'finger_sheet'];
 let renderer, scene, camera, controls, parts = {}, linkages = [];
 let pod = null, cellElec = null, glbMotor = [], podShells = [];
 
@@ -368,7 +357,7 @@ function applyMaterials(obj) {
       m.envMapIntensity = ENV_INTENSITY;
     } else if (n.startsWith('motor')) {
       m.metalness = 0.55; m.roughness = 0.5; m.envMapIntensity = ENV_INTENSITY;
-    } else if (n === 'base_plate' || n === 'mid_plate') {
+    } else if (n === 'base_plate' || n === 'mid_plate' || n === 'hall_retainer') {
       m.metalness = 0.10; m.roughness = 0.74; m.color.set(0x8e939a);
       m.envMapIntensity = ENV_INTENSITY;
     } else if (n === 'pod_shell' || n === 'pod_lid') {
@@ -492,9 +481,13 @@ function setElectronics(on) {
 const SPOTS = [];
 const MECH_INFO = [
   ['cam', 'THE CAM DISC',
-   'The whole mechanism in one part. Six concentric tracks, 64 angular slices - one per possible dot pattern. Rotating it to an angle IS choosing a character.'],
+   'The whole mechanism in one part. Six concentric tracks, 64 angular slices - one per possible dot pattern. Rotating it to an angle IS choosing a character. This is the resin part already printed; the motion here is measured from its mesh.'],
   ['linkage_1', 'LINKAGE (x6)',
    'One per dot. A foot rides the cam track; when it meets a raised section the guided linkage slides upward and pushes its dot up 0.5mm through the reading surface.'],
+  ['finger_sheet', 'FINGER SHEET (PETG)',
+   'The return spring, printed. A flat sheet under the top plate with one flexible tongue resting on each arm: the cam pushes an arm up, and its tongue pushes it back down. It replaced six coil springs that dragged on the turning cam like brake pads: they needed about 85 mN*m from a motor that gives about 30. The sheet needs about 11.'],
+  ['hall_retainer', 'HALL RETAINER',
+   'A small screw-on plate under the base plate that holds the Hall sensor in its pocket, facing the magnet in the cam above it.'],
   ['top_plate', 'READING SURFACE',
    'What the finger touches. Braille pitch is SQUARE - 2.6mm between rows AND between the two columns. A cell looks tall because it is 2 columns by 3 rows, not because the pitch is uneven.'],
 ];
@@ -710,6 +703,14 @@ function flyTo(o) {
   const margin = matchMedia('(max-width:840px)').matches ? 1.3 : 1.7;
   const dist = Math.max(26, sph.radius / Math.sin(Math.min(vFov, hFov) / 2) * margin);
   const dir = camera.position.clone().sub(controls.target).normalize();
+  // A flat part seen from a low camera is a line: the finger sheet is 58mm wide
+  // and 2.8mm thick, and focusing it edge-on showed nothing at all. Keep the
+  // heading but always look down on the part from at least 35 degrees.
+  const minEl = Math.sin(THREE.MathUtils.degToRad(35));
+  if (dir.z < minEl) {
+    const k = Math.sqrt(1 - minEl * minEl) / (Math.hypot(dir.x, dir.y) || 1);
+    dir.set(dir.x * k, dir.y * k, minEl);
+  }
   startTween(sph.center.clone().addScaledVector(dir, dist), sph.center.clone());
 }
 
@@ -1495,12 +1496,7 @@ async function main() {
   }
   CAM = P.cam; STACK = P.stack;
   STATES = CAM.states; SLICE = CAM.slice_angle;
-  // ramp_angle became a per-track array at R-07. Tolerate the old scalar so an
-  // out-of-date params file degrades to the previous behaviour instead of
-  // silently making every ramp NaN.
-  RAMP = Array.isArray(CAM.ramp_angle)
-    ? CAM.ramp_angle
-    : new Array(CAM.dots).fill(CAM.ramp_angle);
+  PROFILE = CAM.profile;
   PIN_LIFT = CAM.pin_lift; CAM_FLAT = STACK.cam_flat_z;
   Z_SIGN = P.motion.blender_z_sign; STEPS_PER_POS = P.motion.steps_per_position;
   D2B = Object.fromEntries(Object.entries(P.encoding.DOT_TO_BIT).map(([k, v]) => [+k, v]));

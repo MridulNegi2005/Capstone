@@ -25,7 +25,7 @@ export const POD = {
   pogo: { z: 15.5 },                                   // dock_interface.scad dock_center_z
   mag: { dia: 8.4, ys: [-18.5, 18.5], z: 13.5 },       // dock_mag_y / dock_mag_z
 };
-const CELL = { length: 68, width: 68, height: 46.5 };  // outer_box shell_height
+const CELL = { length: 68, width: 68, height: 58 };    // outer_box shell_height, tall box
 
 // 28BYJ-48, 5V geared stepper. The shaft is OFFSET from the body centre by 8mm —
 // this is the single most commonly wrong detail in models of this motor.
@@ -34,18 +34,32 @@ export const MOTOR = {
   dia: 28.1, height: 19.0, xOffset: -7.5,
   shaftDia: 5.0, shaftLen: 9.5, earSpan: 34.7, earW: 7.0, earT: 1.0,
   bossDia: 9.0, bossH: 2.0,   // raised ring at the shaft base; the hub stops on it
-  seatZ: 4.0,             // can bottom sits on the box floor (floor_thickness)
-  faceZ: 23.0,            // 4 + 19 — the mounting face, was 41
+  // TALL BOX. The motor HANGS from the base plate now - its shaft boss seats on
+  // the bottom of the cam hub - so the floor under it is free for the boards.
+  // electronics_envelopes.scad motor_env(): can 15.5..34.5.
+  seatZ: 15.5,
+  faceZ: 34.5,
 };
 
-// The driver, from cad/scad/electronics_spec.scad. A bare ULN2003AN in a DIP-16
-// socket on cut perfboard — the breakout module does not fit the cell at all.
+// Bought boards in the tall-box frame, from cad/scad/electronics_envelopes.scad.
+// Both stand on a long edge in a slotted sled; the bottom 3mm of each board is
+// bare and held in the grooves.
+//
+// ULN2003 module: the common 35 x 32 board - the size is ASSUMED, not measured.
+// It stands in the plane x = 13.3 with its chip side facing +X, the wall.
 export const DRIVER = {
-  pcbLen: 28.0, pcbW: 18.0, pcbT: 1.6,      // 11 x 7 holes off a 10x4cm board
-  socketH: 3.4, tail: 1.5,                  // socketed: a dead ULN is replaceable
-  icLen: 19.5, icW: 6.4, icH: 4.5, rowPitch: 7.62, pinPitch: 2.54,
-  overallH: 11.0,                           // elec_overall_h, tails to chip top
-  x: 16.0, y: 0.0, z: 4.0,                  // stands on the box floor, +X gap
+  pcbL: 35, pcbH: 32, pcbT: 1.6,
+  x: 13.3, seatZ: 5.2,
+  front: 8.5,          // chip, LEDs, JST socket
+  back: 2.0,           // solder joints
+};
+// 7Semi MCP23017 breakout (BO-10180): 31 x 20, published size. Stands in the
+// plane y = -23.26 with its parts facing -Y, the wall.
+export const EXPANDER = {
+  pcbL: 31, pcbH: 20, pcbT: 1.6,
+  y: -23.26, seatZ: 5.2,
+  front: 7.14 - 1.6,   // 7.14 tall including the JST
+  back: 2.0,
 };
 
 // ---- shared materials -------------------------------------------------
@@ -206,44 +220,52 @@ function esp32Devkit() {
 // Every number here is from cad/scad/electronics_spec.scad.
 function uln2003() {
   const m = mats(), g = new THREE.Group();
-  const { pcbLen, pcbW, pcbT, socketH, icLen, icW, icH, rowPitch, pinPitch,
-          tail } = DRIVER;
+  const { pcbL, pcbH, pcbT } = DRIVER;
+  const top = pcbT / 2;
+  // Drawn flat in its own frame: 35 along x, 32 along y, parts up +z. The caller
+  // stands it in the tall box. Layout follows driver_env(): the motor JST at the
+  // top middle, the input headers low on the edge nearest the expander, and the
+  // bottom 3mm left bare for the sled grooves.
+  g.add(box(pcbL, pcbH, pcbT, m.pcbBlue, [0, 0, 0], 'pcb'));
 
-  // Drawn flat in its own frame: board in XY, stack up +Z. The caller stands it
-  // on edge. Board origin is the top face, so z=0 is the component surface.
-  g.add(box(pcbW, pcbLen, pcbT, m.pcbFr4, [0, 0, -pcbT / 2], 'pcb'));
+  g.add(dip(m, 16, [-3, -1, top], 'uln_ic'));            // the ULN2003 itself, DIP-16
 
-  // the 11 x 7 hole grid, drawn as pads — it is what makes it read as perfboard
-  for (let ix = -3; ix <= 3; ix++)
-    for (let iy = -5; iy <= 5; iy++)
-      g.add(cyl(1.5, 0.06, m.gold, [ix * pinPitch, iy * pinPitch, 0.03], null, 8));
+  // white 5-pin JST the motor plugs into, with the mated plug and its cable
+  g.add(box(12, 9, 8, m.whitePlas, [0, 9.5, top + 4], 'motor_socket'));
+  g.add(box(10, 7, 6, m.whitePlas, [0, 9.5, top + 11], 'motor_plug'));
 
-  // DIP-16 socket, then the chip seated in it
-  g.add(box(icW + 1.6, icLen + 1.2, socketH, m.blackPlas, [0, 0, socketH / 2],
-            'dip_socket'));
-  const ic = new THREE.Group();
-  ic.add(box(icW, icLen, icH, m.blackPlas, [0, 0, icH / 2]));
-  ic.add(cyl(1.6, 0.3, m.pcbFr4, [0, -icLen / 2 + 2, icH], null, 12));  // pin 1
-  for (let i = 0; i < 8; i++)
-    for (const sx of [-1, 1])
-      ic.add(box(0.6, 0.5, socketH,
-                 m.solder, [sx * rowPitch / 2, -icLen / 2 + 1.5 + i * pinPitch,
-                            socketH / 2]));
-  ic.position.z = socketH;
-  ic.name = 'uln_ic';
-  g.add(ic);
+  // IN1..IN4 and the 5V / GND pair, on the edge that faces the expander
+  for (let i = 0; i < 4; i++)
+    g.add(box(0.64, 0.64, 9, m.gold, [-15.5, -9 + i * 2.54, top + 4.5]));
+  g.add(box(2.5, 10.5, 2.5, m.blackPlas, [-15.5, -5.2, top + 1.25]));
+  for (let i = 0; i < 2; i++)
+    g.add(box(0.64, 0.64, 9, m.gold, [-15.5, 4.7 + i * 2.54, top + 4.5]));
+  g.add(box(2.5, 5.4, 2.5, m.blackPlas, [-15.5, 6, top + 1.25]));
 
-  // trimmed pin tails on the solder side
-  for (let i = 0; i < 8; i++)
-    for (const sx of [-1, 1])
-      g.add(box(0.6, 0.5, tail, m.solder,
-                [sx * rowPitch / 2, -icLen / 2 + 1.5 + i * pinPitch,
-                 -pcbT - tail / 2]));
+  // the four coil LEDs - these are what let you SEE the step sequence
+  for (let i = 0; i < 4; i++) {
+    const led = smd0805(m, [2 + i * 3.5, -8, top], m.ledRed);
+    led.name = 'coil_led_' + (i + 1);
+    g.add(led);
+    g.add(smd0805(m, [2 + i * 3.5, -10.5, top], m.resistor));
+  }
+  g.add(box(5, 2.5, 2.5, m.bluePlas, [13, 4, top + 1.25], 'jumper'));
+  g.add(electrolytic(m, 4.0, 4.5, [13, -2, top]));
+  return g;
+}
 
-  // the spare hole rows earn their place: motor pigtail pads, flyback commons,
-  // and the 5V/GND pair the pogo bus lands on
-  g.add(electrolytic(m, 4.0, 4.5, [0, pcbLen / 2 - 3.5, 0]));
-  g.add(smd0805(m, [-pinPitch, -pcbLen / 2 + 3.5, 0], m.capCer));
+// ------------------------------------------------------- MCP23017 board
+function mcp23017() {
+  const m = mats(), g = new THREE.Group();
+  const { pcbL, pcbH, pcbT } = EXPANDER;
+  const top = pcbT / 2;
+  g.add(box(pcbL, pcbH, pcbT, m.pcbBlue, [0, 0, 0], 'pcb'));
+  g.add(box(18, 7.5, 2.4, m.blackPlas, [0, 1, top + 1.2], 'mcp_ic'));   // SOIC-28
+  // two 1 x 8 header rows along the long edges
+  for (const sy of [-1, 1])
+    for (let i = 0; i < 8; i++)
+      g.add(box(0.64, 0.64, 2.5, m.gold, [-8.9 + i * 2.54, sy * 7.5, top + 1.25]));
+  g.add(box(6, 5, 5.54, m.whitePlas, [12, 1, top + 2.77], 'qwiic'));    // the JST
   return g;
 }
 
@@ -404,41 +426,40 @@ const wrapPi = a => Math.atan2(Math.sin(a), Math.cos(a));
 // space, grown by half a wire. Points inside are pushed out through the nearest
 // face, which for this geometry is always -X -- the side the pads are on and
 // the side every run approaches from.
-// The SOLID part only. The assembly envelope is 11mm deep but the first
-// 1.5mm of it is pin tails in open air -- that is where the wires land, and
-// treating it as solid pushed every terminal back off its own pad.
-//
-//   tails 10.50..12.00   <- air, wires terminate here
-//   board 12.00..13.60   ] solid
-//   socket+chip ..21.50  ]
-const boardKeepOut = () => {
-  const front = DRIVER.x - DRIVER.overallH / 2 + DRIVER.tail;   // 12.0
-  return {
-    x0: front - 0.3, x1: DRIVER.x + DRIVER.overallH / 2 + 0.6,
-    y0: -DRIVER.pcbLen / 2 - 0.6, y1: DRIVER.pcbLen / 2 + 0.6,
-    z0: DRIVER.z - 0.6, z1: DRIVER.z + DRIVER.pcbW + 0.6,
-  };
+// Solid boxes the loom must stay out of, in world space and grown by half a
+// wire. Each board's solid spans its solder side to its parts side; the motor's
+// wire block hangs off the -X side of the can.
+const keepOuts = () => {
+  const d = DRIVER, e = EXPANDER, g = 0.6;
+  return [
+    { x0: d.x - d.pcbT / 2 - d.back - g, x1: d.x + d.pcbT / 2 + d.front + g,
+      y0: -d.pcbL / 2 - g, y1: d.pcbL / 2 + g, z0: d.seatZ - g, z1: d.seatZ + d.pcbH + g },
+    { x0: -e.pcbL / 2 - g, x1: e.pcbL / 2 + g,
+      y0: e.y - e.pcbT / 2 - e.front - g, y1: e.y + e.pcbT / 2 + e.back + g,
+      z0: e.seatZ - g, z1: e.seatZ + e.pcbH + g },
+    { x0: -25 - g, x1: -20 + g, y0: -8 - g, y1: 8 + g,
+      z0: MOTOR.seatZ - g, z1: MOTOR.seatZ + 8 + g },
+  ];
 };
 
-function avoidBoard(pts) {
-  const b = boardKeepOut();
-  const inside = ([x, y, z]) =>
-    x > b.x0 && x < b.x1 && y > b.y0 && y < b.y1 && z > b.z0 && z < b.z1;
+function avoidBoxes(pts) {
   const last = pts.length - 1;
   return pts.map((pt, i) => {
     // a wire is allowed to touch what it lands ON; only the run between the
     // ends has to keep clear
     if (i === 0 || i === last) return pt;
-    if (!inside(pt)) return pt;
-    const [x, y, z] = pt;
-    // nearest face wins, so a point that has only just crept in does not get
-    // flung across the bay
-    const d = [
-      [x - b.x0, [b.x0, y, z]], [b.x1 - x, [b.x1, y, z]],
-      [y - b.y0, [x, b.y0, z]], [b.y1 - y, [x, b.y1, z]],
-      [z - b.z0, [x, y, b.z0]], [b.z1 - z, [x, y, b.z1]],
-    ].sort((p, q) => p[0] - q[0])[0];
-    return d[1];
+    for (const b of keepOuts()) {
+      const [x, y, z] = pt;
+      if (!(x > b.x0 && x < b.x1 && y > b.y0 && y < b.y1 && z > b.z0 && z < b.z1)) continue;
+      // nearest face wins, so a point that has only just crept in does not get
+      // flung across the bay
+      pt = [
+        [x - b.x0, [b.x0, y, z]], [b.x1 - x, [b.x1, y, z]],
+        [y - b.y0, [x, b.y0, z]], [b.y1 - y, [x, b.y1, z]],
+        [z - b.z0, [x, y, b.z0]], [b.z1 - z, [x, y, b.z1]],
+      ].sort((p, q) => p[0] - q[0])[0][1];
+    }
+    return pt;
   });
 }
 
@@ -498,7 +519,7 @@ function avoidMotor(pts) {
 // Dupont jumpers drawn as swept tubes through a Catmull-Rom curve. Real jumpers
 // sag and bulge; dead-straight lines look like a schematic, not a build.
 function wire(pts, mat, dia = 0.9) {
-  const route = avoidMotor(avoidBoard(pts));
+  const route = avoidMotor(avoidBoxes(pts));
   const curve = new THREE.CatmullRomCurve3(route.map(p => new THREE.Vector3(...p)));
   // more segments than before: the arc waypoints put real curvature in these
   // runs, and 18 samples faceted it visibly
@@ -536,18 +557,6 @@ const pogoY = i => -(POGO.pins - 1) * POGO.pinPitch / 2 + i * POGO.pinPitch;
 // yet, and pretending otherwise is why several wires used to stop in mid-air: SDA,
 // SCL and the four IN lines have nothing on a ULN2003 to land on. They terminate
 // here instead, on a real footprint, which is the honest picture.
-const EXPANDER = [-20, -4, 4.6];   // on the box floor (4mm) now the bay is gone
-function expanderSlot() {
-  const m = mats(), g = new THREE.Group();
-  g.name = 'expander_slot';
-  g.add(box(24, 20, 0.4, m.pcbBlue, [0, 0, 0]));
-  for (const s of [-1, 1])
-    for (let i = 0; i < 8; i++)
-      g.add(box(1.4, 1.4, 0.5, m.gold, [-8.9 + i * 2.54, s * 6.5, 0.35]));
-  g.position.set(...EXPANDER);
-  return g;
-}
-
 // Inside the pod: DevKit header -> the four pogo pins on the dock wall.
 function podHarness() {
   const m = mats(), g = new THREE.Group(), W = m.wire;
@@ -586,65 +595,76 @@ function cellHarness() {
   const NETCOL = { GND: W.black, '5V': W.red, SDA: W.blue, SCL: W.yellow };
   const cols = POGO_NET.map(n => NETCOL[n]);
   const FACE = -CELL.length / 2;                        // -34, the dock face
-  const FLOOR = 4.6;                                    // box floor top
+  const FLOOR = 4.0;
+  const d = DRIVER, e = EXPANDER;
+  const dz = local => d.seatZ + d.pcbH / 2 + local;     // driver local y -> world z
+  // Driver header pins point +X, toward the wall, so the jumpers land on that
+  // side; the motor plug also enters from +X. Expander wires are soldered to
+  // its back, which faces the middle of the box.
+  const pinX = d.x + d.pcbT / 2 + 9.5;
+  const drvIn = i => [pinX, -15.5, dz(-9 + i * 2.54)];
+  const drvPwr = i => [pinX, -15.5, dz(4.7 + i * 2.54)];
+  const exBack = e.y + e.pcbT / 2 + 1.0;
+  const exPin = i => [-8.9 + i * 2.54, exBack, e.seatZ + e.pcbH - 2];
 
-  // pads -> across the open floor to the expander footprint. There is no 14mm
-  // bay any more, so nothing has to thread down a pocket wall.
-  const exPin = i => [EXPANDER[0] - 8.9 + i * 2.54, EXPANDER[1] + 6.5, EXPANDER[2] + 0.6];
-  // The driver's solder side faces +X at x=20.0, so every wire lands on a
-  // perfboard pad rather than a connector — there is no JST plug now.
-  // solder side, facing the wires. Was 20.4 on the far face of the board.
-  const PAD_X = 11.2;
-  const pad = (y, z) => [PAD_X, y, z];
-  const drvPwr = pad(11, 19);                          // 5V / GND pads, top row
-  // Routed by NET, not by pin index: 5V and both grounds land on the driver's
-  // power pads, SDA and SCL carry on to the expander footprint.
+  // The motor hangs from the base plate now, so the floor underneath it is open
+  // and every run from the dock goes along it, under the can.
+  let pwr = 0;
   for (let i = 0; i < POGO.pins; i++) {
     const y = pogoY(i);
     const power = POGO_NET[i] === 'GND' || POGO_NET[i] === '5V';
-    const end = power ? drvPwr : exPin(i + 2);
-    g.add(wire([
-      [FACE + POGO.wall - 0.2, y, POD.pogo.z],
-      [FACE + 8, y * 1.8, 12],
-      [-18, y * 2.2, FLOOR + 2],
-      [end[0] - 10, end[1] + (power ? -4 : 4), FLOOR + 2],
-      end,
-    ], cols[i], 0.85));
+    const start = [FACE + POGO.wall - 0.2, y, POD.pogo.z];
+    const run = power ? [
+      start,
+      [FACE + 6, y, FLOOR + 3],
+      [-6, -6 + y * 0.4, FLOOR + 2],
+      [8, -19 + y * 0.2, FLOOR + 3],
+      [pinX + 2, -19.5, FLOOR + 6],
+      drvPwr(Math.min(pwr++, 1)),
+    ] : [
+      start,
+      [FACE + 6, y, FLOOR + 3],
+      [-18, -14 + y * 0.3, FLOOR + 3],
+      [-12 + y, exBack + 1, e.seatZ + e.pcbH - 4],
+      exPin(POGO_NET[i] === 'SDA' ? 0 : 1),
+    ];
+    g.add(wire(run, cols[i], 0.85));
   }
 
-  // driver IN1..IN4 -> the expander that will drive them
+  // expander -> driver IN1..IN4, round the -Y end of the driver
   for (let i = 0; i < 4; i++)
     g.add(wire([
-      pad(-2 + i * 2.54, 16),
-      // was x=22, i.e. behind the board, from when the pads faced +X. Both
-      // ends are on the -X side now, so the run never leaves that side.
-      [9.5, -15 + i * 1.4, FLOOR + 3],
-      [4, -14 + i * 1.2, FLOOR + 1.5],
-      exPin(i),
+      exPin(4 + i),
+      [6 + i, exBack + 1.2, e.seatZ + e.pcbH - 6],
+      [pinX + 1.5, -19.6, dz(-9 + i * 2.54)],
+      drvIn(i),
     ], [W.green, W.orange, W.purple, W.white][i], 0.8));
 
-  // driver coil pads -> the motor. Both stand on the floor now, so this is a
-  // short hop across it rather than a climb through a mid-plate notch.
-  const CAN = [MOTOR.xOffset, 0], R = MOTOR.dia / 2;
+  // motor -> driver. The lead leaves the wire block on the -X side of the can,
+  // drops to the open floor, runs under the motor and round the +Y end of the
+  // driver, and plugs into the JST from the wall side.
   for (let i = 0; i < 5; i++) {
-    const o = (i - 2) * 1.2;
+    const o = (i - 2) * 1.0;
     g.add(wire([
-      pad(-13 + i * 2.54, 8),
-      // around the board's -Y end and along the floor, all on the -X side
-      [10, -18.5 + o, FLOOR + 2],
-      [8, -19 + o, FLOOR + 2],
-      [CAN[0] + R * 0.7, -13 + o, 9 + o * 0.4],          // onto the can's near side
+      [-25.5, o * 1.4, MOTOR.seatZ + 4],
+      [-27, o, FLOOR + 4],
+      [-6, 6 + o, FLOOR + 3],
+      [8, 20 + o * 0.5, FLOOR + 5],
+      [24, 20 + o * 0.5, dz(4)],
+      [d.x + d.pcbT / 2 + 14.5, o * 1.6, dz(9.5)],
     ], [W.blue, W.purple, W.yellow, W.orange, W.red][i], 0.8));
   }
 
-  // hall legs -> the expander, hugging the underside of the base plate (29.5)
-  for (const [c, dy, i] of [[W.red, -1.27, 5], [W.black, 0, 6], [W.white, 1.27, 7]])
+  // Hall legs -> the expander. The sensor sits in its pocket under the base
+  // plate; the legs drop straight down, clear of the can, to the open floor.
+  for (const [c, dy, i] of [[W.red, -1.27, 12], [W.black, 0, 13], [W.white, 1.27, 14]])
     g.add(wire([
-      [dy, 17.35, 28.0],
-      [dy - 4, 21, 25.0],
-      [-26, 22, 16],
-      [-30, 12, 9],
-      exPin(i),
+      [dy, 17.35, 35.6],
+      [dy + 2, 20, 28],
+      [4 + dy, 18, FLOOR + 4],
+      [-2 + dy, -10, FLOOR + 4],
+      [i - 18, exBack + 1, e.seatZ + 4],
+      [i - 18, exBack, e.seatZ + 3],
     ], c, 0.8));
   return g;
 }
@@ -718,32 +738,24 @@ export function buildCellElectronics(realMotor) {
   const m = mats(), g = new THREE.Group();
   g.name = 'cell_electronics';
 
-  // The 14mm electronics bay no longer exists. outer_box.scad:12 — "the driver
-  // board now stands on edge against the +X wall, which frees the whole floor".
-  // The driver stands on edge in the only gap that takes it: between the motor
-  // cup at x=+9.75 and the corner bosses at x=+22.10. 12.35mm of strip, 11.0mm
-  // of assembly, 1.35mm of spare.
-  //
-  // NOTE: electronics_spec.scad calls elec_pcb_x=16.0 "the board's mid-plane",
-  // but that reading does not fit — it puts the chip at x=7.3, inside the motor
-  // cup. Read as the ASSEMBLY mid-plane it lands at 10.50..21.50 with exactly
-  // the 1.35mm the handoff quotes, so that is what is drawn. Flagged upstream.
-  // CHIP FACES THE WALL, SOLDER SIDE FACES THE WIRES. It was the other way
-  // round, which put the pads at x=20.4 on the FAR side of the board from
-  // everything that lands on them -- so every run crossed the board to reach
-  // its own pads. On a perfboard you solder on the side the wires come from,
-  // and here they all come from -X: the dock, and the motor.
-  //
-  //   tails 10.50..12.00 | board 12.00..13.60 | socket 13.60..17.00 | chip 17.00..21.50
-  //
-  // The chip then sits 0.60mm off the corner-boss inner edge at 22.10, which is
-  // inside the 1.35mm the gap has spare.
+  // Each board is drawn flat (long edge along x, short along y, parts +z) and
+  // stood on its long edge here by naming where those three axes end up.
+  const stand = (o, ax, ay, az) => o.quaternion.setFromRotationMatrix(
+    new THREE.Matrix4().makeBasis(ax, ay, az));
+  const X = new THREE.Vector3(1, 0, 0), Y = new THREE.Vector3(0, 1, 0),
+        Z = new THREE.Vector3(0, 0, 1);
+
   const drv = uln2003();
   drv.name = 'uln2003';
-  drv.rotation.set(0, Math.PI / 2, 0);    // board plane -> YZ, chip faces +X
-  drv.position.set(DRIVER.x - DRIVER.overallH / 2 + DRIVER.tail + DRIVER.pcbT,
-                   DRIVER.y, DRIVER.z + DRIVER.pcbW / 2);
+  stand(drv, Y, Z, X);                                  // parts face +X, the wall
+  drv.position.set(DRIVER.x, 0, DRIVER.seatZ + DRIVER.pcbH / 2);
   g.add(drv);
+
+  const mcp = mcp23017();
+  mcp.name = 'mcp23017';
+  stand(mcp, X, Z, Y.clone().negate());                 // parts face -Y, the wall
+  mcp.position.set(0, EXPANDER.y, EXPANDER.seatZ + EXPANDER.pcbH / 2);
+  g.add(mcp);
 
   const mot = realMotor || stepper28byj();
   mot.name = 'stepper';
@@ -751,11 +763,11 @@ export function buildCellElectronics(realMotor) {
   mot.position.set(realMotor ? 0 : MOTOR.xOffset, 0, MOTOR.faceZ - MOTOR.height);
   g.add(mot);
 
-  // v8.8: base plate spans 29.5..34.5, cam pocket floor 31.5, and the hall pocket
-  // sits 0.4mm under it — so the sensor body occupies 29.5..31.1, clear of the cam.
+  // The A3144 sits in its pocket under the base plate, 40.6..42.2, held up by
+  // the screw-on retainer (electronics_envelopes / make_viewer).
   const hall = hallSensor();
   hall.name = 'hall';
-  hall.position.set(0, 17.35, 30.3);
+  hall.position.set(0, 17.35, 41.4);
   g.add(hall);
 
   // outer_box.scad cuts dock_pogo_cutout on BOTH walls, so a cell is female on
@@ -782,7 +794,6 @@ export function buildCellElectronics(realMotor) {
   }
   g.add(cellMagnets);
 
-  g.add(expanderSlot());
   g.add(cellHarness());
   return g;
 }
@@ -790,7 +801,7 @@ export function buildCellElectronics(realMotor) {
 // ============================================ what each piece actually is
 export const PART_INFO = [
   ['brain_pod', 'ESP32 BRAIN POD',
-   'A 68x68x58 shell, the same brick size as a cell so a docked chain looks uniform. Holds the controller and the power inlet. One pod drives the whole chain.'],
+   'Holds the controller and the power inlet; one pod drives the whole chain. Its CAD is still the 68x68x46.5 brick, so it stands 11.5mm lower than the 58mm tall cell beside it. The dock connector and magnets still line up, because both sit at the same height from the floor.'],
   ['esp32', 'ESP32-WROOM-32 DEVKIT',
    'The controller. 51.5x28mm, dropped onto two female header strips so it lifts out with no soldering. Runs the text-to-braille encoding and drives the motor.'],
   ['dc_jack', 'DC BARREL JACK 5.5/2.1',
@@ -802,17 +813,17 @@ export const PART_INFO = [
   ['pod_shell', 'POD SHELL (PETG)',
    'The real printed part, straight from esp32_pod_shell.scad - 4mm walls, the USB service opening, the pogo recess, the magnet pockets and the slotted grille that keeps the WiFi antenna out of solid plastic.'],
   ['stepper', '28BYJ-48 STEPPER  (model: NandouTech, CC-BY)',
-   'The only moving actuator. 28mm can, 19mm tall, 4096 steps per turn. Its output shaft is offset 7.5mm from the body centre, and that offset drives the whole in-box layout. The shaft stands 9.5mm above the mounting face, and its first 2mm is a 9mm boss the cam hub stops against, leaving 7.5mm of grabbable shaft.'],
-  ['expander_slot', 'I/O EXPANDER FOOTPRINT (empty)',
-   'Where the per-cell MCP23017 goes in the multi-cell product. Nothing is fitted yet, which is why SDA, SCL and the four IN lines terminate here rather than on the driver - a ULN2003 has no pins for them.'],
-  ['uln2003', 'ULN2003AN DRIVER  (DIP-16 on perfboard)',
-   'Darlington array. The ESP32 cannot supply the motor coils directly, so four GPIO lines switch this instead. The ready-made breakout was dropped: at 35x32mm it fits nowhere in the cell, and nearly all of it is a JST socket, an LED row and headers this build does not use. What is left is the bare chip in a socket on a 28x18mm scrap of perfboard - 11mm tall, standing on edge in the 12.35mm strip beside the motor. The socket is deliberate: a ULN2003 dies shorted on coil kickback, and desoldering 16 pins inside a glued box is not a repair.'],
+   'The only moving actuator. 28mm can, 19mm tall, 4096 steps per turn. In the tall box it hangs from the base plate - its shaft boss seats on the bottom of the cam hub - which leaves the floor beneath it open for the two boards. The output shaft is offset 7.5mm from the body centre, and that offset drives the whole in-box layout.'],
+  ['mcp23017', 'MCP23017 I/O EXPANDER (7Semi BO-10180)',
+   'Turns the two-wire I2C bus into the four coil lines and reads the Hall sensor, so every cell needs only power and I2C from the dock. 31x20mm, standing on its long edge against the -Y wall, parts facing the wall and its wires soldered to the back.'],
+  ['uln2003', 'ULN2003 DRIVER MODULE',
+   'Darlington array. The expander cannot supply the motor coils directly, so its four outputs switch this instead. The common 35x32mm module, standing on its long edge against the +X wall - the tall box made room for it again. Its size is assumed, not measured, so the fit still has to be checked on the real board. The four LEDs show the coil sequence as it steps.'],
   ['hall', 'HALL SENSOR (BARE TO-92)',
-   'Finds home. On power-up the cam turns until the magnet passes it - the only way the firmware learns which of the 64 positions it is sitting on. Shown as the bare TO-92 because the module it ships on is too big for the pocket, so the sensor gets desoldered off its blue carrier board.'],
+   'Finds home. On power-up the cam turns until its 3x1.5mm magnet passes the sensor - the only way the firmware learns which of the 64 positions it is sitting on. A bare A3144 in a pocket under the base plate, held by a screw-on retainer.'],
   ['pogo_pads', 'POGO CONNECTOR - 5P MAGNETIC (FEMALE)',
    'The mating half on the -X face. Flat-to-sprung means no alignment tolerance problem and nothing to snap off. Its own magnets align the last millimetre; the 8mm shell magnets either side do the holding.'],
   ['pod_magnets', 'DOCK MAGNETS 8x1mm',
-   'Two per face, flush with the dock wall at y +/-14. Poles are reversed between pod and cell so they only latch the right way round - you physically cannot dock a cell backwards.'],
-  ['cell_wiring', 'THE 13-WIRE LOOM',
-   'Dupont jumpers, no soldering. Four coil lines and power reach the driver, five cores go on to the motor, and three run back from the hall sensor. Colour coding matches the build guide.'],
+   'Two per face, flush with the dock wall at y +/-18.5, either side of the connector. Poles are reversed between pod and cell so they only latch the right way round - you physically cannot dock a cell backwards.'],
+  ['cell_wiring', 'THE CELL WIRING',
+   'Power and I2C from the dock, four coil lines from the expander to the driver, the five-core motor lead, and three wires from the Hall sensor. With the motor hanging, every run uses the open floor beneath it.'],
 ];

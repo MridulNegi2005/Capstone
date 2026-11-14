@@ -13,18 +13,22 @@ Placement matches esp32_pod_assembly.scad — the lid sits at pod_height - lid_h
 """
 import bpy
 import os
+import subprocess
 import sys
+import tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STL = os.path.join(ROOT, "cad", "stl")
+SCAD = os.path.join(ROOT, "cad", "scad")
+OPENSCAD = r"C:\Program Files\OpenSCAD (Nightly)\openscad.com"
 OUT = os.path.join(ROOT, "sim", "3d", "pod.glb")
 
-# from cad/scad/esp32_pod_params.scad
-POD_HEIGHT, LID_H = 46.5, 4.0   # v8.8: pod_height tracks the cell shell, 44 -> 46.5
-
-PARTS = {                      # name: (z offset, hex colour, metal, rough)
+# The lid sits on the shell's wall top, so it is placed by the shell's own
+# height rather than a copied pod_height - that literal was 46.5 here while the
+# CAD moved underneath it.
+PARTS = {                      # name: (z rule, hex colour, metal, rough)
     "esp32_pod_shell": (0.0, "5A6B7C", 0.05, 0.75),
-    "esp32_pod_lid": (POD_HEIGHT - LID_H, "6E7A88", 0.05, 0.72),
+    "esp32_pod_lid": ("on_shell", "6E7A88", 0.05, 0.72),
 }
 RENAME = {"esp32_pod_shell": "pod_shell", "esp32_pod_lid": "pod_lid"}
 
@@ -43,19 +47,38 @@ def material(name, hx, metal, rough):
     return m
 
 
+def source(name):
+    """cad/stl holds only the current muscle cell, so the pod meshes are rendered
+    from their SCAD. The brain was not re-released with the tall cell; this is
+    whatever its CAD currently says."""
+    path = os.path.join(STL, name + ".stl")
+    if os.path.exists(path):
+        return path
+    if not os.path.exists(OPENSCAD):
+        sys.exit(f"missing {path} and OpenSCAD is not at {OPENSCAD}")
+    out = os.path.join(tempfile.mkdtemp(), name + ".stl")
+    run = subprocess.run([OPENSCAD, "--backend=Manifold", "--export-format", "binstl",
+                          "-o", out, os.path.join(SCAD, name + ".scad")],
+                         capture_output=True, text=True)
+    if not os.path.exists(out):
+        sys.exit(f"{name} render failed:\n{run.stderr[-1500:]}")
+    return out
+
+
 def main():
     bpy.ops.wm.read_factory_settings(use_empty=True)
 
-    built = []
+    built, shell_top = [], None
     for name, (z, hx, metal, rough) in PARTS.items():
-        path = os.path.join(STL, name + ".stl")
-        if not os.path.exists(path):
-            sys.exit(f"missing {path}\n  regenerate with:\n"
-                     f"  openscad -o cad/stl/{name}.stl cad/scad/{name}.scad")
+        path = source(name)
         bpy.ops.wm.stl_import(filepath=path, global_scale=1.0)   # millimetres
         o = bpy.context.selected_objects[0]
         o.name = RENAME[name]
+        if z == "on_shell":
+            z = shell_top
         o.location.z += z
+        if name == "esp32_pod_shell":
+            shell_top = max(v.co.z for v in o.data.vertices)
         o.data.materials.clear()
         o.data.materials.append(material("mat_" + o.name, hx, metal, rough))
         # left flat-shaded on purpose: this is a printed box, and smoothing the
@@ -72,6 +95,7 @@ def main():
     tris = sum(len(bpy.data.objects[n].data.loop_triangles) or
                len(bpy.data.objects[n].data.polygons) for n in built)
     print(f"\nwrote {OUT}")
+    print(f"  shell top {shell_top:.2f}, lid on it")
     print(f"  objects: {built}")
     print(f"  size   : {os.path.getsize(OUT) / 1024:.0f} KB")
 
