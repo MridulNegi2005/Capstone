@@ -25,7 +25,7 @@ The human owner is a student. The owner chooses the service and approves every p
 | `dot_tile.stl` | 2 | 15.0 x 15.0 x 3.2 | Small plate. The six braille dots come up through its holes (one spare). |
 | `arm_1.stl` to `arm_6.stl` | 2 each | about 20 x 12 x 2.2 | Six different arms. Each arm lifts one dot (one spare set). |
 
-One upload file holds all 18 resin parts, two complete sets: `resin_all_in_one.stl` (164 x 139 x 9 mm,
+One upload file holds all 18 resin parts, two complete sets: `resin_all_in_one.stl` (112 x 158 x 9 mm, fits one 218 x 123 mm plate,
 16.8 cm3, 18 separate bodies, all flat at z = 0, 4 mm apart). Upload this file, not the separate files.
 The service charges a minimum of INR 500 per file, so one file is the cheapest. In the order note, write:
 "This file contains 18 separate parts. Print all of them as separate parts."

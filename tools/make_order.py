@@ -43,7 +43,7 @@ for name, src, qty in RESIN:
 parts.sort(key=lambda p: -p[1].extents[1])
 x = y = row_h = 0.0; placed = []
 for name, m in parts:
-    if x + m.extents[0] > 170:
+    if x + m.extents[0] > 118:
         x, y, row_h = 0.0, y + row_h + 4.0, 0.0
     m.apply_translation([x, y, 0]); placed.append(m)
     x += m.extents[0] + 4.0; row_h = max(row_h, m.extents[1])

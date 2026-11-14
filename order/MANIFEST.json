@@ -152,11 +152,11 @@
   "resin_all_in_one.stl": {
     "bodies": 18,
     "size_mm": [
-      164.4,
-      138.8,
+      112.0,
+      157.8,
       9.0
     ],
     "volume_cm3": 16.81,
-    "sha256": "0a300dfec847c03cd784eecf1581a138fde9c241a13d57929566e8dce9d77509"
+    "sha256": "7a06e67bff1ec1015aa8968689db9081519e62b575055f03b5b8a1013d6657b5"
   }
 }
