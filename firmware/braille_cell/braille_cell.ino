@@ -16,12 +16,16 @@
  * Wiring (identical to docs/BREADBOARD_STEP_BY_STEP.md):
  *   ULN2003 IN1 -> GPIO 18       ULN2003 (+) -> 5V rail (adapter)
  *   ULN2003 IN2 -> GPIO 19       ULN2003 (-) -> GND rail
- *   ULN2003 IN3 -> GPIO 21       Hall AO     -> GPIO 34
- *   ULN2003 IN4 -> GPIO 22       Hall VCC    -> 3V3, Hall GND -> GND
+ *   ULN2003 IN3 -> GPIO 21       A3144 OUT   -> GPIO 34, 10k pull-up to 3V3
+ *   ULN2003 IN4 -> GPIO 22       A3144 VCC   -> 3V3, A3144 GND -> GND
  *   ESP32 GND   -> GND rail  <-- the one wire that must not be missed
+ *
+ * GPIO 34 is input-only and has NO internal pull-up. The A3144 is open
+ * collector, so without the external 10k the pin floats and homing is noise.
  */
 
 #include <AccelStepper.h>
+#include <Preferences.h>
 #include <WiFi.h>
 #include <WebServer.h>
 #include <BLEDevice.h>
@@ -70,9 +74,11 @@ WebServer server(80);
 AccelStepper stepper(AccelStepper::HALF4WIRE, IN1, IN3, IN2, IN4);
 
 // --- from sim/3d/braillix_params.json — keep these in step with the simulator ---
-const int STEPS_PER_REV = 4096;   // 28BYJ-48 half-steps, 64:1 gearbox
-const int STEPS_PER_POS = 64;     // one of 64 cam states
-const int DWELL_OFFSET  = 32;     // land MID-dwell, not on a ramp edge
+// The gearbox is 63.68395:1, not 64:1. With 4096 the cam drifts ~20 half-steps
+// per revolution and the error adds up, so slice targets come from the real
+// ratio and are computed against an absolute step count that is never wrapped.
+const double STEPS_PER_REV_REAL = 4075.7728;   // 64 half-steps * 63.68395
+const int    CAM_SLICES = 64;
 #define USE_GRAY_ORDER 1          // must match braille_cam.scad's use_gray_order
 
 // bit = DOT_TO_BIT[dot]; dot 1->3, 2->2, 3->1, 4->4, 5->5, 6->0
@@ -88,8 +94,30 @@ const uint8_t LETTER_DOTS[26][6] PROGMEM = {
   {1,3,5,6,0,0}
 };
 
-const int HALL_THRESHOLD = 500;   // analogRead below this = magnet present
+// --- homing and backlash --------------------------------------------------
+// Homing only ever runs FORWARD and stops on the first not-triggered ->
+// triggered edge. A wide magnet triggers over a band of angles; the leading
+// edge seen from one direction is the only point of that band that repeats.
+const int    HALL_ACTIVE        = LOW;   // A3144 pulls low on a south pole
+const int    HOME_SPEED         = 400;   // half-steps/s, slow so the edge is not overrun
+const double HOME_TIMEOUT_REVS  = 1.5;
+const int    HOME_CONFIRM       = 3;     // consecutive triggered steps to accept an edge
+
+// Steps from the hall edge to the CENTRE of slice 0. Set on the bench:
+// home, send !s 0, adjust with !homeoff N until the slice-0 pattern sits
+// mid-dwell. !homeoff saves it to flash, so this default only applies once.
+const int HOME_EDGE_TO_SLICE0 = 0;
+const int BACKLASH_STEPS      = 40;      // overshoot past target on a reverse move
+const int REHOME_EVERY        = 20;      // letters between automatic re-homes, 0 = off
+
+int  homeEdgeToSlice0 = HOME_EDGE_TO_SLICE0;
+int  backlashSteps    = BACKLASH_STEPS;
+int  rehomeEvery      = REHOME_EVERY;
+long homeEdge         = 0;               // absolute step count where the edge fired
+int  lettersSinceHome = 0;
 bool homed = false;
+
+Preferences prefs;
 
 // Tunable live over serial (!speed, !gap). A one-state move is only 64 steps, so
 // it is ACCELERATION-limited, not speed-limited: at accel 500 the motor needs 490
@@ -123,24 +151,44 @@ int grayToBinary(int g) {
   return b;
 }
 
-int stateToStep(int state) {
-  int slice = USE_GRAY_ORDER ? grayToBinary(state) : state;
-  return slice * STEPS_PER_POS + DWELL_OFFSET;
+int stateToSlice(int state) {
+  return USE_GRAY_ORDER ? grayToBinary(state) : state;
 }
 
-// Shortest path: wrap the target to the nearest equivalent of where we are.
-// Matches the simulator's gotoIndex(). Without this, 63 -> 0 spins 354 degrees
-// the wrong way instead of stepping 5.6 degrees back.
-long shortestTarget(long current, int wantStep) {
-  long diff = ((wantStep - current) % STEPS_PER_REV + STEPS_PER_REV * 3 / 2)
-              % STEPS_PER_REV - STEPS_PER_REV / 2;
-  return current + diff;
+long sliceZero() { return homeEdge + homeEdgeToSlice0; }
+
+// Absolute step of a slice centre, nearest to where we are (shortest path,
+// matches the simulator's gotoIndex()). Each candidate is rounded from its own
+// revolution number, so rounding error never carries from one turn to the next.
+// sliceZero() already points at the slice-0 centre, so the +0.5 slice of
+// round((slice + 0.5) * rev / 64) is folded into homeEdgeToSlice0.
+long sliceTarget(long current, int slice) {
+  long base = sliceZero();
+  long rev  = (long)floor((current - base) / STEPS_PER_REV_REAL);
+  long best = current, bestDist = LONG_MAX;
+  for (long k = rev - 1; k <= rev + 1; k++) {
+    long t = base + lround((k * CAM_SLICES + slice) * STEPS_PER_REV_REAL / CAM_SLICES);
+    long d = labs(t - current);
+    if (d < bestDist) { bestDist = d; best = t; }
+  }
+  return best;
 }
 
 // --- motion ---------------------------------------------------------------
 
 void runToTarget() {
   while (stepper.distanceToGo() != 0) stepper.run();
+}
+
+// Every move ends travelling forward, the same way homing approaches the edge,
+// so gear backlash is always taken up on the same flank.
+void approach(long target) {
+  if (target < stepper.currentPosition()) {
+    stepper.moveTo(target - backlashSteps);
+    runToTarget();
+  }
+  stepper.moveTo(target);
+  runToTarget();
 }
 
 void releaseCoils() {                 // stop cooking the motor while idle
@@ -152,19 +200,26 @@ void releaseCoils() {                 // stop cooking the motor while idle
 // drive a state directly over Web Serial: the simulator already expands text into
 // cells (including the capital/number indicators this table knows nothing about),
 // so the encoding lives in ONE place and the firmware just follows.
+void tryHome();
+
 void showState(int state) {
+  if (homed && rehomeEvery > 0 && lettersSinceHome >= rehomeEvery) {
+    Serial.printf("\n  re-homing after %d letters\n", lettersSinceHome);
+    tryHome();
+  }
+
+  int  slice  = stateToSlice(state);
   long from   = stepper.currentPosition();
-  long target = shortestTarget(from, stateToStep(state));
+  long target = sliceTarget(from, slice);
   long delta  = target - from;
 
-  Serial.printf("state %2d  step %4d  move %+5ld (%s)  %.1f deg",
-                state, stateToStep(state), delta,
-                delta >= 0 ? "CW " : "CCW", delta * 360.0 / STEPS_PER_REV);
+  Serial.printf("state %2d  slice %2d  step %6ld  move %+5ld (%s)  %.1f deg",
+                state, slice, target, delta,
+                delta >= 0 ? "CW " : "CCW+bl", delta * 360.0 / STEPS_PER_REV_REAL);
 
-  stepper.moveTo(target);
-  runToTarget();
-  stepper.setCurrentPosition(((target % STEPS_PER_REV) + STEPS_PER_REV) % STEPS_PER_REV);
+  approach(target);
   releaseCoils();
+  lettersSinceHome++;
 }
 
 void showChar(char c) {
@@ -184,29 +239,58 @@ void showChar(char c) {
   showState(state);
 }
 
-// Look for the homing magnet. There is no cam disc yet, so this MUST NOT hang.
+bool hallTriggered() { return digitalRead(HALL_PIN) == HALL_ACTIVE; }
+
+void loadTuning() {
+  prefs.begin("braillix", false);      // read-write: a read-only open of a new namespace fails
+  homeEdgeToSlice0 = prefs.getInt("homeoff",  HOME_EDGE_TO_SLICE0);
+  backlashSteps    = prefs.getInt("backlash", BACKLASH_STEPS);
+  rehomeEvery      = prefs.getInt("rehome",   REHOME_EVERY);
+  prefs.end();
+}
+
+void saveTuning() {
+  prefs.begin("braillix", false);
+  prefs.putInt("homeoff",  homeEdgeToSlice0);
+  prefs.putInt("backlash", backlashSteps);
+  prefs.putInt("rehome",   rehomeEvery);
+  prefs.end();
+}
+
+// Look for the homing magnet. There may be no cam disc yet, so this MUST NOT hang.
 void tryHome() {
-  Serial.println("Homing: looking for the magnet (one revolution max)...");
-  stepper.setCurrentPosition(0);
-  stepper.moveTo(STEPS_PER_REV);
-  int best = 4095; long bestAt = 0;
-  while (stepper.distanceToGo() != 0) {
-    stepper.run();
-    int v = analogRead(HALL_PIN);
-    if (v < best) { best = v; bestAt = stepper.currentPosition(); }
+  Serial.printf("Homing: forward to the hall edge (%.1f rev max)...\n", HOME_TIMEOUT_REVS);
+  long limit = stepper.currentPosition() + lround(HOME_TIMEOUT_REVS * STEPS_PER_REV_REAL);
+  bool armed = !hallTriggered();       // starting inside the field is not an edge
+  long edgeAt = 0;
+  int  confirm = 0;
+  bool found = false;
+
+  stepper.setSpeed(HOME_SPEED);
+  while (stepper.currentPosition() < limit) {
+    if (!stepper.runSpeed()) continue;
+    bool t = hallTriggered();
+    if (!armed) { armed = !t; continue; }
+    if (t) {
+      if (confirm == 0) edgeAt = stepper.currentPosition();
+      if (++confirm >= HOME_CONFIRM) { found = true; break; }
+    } else confirm = 0;
   }
+  // Same count, but clears the speed runSpeed() left behind so moveTo() ramps from rest.
+  stepper.setCurrentPosition(stepper.currentPosition());
   releaseCoils();
-  if (best < HALL_THRESHOLD) {
-    Serial.printf("  magnet found at step %ld (reading %d). Zero set there.\n", bestAt, best);
-    stepper.setCurrentPosition(((stepper.currentPosition() - bestAt) % STEPS_PER_REV
-                                + STEPS_PER_REV) % STEPS_PER_REV);
+  lettersSinceHome = 0;
+
+  if (found) {
+    homeEdge = edgeAt;
     homed = true;
+    Serial.printf("  edge at step %ld, slice 0 at %ld (homeoff %d).\n",
+                  homeEdge, sliceZero(), homeEdgeToSlice0);
   } else {
-    Serial.printf("  no magnet (best reading %d, need < %d).\n", best, HALL_THRESHOLD);
-    Serial.println("  EXPECTED right now — there is no disc on the shaft yet.");
-    Serial.println("  Treating the current position as zero. Motion still works.");
-    stepper.setCurrentPosition(0);
     homed = false;
+    Serial.printf("  HOMING FAILED: no hall edge in %.1f rev (%s).\n", HOME_TIMEOUT_REVS,
+                  armed ? "never triggered" : "triggered the whole time");
+    Serial.println("  Expected if there is no disc on the shaft. Keeping the old zero; motion still works.");
   }
 }
 
@@ -305,8 +389,11 @@ void help() {
   Serial.println("Type a letter or a word, then Enter.  Examples:  a    hello    cab");
   Serial.println("Commands:  !s N    go to cam state N (0-63) - the web simulator uses this");
   Serial.println("           !home   re-run homing");
-  Serial.println("           !zero   call this position step 0");
-  Serial.println("           !hall   print the hall reading");
+  Serial.println("           !zero   call this position the centre of slice 0");
+  Serial.println("           !hall   print the hall switch and step counts");
+  Serial.println("           !homeoff N   steps from hall edge to slice-0 centre (saved)");
+  Serial.println("           !backlash N  overshoot on reverse moves (saved)");
+  Serial.println("           !rehome N    re-home every N letters, 0 = off (saved)");
   Serial.println("           !spin   one full revolution, to eyeball direction");
   Serial.println("           !speed V A   set max speed and acceleration");
   Serial.println("           !gap MS      pause between letters of a word");
@@ -318,8 +405,9 @@ void setup() {
   Serial.begin(115200);
   delay(600);
   Serial.println("\n=== Braillix bare-motor letter test ===");
-  Serial.printf("%d steps/rev, %d steps/state, +%d mid-dwell offset\n",
-                STEPS_PER_REV, STEPS_PER_POS, DWELL_OFFSET);
+  loadTuning();
+  Serial.printf("%.4f steps/rev, %d slices, homeoff %d, backlash %d, rehome every %d\n",
+                STEPS_PER_REV_REAL, CAM_SLICES, homeEdgeToSlice0, backlashSteps, rehomeEvery);
 
   pinMode(HALL_PIN, INPUT);
   stepper.setMaxSpeed(vmax);     // must ramp; commanding full speed cold = stall
@@ -339,14 +427,41 @@ void handleLine(String line, bool echo) {
 
   if (line.startsWith("!")) {
     if      (line == "!home") tryHome();
-    else if (line == "!zero") { stepper.setCurrentPosition(0); Serial.println("  zero set."); }
-    else if (line == "!hall") Serial.printf("  hall = %d\n", analogRead(HALL_PIN));
+    else if (line == "!zero") {
+      homeEdge = stepper.currentPosition() - homeEdgeToSlice0;
+      Serial.println("  zero set.");
+    }
+    else if (line == "!hall")
+      Serial.printf("  hall %s  step %ld  from edge %ld  homed %d\n",
+                    hallTriggered() ? "TRIGGERED" : "clear", stepper.currentPosition(),
+                    stepper.currentPosition() - homeEdge, homed);
+    else if (line.startsWith("!homeoff")) {
+      int n;
+      if (sscanf(line.c_str(), "!homeoff %d", &n) == 1) {
+        homeEdgeToSlice0 = n; saveTuning();
+        Serial.printf("  homeoff %d saved (send !s 0 to check)\n", homeEdgeToSlice0);
+      } else Serial.printf("  usage: !homeoff <steps>   now %d\n", homeEdgeToSlice0);
+    }
+    else if (line.startsWith("!backlash")) {
+      int n;
+      if (sscanf(line.c_str(), "!backlash %d", &n) == 1 && n >= 0) {
+        backlashSteps = n; saveTuning();
+        Serial.printf("  backlash %d saved\n", backlashSteps);
+      } else Serial.printf("  usage: !backlash <steps>   now %d\n", backlashSteps);
+    }
+    else if (line.startsWith("!rehome")) {
+      int n;
+      if (sscanf(line.c_str(), "!rehome %d", &n) == 1 && n >= 0) {
+        rehomeEvery = n; saveTuning();
+        Serial.printf("  re-home every %d letters saved\n", rehomeEvery);
+      } else Serial.printf("  usage: !rehome <letters>   now %d (0 = off)\n", rehomeEvery);
+    }
     else if (line.startsWith("!speed")) {
       int v, a;
       if (sscanf(line.c_str(), "!speed %d %d", &v, &a) == 2 && v > 0 && a > 0) {
         vmax = v; accel = a;
         stepper.setMaxSpeed(vmax); stepper.setAcceleration(accel);
-        Serial.printf("  vmax %d (%.1f RPM), accel %d\n", vmax, vmax * 60.0 / STEPS_PER_REV, accel);
+        Serial.printf("  vmax %d (%.1f RPM), accel %d\n", vmax, vmax * 60.0 / STEPS_PER_REV_REAL, accel);
         if (vmax > 1200) Serial.println("  WARNING: past ~1200 the 28BYJ-48 will start skipping steps.");
       } else Serial.println("  usage: !speed <maxspeed> <accel>   e.g. !speed 1000 2000");
     }
@@ -362,9 +477,8 @@ void handleLine(String line, bool echo) {
     }
     else if (line == "!spin") {
       Serial.println("  one revolution...");
-      stepper.moveTo(stepper.currentPosition() + STEPS_PER_REV);
+      stepper.moveTo(stepper.currentPosition() + lround(STEPS_PER_REV_REAL));
       runToTarget(); releaseCoils();
-      stepper.setCurrentPosition(stepper.currentPosition() % STEPS_PER_REV);
       Serial.println("  done.");
     }
     else help();
