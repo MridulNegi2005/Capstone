@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Braillix Cell Viewer</title>
+<style>
+  :root { --bg:#f4f5f7; --panel:#ffffff; --ink:#1b1d21; --muted:#6b7280; --line:#e3e5e9; --accent:#2f6fd0; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; height:100%; background:var(--bg); color:var(--ink); font:14px/1.35 system-ui, Segoe UI, Arial, sans-serif; }
+  #app { display:flex; height:100%; }
+  #side { width:350px; min-width:350px; background:var(--panel); border-right:1px solid var(--line); overflow-y:auto; padding:14px 14px 30px; }
+  #view { flex:1; position:relative; }
+  #view canvas { display:block; }
+  h1 { font-size:17px; margin:0 0 4px; }
+  .sub { color:var(--muted); font-size:12px; margin-bottom:12px; }
+  .box { border:1px solid var(--line); border-radius:8px; padding:10px; margin-bottom:12px; }
+  .box h2 { font-size:13px; margin:0 0 8px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
+  label.row { display:flex; align-items:center; gap:8px; margin:5px 0; }
+  .row input[type=range] { flex:1; }
+  .val { width:56px; text-align:right; font-variant-numeric:tabular-nums; color:var(--muted); }
+  .part { display:grid; grid-template-columns:18px 12px 1fr 70px; align-items:center; gap:6px; padding:3px 0; border-bottom:1px dashed var(--line); }
+  .part:last-child { border-bottom:0; }
+  .sw { width:12px; height:12px; border-radius:3px; border:1px solid #0002; }
+  .pname { cursor:pointer; font-size:13px; }
+  .pname:hover { color:var(--accent); }
+  .pname.sel { color:var(--accent); font-weight:600; }
+  .grp { font-size:11px; color:var(--muted); margin:8px 0 2px; }
+  button { font:inherit; padding:5px 9px; border:1px solid var(--line); border-radius:6px; background:#fafbfc; cursor:pointer; }
+  button:hover { border-color:var(--accent); }
+  .btns { display:flex; flex-wrap:wrap; gap:6px; }
+  #dots { display:grid; grid-template-columns:repeat(2, 34px); gap:8px; margin:8px 0 4px; }
+  .dot { width:34px; height:34px; border-radius:50%; border:2px solid #333; display:flex; align-items:center; justify-content:center; font-size:12px; }
+  #hud { position:absolute; left:12px; bottom:10px; background:#fffd; border:1px solid var(--line); border-radius:8px; padding:6px 10px; font-size:12px; color:var(--muted); }
+  #step-name { font-weight:600; color:var(--ink); }
+  @media (max-width: 800px) { #app { flex-direction:column; } #side { width:auto; min-width:0; height:46%; border-right:0; border-bottom:1px solid var(--line); } }
+</style>
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+               "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+</script>
+</head>
+<body>
+<div id="app">
+  <div id="side">
+    <h1>Braillix muscle cell</h1>
+    <div class="sub">The real order files, assembled. Units: mm. Drag to rotate, scroll to zoom, right-drag to pan. Click a part name to highlight it.</div>
+
+    <div class="box">
+      <h2>Build it step by step</h2>
+      <label class="row">Step <input id="step" type="range" min="1" max="1" value="1"><span class="val" id="stepv"></span></label>
+      <div>Last part added: <span id="step-name"></span></div>
+      <label class="row">Explode <input id="explode" type="range" min="0" max="25" step="0.5" value="0"><span class="val" id="explodev">0</span></label>
+    </div>
+
+    <div class="box">
+      <h2>Cut through</h2>
+      <div class="btns" style="margin-bottom:6px">
+        <button data-cut="none">No cut</button><button data-cut="x">Cut across X</button><button data-cut="y">Cut across Y</button><button data-cut="z">Cut across Z</button>
+      </div>
+      <label class="row">Position <input id="cutpos" type="range" min="-35" max="60" step="0.1" value="0"><span class="val" id="cutv">0</span></label>
+      <label class="row"><input id="flip" type="checkbox"> Keep the other side</label>
+    </div>
+
+    <div class="box">
+      <h2>Turn the cam</h2>
+      <label class="row">Angle <input id="cam" type="range" min="0" max="360" step="0.25" value="2.8"><span class="val" id="camv"></span></label>
+      <div class="btns"><button id="prev">&#9664; Prev letter stop</button><button id="next">Next letter stop &#9654;</button><button id="play">Play</button><button id="home">Blank (home)</button></div>
+      <div id="dots"></div>
+      <div class="sub" id="dotinfo" style="margin:0"></div>
+    </div>
+
+    <div class="box">
+      <h2>Views</h2>
+      <div class="btns"><button data-v="iso">3D</button><button data-v="top">Top</button><button data-v="front">Front</button><button data-v="side">Side</button><button data-v="dots">Dots close-up</button></div>
+    </div>
+
+    <div class="box">
+      <h2>Parts (show / transparency)</h2>
+      <div class="btns" style="margin-bottom:6px">
+        <button data-g="all">Show all</button><button data-g="none">Hide all</button>
+        <button data-g="Resin">Resin only</button><button data-g="PETG">PETG only</button><button data-g="Bought">Bought only</button>
+      </div>
+      <label class="row">All parts opacity <input id="allop" type="range" min="0.05" max="1" step="0.05" value="1"></label>
+      <div id="parts"></div>
+    </div>
+  </div>
+  <div id="view"><div id="hud"></div></div>
+</div>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { STLLoader } from "three/addons/loaders/STLLoader.js";
+
+const DATA = /*DATA*/null;
+const view = document.getElementById("view");
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.localClippingEnabled = true;
+view.appendChild(renderer.domElement);
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0xeef0f3);
+const camera = new THREE.PerspectiveCamera(35, 1, 0.5, 3000);
+camera.up.set(0, 0, 1);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0, 40);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x8890a0, 1.1));
+const key = new THREE.DirectionalLight(0xffffff, 1.6); key.position.set(80, -120, 200); scene.add(key);
+const fill = new THREE.DirectionalLight(0xffffff, 0.6); fill.position.set(-150, 80, 60); scene.add(fill);
+const grid = new THREE.GridHelper(200, 20, 0xc8ccd2, 0xdde0e5); grid.rotation.x = Math.PI / 2; scene.add(grid);
+
+const clip = new THREE.Plane(new THREE.Vector3(1, 0, 0), 0);
+let cutAxis = "none";
+const loader = new STLLoader();
+function b64(s) { const b = atob(s), a = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a.buffer; }
+
+const TIER = { "Box": 0, "Motor": 1, "ULN2003": 1, "MCP23017": 1, "Hall sensor": 2, "Hall retainer": 2, "Base plate": 3,
+               "Cam": 4, "Comb": 5, "Arm": 6, "Finger": 7, "Top plate": 8, "Dot tile": 9 };
+const tierOf = n => { for (const k in TIER) if (n.startsWith(k)) return TIER[k]; return 0; };
+
+const parts = DATA.parts.map((p, i) => {
+  const g = loader.parse(b64(p.stl)); g.computeVertexNormals();
+  const m = new THREE.MeshStandardMaterial({ color: p.color, roughness: 0.55, metalness: 0.05, side: THREE.DoubleSide,
+                                             transparent: true, opacity: p.opacity, depthWrite: p.opacity > 0.99 });
+  const mesh = new THREE.Mesh(g, m);
+  const holder = new THREE.Group(); holder.add(mesh); scene.add(holder);
+  return { ...p, i, mesh, holder, mat: m, tier: tierOf(p.name), visible: true, baseOpacity: p.opacity };
+});
+const byName = n => parts.find(p => p.name.startsWith(n));
+const cam = byName("Cam");
+const arms = [1, 2, 3, 4, 5, 6].map(i => byName(`Arm ${i}`));
+const tongues = [1, 2, 3, 4, 5, 6].map(i => byName(`Finger tongue ${i}`));
+tongues.forEach((t, d) => {
+  const [tx, ty, ux, uy, L] = DATA.pivots[d];
+  const root = new THREE.Vector3(tx + ux * L, ty + uy * L, 54);
+  t.pivot = new THREE.Group(); t.pivot.position.copy(root);
+  t.holder.remove(t.mesh); t.pivot.add(t.mesh); t.mesh.position.copy(root).multiplyScalar(-1); t.holder.add(t.pivot);
+  t.axis = new THREE.Vector3(uy, -ux, 0).normalize(); t.L = L;
+});
+
+const prof = DATA.profile, N = prof[0].length;
+function lift(d, a) { const k = ((DATA.phase[d] + a) % 360 + 360) % 360; return prof[DATA.track[d]][Math.round(k / 360 * N) % N]; }
+
+const state = { step: parts.length, explode: 0, angle: 2.8 };
+function apply() {
+  const a = state.angle, h = [0, 1, 2, 3, 4, 5].map(d => lift(d, a));
+  parts.forEach(p => {
+    p.holder.position.z = p.z + p.tier * state.explode;
+    p.holder.visible = p.visible && p.i < state.step;
+  });
+  cam.mesh.rotation.z = -a * Math.PI / 180;
+  arms.forEach((p, d) => { p.mesh.position.z = h[d]; });
+  tongues.forEach((t, d) => { t.pivot.quaternion.setFromAxisAngle(t.axis, -(0.3 + h[d]) / t.L); });
+  const dots = document.getElementById("dots"); dots.innerHTML = "";
+  [0, 3, 1, 4, 2, 5].forEach(d => {
+    const up = Math.max(0, Math.min(1, h[d] / 0.5)), el = document.createElement("div");
+    el.className = "dot"; el.textContent = d + 1;
+    el.style.background = `rgba(47,111,208,${up})`; el.style.color = up > 0.5 ? "#fff" : "#333"; dots.appendChild(el);
+  });
+  const raised = h.map((v, d) => v > 0.25 ? d + 1 : 0).filter(Boolean);
+  document.getElementById("dotinfo").textContent = `Dot heights (mm): ${h.map(v => v.toFixed(2)).join("  ")}  -  raised: ${raised.length ? raised.join(", ") : "none"}`;
+  document.getElementById("camv").textContent = a.toFixed(1) + "°";
+  document.getElementById("stepv").textContent = `${state.step}/${parts.length}`;
+  document.getElementById("step-name").textContent = parts[state.step - 1].name;
+  document.getElementById("hud").textContent = `${parts.filter(p => p.holder.visible).length} parts shown` +
+    (cutAxis !== "none" ? ` - cut across ${cutAxis.toUpperCase()} at ${(+document.getElementById("cutpos").value).toFixed(1)} mm` : "");
+}
+
+const list = document.getElementById("parts"); let lastGroup = null, selected = null;
+parts.forEach(p => {
+  if (p.group !== lastGroup) { const gl = document.createElement("div"); gl.className = "grp"; gl.textContent = p.group === "Bought" ? "Bought parts (outer size only)" : p.group + " parts"; list.appendChild(gl); lastGroup = p.group; }
+  const row = document.createElement("div"); row.className = "part";
+  const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = true;
+  cb.onchange = () => { p.visible = cb.checked; apply(); }; p.cb = cb;
+  const sw = document.createElement("span"); sw.className = "sw"; sw.style.background = p.color;
+  const nm = document.createElement("span"); nm.className = "pname"; nm.textContent = p.name;
+  nm.onclick = () => {
+    if (selected) { selected.mat.emissive.setHex(0); selected.nm.classList.remove("sel"); }
+    if (selected === p) { selected = null; return; }
+    selected = p; p.mat.emissive.setHex(0xff2a00); p.mat.emissiveIntensity = 0.45; nm.classList.add("sel");
+  };
+  p.nm = nm;
+  const op = document.createElement("input"); op.type = "range"; op.min = 0.05; op.max = 1; op.step = 0.05; op.value = p.opacity;
+  op.title = "transparency"; op.oninput = () => setOpacity(p, +op.value); p.op = op;
+  row.append(cb, sw, nm, op); list.appendChild(row);
+});
+function setOpacity(p, v) { p.mat.opacity = v; p.mat.depthWrite = v > 0.99; p.op.value = v; }
+
+const $ = id => document.getElementById(id);
+$("step").max = parts.length; $("step").value = parts.length;
+$("step").oninput = e => { state.step = +e.target.value; apply(); };
+$("explode").oninput = e => { state.explode = +e.target.value; $("explodev").textContent = e.target.value; apply(); };
+$("cam").oninput = e => { state.angle = +e.target.value; apply(); };
+$("home").onclick = () => { state.angle = 2.8; $("cam").value = 2.8; apply(); };
+const snap = k => { const i = Math.round((state.angle - 2.8125) / 5.625) + k; state.angle = ((i % 64 + 64) % 64) * 5.625 + 2.8125; $("cam").value = state.angle; apply(); };
+$("prev").onclick = () => snap(-1); $("next").onclick = () => snap(1);
+let playing = false, last = 0;
+$("play").onclick = () => { playing = !playing; $("play").textContent = playing ? "Pause" : "Play"; };
+$("allop").oninput = e => parts.forEach(p => setOpacity(p, +e.target.value));
+document.querySelectorAll("[data-g]").forEach(b => b.onclick = () => {
+  const g = b.dataset.g; parts.forEach(p => { p.visible = g === "all" || p.group === g; p.cb.checked = p.visible; }); apply();
+});
+function setCut() {
+  const v = +$("cutpos").value, s = $("flip").checked ? 1 : -1; $("cutv").textContent = v.toFixed(1);
+  const n = { x: [1, 0, 0], y: [0, 1, 0], z: [0, 0, 1] }[cutAxis] || [1, 0, 0];
+  clip.normal.set(n[0] * s, n[1] * s, n[2] * s); clip.constant = -s * v;
+  parts.forEach(p => { p.mat.clippingPlanes = cutAxis === "none" ? [] : [clip]; p.mat.needsUpdate = true; });
+  apply();
+}
+document.querySelectorAll("[data-cut]").forEach(b => b.onclick = () => {
+  cutAxis = b.dataset.cut;
+  if (cutAxis === "z") { $("cutpos").min = 0; $("cutpos").max = 60; $("cutpos").value = 50; }
+  else { $("cutpos").min = -35; $("cutpos").max = 35; $("cutpos").value = 0; }
+  setCut();
+});
+$("cutpos").oninput = setCut; $("flip").onchange = setCut;
+const VIEWS = { iso: [[150, -190, 170], [0, 0, 38]], top: [[0, -0.01, 260], [0, 0, 40]], front: [[0, -240, 45], [0, 0, 40]],
+                side: [[240, 0, 45], [0, 0, 40]], dots: [[0, -28, 80], [0, 0, 57]] };
+function setView(k) { const [p, t] = VIEWS[k]; camera.position.set(...p); controls.target.set(...t); controls.update(); }
+document.querySelectorAll("[data-v]").forEach(b => b.onclick = () => setView(b.dataset.v));
+
+function resize() { const w = view.clientWidth, h = view.clientHeight; renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+window.addEventListener("resize", resize);
+resize(); setView("iso"); apply();
+renderer.setAnimationLoop(t => {
+  if (playing) { const dt = Math.min(0.05, (t - last) / 1000); state.angle = (state.angle + dt * 25) % 360; $("cam").value = state.angle; apply(); }
+  last = t; controls.update(); renderer.render(scene, camera);
+});
+</script>
+</body>
+</html>
