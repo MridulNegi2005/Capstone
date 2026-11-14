@@ -89,6 +89,36 @@
     "volume_cm3": 0.07,
     "sha256": "71b03d35e3434ddcc9aeb0ed7f9c1aa88e7d0d2e50e33c2857ad19815b06356d"
   },
+  "resin/nav_button_prev.stl": {
+    "quantity": 2,
+    "size_mm": [
+      10.0,
+      10.0,
+      8.7
+    ],
+    "volume_cm3": 0.29,
+    "sha256": "c9591da0a3bdeec54fcf2791fd213372e6424c976323ce1246e5f38f5e31398e"
+  },
+  "resin/nav_button_select.stl": {
+    "quantity": 2,
+    "size_mm": [
+      10.0,
+      10.0,
+      8.7
+    ],
+    "volume_cm3": 0.29,
+    "sha256": "6ca49e7298c5af8aa440a1eb8de7433457567bbd214b7f8cfdb6fd8368b0617f"
+  },
+  "resin/nav_button_next.stl": {
+    "quantity": 2,
+    "size_mm": [
+      10.0,
+      10.0,
+      8.7
+    ],
+    "volume_cm3": 0.29,
+    "sha256": "e2e17c968c6fad672f40e2a9958d8f05b3f26766e563951f53d606660ea799f0"
+  },
   "petg/box.stl": {
     "quantity": 1,
     "size_mm": [
@@ -149,14 +179,34 @@
     "volume_cm3": 2.95,
     "sha256": "b48deef19be6f6c4e53b77504413710100d3bf13171ce3b7e0497a8e6316b688"
   },
-  "resin_all_in_one.stl": {
-    "bodies": 18,
+  "petg/brain_pod_shell.stl": {
+    "quantity": 1,
     "size_mm": [
-      112.0,
-      157.8,
+      68.0,
+      68.0,
+      42.5
+    ],
+    "volume_cm3": 56.25,
+    "sha256": "1e96295aec949d58570633a8600e104ad62e45e576fb66d448e93446a891925e"
+  },
+  "petg/brain_pod_lid.stl": {
+    "quantity": 1,
+    "size_mm": [
+      68.0,
+      68.0,
+      5.39
+    ],
+    "volume_cm3": 18.54,
+    "sha256": "cf2cf0ae1a680a6ebbcddd93bfca847499e5d5adaa705ce9c740df5a2c9e833b"
+  },
+  "resin_all_in_one.stl": {
+    "bodies": 24,
+    "size_mm": [
+      115.0,
+      171.8,
       9.0
     ],
-    "volume_cm3": 16.81,
-    "sha256": "7a06e67bff1ec1015aa8968689db9081519e62b575055f03b5b8a1013d6657b5"
+    "volume_cm3": 18.57,
+    "sha256": "6c0d0d67c754e11d1d3f43cd3cdbb2fcfad76a8ab79afe1a2f7841345e2e64e4"
   }
 }

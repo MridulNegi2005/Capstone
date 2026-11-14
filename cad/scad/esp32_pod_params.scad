@@ -120,15 +120,18 @@ power_tie_x      = power_cable_x;
 power_tie_y      = pod_int_width/2 - 4;
 
 // --- NAVIGATION BUTTONS (front face, -Y wall) ---
-// 3× PS-style flanged caps: Previous (<), Select (O), Next (>)
-// 6×6×5mm tactile switches held in printed snap pockets behind wall
-nav_shaft_dia    = 3.8;    // resin stem; 0.4mm diametral clearance in the Ø4.2 PETG hole
-nav_hole_dia     = 4.2;    // 0.2mm sliding clearance
-nav_flange_dia   = 8.0;
-nav_flange_h     = 1.5;
-nav_cap_body_dia = 7.5;
-nav_cap_body_h   = 3.5;
-nav_shaft_len    = 4.5;    // measured from flange INNER face: 4mm wall + 0.5mm to switch plunger
+// 3 captive resin buttons: Previous (<), Select (O), Next (>).
+// The flange sits INSIDE the wall: the wall stops the button coming out, the switch
+// behind it stops it falling in. The body is D-shaped in a D-shaped hole, so the
+// arrows cannot turn. Fit the button from inside, then drop the switch in behind it.
+nav_body_dia     = 6.4;    // resin, through the wall
+nav_body_flat    = 2.6;    // flat on the underside, this far below the axis
+nav_hole_dia     = 7.0;    // PETG; still clears the body if printed 0.3 small
+nav_hole_flat    = 2.9;
+nav_flange_dia   = 10.0;   // inside the wall
+nav_flange_h     = 1.2;
+nav_proud        = 2.5;    // body length outside the wall
+nav_plunger_gap  = 0.15;   // flange back face to the switch plunger tip
 nav_z            = 58 * 0.42;  // ~24.4mm; keep switch/USB wiring geometry stable
 nav_x_positions  = [-20, 0, 20];
 

@@ -24,11 +24,12 @@ The human owner is a student. The owner chooses the service and approves every p
 | `comb_light.stl` | 2 | 54.0 x 54.0 x 2.8 | Plate with slots that guide the six arms (one spare). |
 | `dot_tile.stl` | 2 | 15.0 x 15.0 x 3.2 | Small plate. The six braille dots come up through its holes (one spare). |
 | `arm_1.stl` to `arm_6.stl` | 2 each | about 20 x 12 x 2.2 | Six different arms. Each arm lifts one dot (one spare set). |
+| `nav_button_prev/select/next.stl` | 2 each | 10 x 10 x 8.7 | Three push buttons for the brain pod (one spare set). |
 
-One upload file holds all 18 resin parts, two complete sets: `resin_all_in_one.stl` (112 x 158 x 9 mm, fits one 218 x 123 mm plate,
-16.8 cm3, 18 separate bodies, all flat at z = 0, 4 mm apart). Upload this file, not the separate files.
+One upload file holds all 24 resin parts, two complete sets plus six buttons: `resin_all_in_one.stl` (115 x 172 x 9 mm, fits one 218 x 123 mm plate,
+18.6 cm3, 24 separate bodies, all flat at z = 0, 4 mm apart). Upload this file, not the separate files.
 The service charges a minimum of INR 500 per file, so one file is the cheapest. In the order note, write:
-"This file contains 18 separate parts. Print all of them as separate parts."
+"This file contains 24 separate parts. Print all of them as separate parts."
 
 Resin requirements:
 
@@ -55,6 +56,8 @@ This is the cheapest setting, and the finger sheets need it (see the rules below
 | `hall_retainer.stl` | 2 | 16.5 x 13 x 1.3 | - | 100% | Small clip for the Hall sensor (one spare). |
 | `finger_sheet_080_normal.stl` | 2 | 58 x 56 x 2.8 | 5 | 100% | Flat spring sheet, normal (one spare). |
 | `finger_sheet_100_stiff.stl` | 2 | 58 x 56 x 2.8 | 5 | 100% | Flat spring sheet, stiff (one spare). |
+| `brain_pod_shell.stl` | 1 | 68 x 68 x 42.5 | 4 | 20% | Brain pod body. Holds the ESP32 and the three buttons. |
+| `brain_pod_lid.stl` | 1 | 68 x 68 x 5.4 | 3 | 20% | Brain pod lid. |
 
 Use 4 top and 4 bottom layers on all parts unless the table says different. Use the default pattern for infill.
 

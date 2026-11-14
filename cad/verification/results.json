@@ -207,6 +207,42 @@
       ],
       "sha256": "89db8ef535bceec3b53f1f8fe3a18fd6e1c7f2917a802f16adec41fc99f840df"
     },
+    "esp32_pod_lid.stl": {
+      "watertight": true,
+      "consistent_winding": true,
+      "components": 1,
+      "bounds": [
+        [
+          -34.0,
+          -34.0,
+          0.0
+        ],
+        [
+          34.0,
+          34.0,
+          5.389999866485596
+        ]
+      ],
+      "sha256": "cf2cf0ae1a680a6ebbcddd93bfca847499e5d5adaa705ce9c740df5a2c9e833b"
+    },
+    "esp32_pod_shell.stl": {
+      "watertight": true,
+      "consistent_winding": true,
+      "components": 1,
+      "bounds": [
+        [
+          -34.0,
+          -34.0,
+          0.0
+        ],
+        [
+          34.0,
+          34.0,
+          42.5
+        ]
+      ],
+      "sha256": "1e96295aec949d58570633a8600e104ad62e45e576fb66d448e93446a891925e"
+    },
     "finger_sheet.stl": {
       "watertight": true,
       "consistent_winding": true,
@@ -296,6 +332,24 @@
         ]
       ],
       "sha256": "b7e933fd2cc73ad1bddb0226c9e6420454a0fd707927ab3b0a35a207e3868312"
+    },
+    "nav_cap.stl": {
+      "watertight": true,
+      "consistent_winding": true,
+      "components": 3,
+      "bounds": [
+        [
+          -5.0,
+          -5.0,
+          0.0
+        ],
+        [
+          33.0,
+          5.0,
+          8.699999809265137
+        ]
+      ],
+      "sha256": "fbfd2911c787d86dfb4ecd1a3f45e053673a97226ef2120afe30452223cf2081"
     },
     "outer_box.stl": {
       "watertight": true,

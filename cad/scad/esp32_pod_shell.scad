@@ -33,12 +33,12 @@ module usb_cutout() {
         cube([pod_wall + 2, usb_w, usb_h]);
 }
 
+module nav_d2d(d, flat) intersection() { circle(d = d, $fn = 48); translate([-d, -flat]) square([2 * d, 2 * d]); }
+
 module nav_button_holes() {
-    for(nx = nav_x_positions) {
-        translate([nx, -pod_width/2 - 1, nav_z])
-            rotate([-90, 0, 0])
-            cylinder(d=nav_hole_dia, h=pod_wall + 2, $fn=30);
-    }
+    for(nx = nav_x_positions)
+        translate([nx, -pod_width/2 + pod_wall + 1, nav_z]) rotate([90, 0, 0])   // local +z = outward, local +y = up
+            linear_extrude(pod_wall + 2) nav_d2d(nav_hole_dia, nav_hole_flat);
 }
 
 module dock_receiver_cutout() {
@@ -117,7 +117,8 @@ module rear_harness_cutout() {
 // orientation would foul the fins). Secure with a dab of hot glue after testing.
 module switch_cages() {
     y_in   = -pod_width/2 + pod_wall;  // inner face of front wall
-    depth  = 7.2;   // wall face → back wall: 5mm body + 1.5mm plunger + play
+    sw_front = nav_flange_h + nav_plunger_gap;   // plunger tip, from the wall face
+    depth  = sw_front + 5.0 + 0.2;   // 6x6x5 switch (plunger included) + play
     bw_t   = 2;     // back wall thickness
     fin_t  = 2;     // side fin thickness
     slot_w = sw_body;            // 6.4 (6mm switch + clearance)
@@ -129,16 +130,16 @@ module switch_cages() {
     for(nx = nav_x_positions) {
         // Side fins
         for(sx = [-1, 1])
-            translate([nx + sx * slot_w/2 + (sx < 0 ? -fin_t : 0), y_in - 0.01, z_bot])
-                cube([fin_t, depth + 0.01, z_top - z_bot]);
+            translate([nx + sx * slot_w/2 + (sx < 0 ? -fin_t : 0), y_in + sw_front, z_bot])
+                cube([fin_t, depth - sw_front, z_top - z_bot]);
         // Back wall (takes the press force)
         translate([nx - slot_w/2 - fin_t, y_in + depth, z_bot])
             cube([slot_w + 2 * fin_t, bw_t, z_top - z_bot]);
         // Corner shelf tabs — switch body rests here, bottom legs hang in the
         // 3.2mm gap between the tabs
         for(sx = [-1, 1])
-            translate([nx + sx * slot_w/2 + (sx < 0 ? 0 : -tab), y_in - 0.01, sw_bot - 1.6])
-                cube([tab, depth + 0.01, 1.6]);
+            translate([nx + sx * slot_w/2 + (sx < 0 ? 0 : -tab), y_in + sw_front, sw_bot - 1.6])
+                cube([tab, depth - sw_front, 1.6]);
     }
 }
 

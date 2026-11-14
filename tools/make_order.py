@@ -6,17 +6,23 @@ import hashlib, json, shutil, trimesh
 
 R = Path(__file__).resolve().parents[1]
 S, A, O = R / "cad/stl", R / "cad/assets", R / "order"
+T = Path(__import__("tempfile").mkdtemp())
+for b, n in zip(sorted(trimesh.load(S / "nav_cap.stl").split(), key=lambda m: m.bounds[0][0]), ("prev", "select", "next")):
+    b.export(T / f"nav_button_{n}.stl")
 
 RESIN = [("cam.stl", S / "braille_cam.stl", 2),
          ("comb_light.stl", A / "linkage_comb_light_2026-10-24.stl", 2),
          ("dot_tile.stl", S / "dot_insert.stl", 2)] + \
-        [(f"arm_{i}.stl", S / f"arm_{i}.stl", 2) for i in range(1, 7)]
+        [(f"arm_{i}.stl", S / f"arm_{i}.stl", 2) for i in range(1, 7)] + \
+        [(f"nav_button_{n}.stl", T / f"nav_button_{n}.stl", 2) for n in ("prev", "select", "next")]
 PETG = [("box.stl", S / "outer_box.stl", 1),
         ("base_plate.stl", S / "base_plate.stl", 1),
         ("top_plate.stl", S / "top_plate.stl", 1),
         ("hall_retainer.stl", S / "hall_retainer.stl", 2),
         ("finger_sheet_080_normal.stl", S / "finger_sheet_t080.stl", 2),
-        ("finger_sheet_100_stiff.stl", S / "finger_sheet_t100.stl", 2)]
+        ("finger_sheet_100_stiff.stl", S / "finger_sheet_t100.stl", 2),
+        ("brain_pod_shell.stl", S / "esp32_pod_shell.stl", 1),
+        ("brain_pod_lid.stl", S / "esp32_pod_lid.stl", 1)]
 
 manifest = {}
 for group, items in (("resin", RESIN), ("petg", PETG)):
