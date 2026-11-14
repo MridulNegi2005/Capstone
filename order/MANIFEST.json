@@ -10,7 +10,7 @@
     "sha256": "5ed54be1f8be0eb6b31b2d7b4750c18168663c03e04b60890019f3d44f4000ad"
   },
   "resin/comb_light.stl": {
-    "quantity": 1,
+    "quantity": 2,
     "size_mm": [
       54.0,
       54.0,
@@ -20,7 +20,7 @@
     "sha256": "c61ff25e1c5d64825ff11ad28fda018ef48431554064e137ea9b1a7c4b7d3f21"
   },
   "resin/dot_tile.stl": {
-    "quantity": 1,
+    "quantity": 2,
     "size_mm": [
       15.0,
       15.0,
@@ -30,7 +30,7 @@
     "sha256": "89db8ef535bceec3b53f1f8fe3a18fd6e1c7f2917a802f16adec41fc99f840df"
   },
   "resin/arm_1.stl": {
-    "quantity": 1,
+    "quantity": 2,
     "size_mm": [
       17.1,
       12.2,
@@ -40,7 +40,7 @@
     "sha256": "08e0586e107a88ffbd6efe8a15e955acd95f98e8e90060a347d7de203476466e"
   },
   "resin/arm_2.stl": {
-    "quantity": 1,
+    "quantity": 2,
     "size_mm": [
       20.4,
       12.2,
@@ -50,7 +50,7 @@
     "sha256": "4a2ccafc59ab0f138f8eeb074e3e470167314c2712deae2812813c777c3a32db"
   },
   "resin/arm_3.stl": {
-    "quantity": 1,
+    "quantity": 2,
     "size_mm": [
       20.5,
       12.2,
@@ -60,7 +60,7 @@
     "sha256": "982bea8c2f0ffd9352afd8c8aac59cd83944c32b45cf783b88f0adb62a683cd2"
   },
   "resin/arm_4.stl": {
-    "quantity": 1,
+    "quantity": 2,
     "size_mm": [
       15.4,
       12.2,
@@ -70,7 +70,7 @@
     "sha256": "2e8e3bf16d260027c4df98d84c8131a441bb2d284408c84c42d97a2813db3bad"
   },
   "resin/arm_5.stl": {
-    "quantity": 1,
+    "quantity": 2,
     "size_mm": [
       15.3,
       12.2,
@@ -80,7 +80,7 @@
     "sha256": "f4252cca95b75e2896e847aacf059c7e4234babddf94918e8c504eb34fd9aad9"
   },
   "resin/arm_6.stl": {
-    "quantity": 1,
+    "quantity": 2,
     "size_mm": [
       22.2,
       12.2,
@@ -148,5 +148,15 @@
     ],
     "volume_cm3": 2.95,
     "sha256": "b48deef19be6f6c4e53b77504413710100d3bf13171ce3b7e0497a8e6316b688"
+  },
+  "resin_all_in_one.stl": {
+    "bodies": 17,
+    "size_mm": [
+      164.4,
+      89.2,
+      9.0
+    ],
+    "volume_cm3": 12.57,
+    "sha256": "cfaa8a6d98402c5dfe176ed29655447b1a2da5b83dc3a027b22c5f6c434b4499"
   }
 }

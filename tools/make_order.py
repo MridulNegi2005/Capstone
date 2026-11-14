@@ -8,9 +8,9 @@ R = Path(__file__).resolve().parents[1]
 S, A, O = R / "cad/stl", R / "cad/assets", R / "order"
 
 RESIN = [("cam.stl", S / "braille_cam.stl", 1),
-         ("comb_light.stl", A / "linkage_comb_light_2026-10-24.stl", 1),
-         ("dot_tile.stl", S / "dot_insert.stl", 1)] + \
-        [(f"arm_{i}.stl", S / f"arm_{i}.stl", 1) for i in range(1, 7)]
+         ("comb_light.stl", A / "linkage_comb_light_2026-10-24.stl", 2),
+         ("dot_tile.stl", S / "dot_insert.stl", 2)] + \
+        [(f"arm_{i}.stl", S / f"arm_{i}.stl", 2) for i in range(1, 7)]
 PETG = [("box.stl", S / "outer_box.stl", 1),
         ("base_plate.stl", S / "base_plate.stl", 1),
         ("top_plate.stl", S / "top_plate.stl", 1),
@@ -34,5 +34,24 @@ for group, items in (("resin", RESIN), ("petg", PETG)):
             "volume_cm3": round(float(m.volume) / 1000, 2),
             "sha256": hashlib.sha256((d / name).read_bytes()).hexdigest(),
         }
+(O / "MANIFEST.json").write_text(json.dumps(manifest, indent=2) + "\n")
+# One upload file for the resin service: every resin body at its order quantity, flat, 4 mm apart.
+parts = []
+for name, src, qty in RESIN:
+    m = trimesh.load(src); m.apply_translation(-m.bounds[0])
+    parts += [(name, m.copy()) for _ in range(qty)]
+parts.sort(key=lambda p: -p[1].extents[1])
+x = y = row_h = 0.0; placed = []
+for name, m in parts:
+    if x + m.extents[0] > 170:
+        x, y, row_h = 0.0, y + row_h + 4.0, 0.0
+    m.apply_translation([x, y, 0]); placed.append(m)
+    x += m.extents[0] + 4.0; row_h = max(row_h, m.extents[1])
+allin = trimesh.util.concatenate(placed)
+allin.export(O / "resin_all_in_one.stl")
+bodies = allin.split(only_watertight=True)
+assert len(bodies) == len(parts), (len(bodies), len(parts))
+manifest["resin_all_in_one.stl"] = {"bodies": len(parts), "size_mm": [round(float(v), 2) for v in allin.extents],
+    "volume_cm3": round(float(allin.volume) / 1000, 2), "sha256": hashlib.sha256((O / "resin_all_in_one.stl").read_bytes()).hexdigest()}
 (O / "MANIFEST.json").write_text(json.dumps(manifest, indent=2) + "\n")
 print(json.dumps(manifest, indent=1))

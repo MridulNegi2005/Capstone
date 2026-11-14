@@ -21,9 +21,12 @@ The human owner is a student. The owner chooses the service and approves every p
 | File | Qty | Size (mm) | What it is |
 |---|---|---|---|
 | `cam.stl` | 1 | 48.4 x 48.4 x 9.0 | Disc with six tracks. It turns and lifts the arms. |
-| `comb_light.stl` | 1 | 54.0 x 54.0 x 2.8 | Plate with slots that guide the six arms. |
-| `dot_tile.stl` | 1 | 15.0 x 15.0 x 3.2 | Small plate. The six braille dots come up through its holes. |
-| `arm_1.stl` to `arm_6.stl` | 1 each | about 20 x 12 x 2.2 | Six different arms. Each arm lifts one dot. |
+| `comb_light.stl` | 2 | 54.0 x 54.0 x 2.8 | Plate with slots that guide the six arms (one spare). |
+| `dot_tile.stl` | 2 | 15.0 x 15.0 x 3.2 | Small plate. The six braille dots come up through its holes (one spare). |
+| `arm_1.stl` to `arm_6.stl` | 2 each | about 20 x 12 x 2.2 | Six different arms. Each arm lifts one dot (one spare set). |
+
+One upload file holds all 17 resin parts at these quantities: `resin_all_in_one.stl` (164 x 89 x 9 mm,
+12.6 cm3, 17 separate bodies, all flat at z = 0, 4 mm apart). Upload this file or the separate files, not both.
 
 Resin requirements:
 
