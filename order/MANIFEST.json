@@ -1,6 +1,6 @@
 {
   "resin/cam.stl": {
-    "quantity": 1,
+    "quantity": 2,
     "size_mm": [
       48.4,
       48.4,
@@ -150,13 +150,13 @@
     "sha256": "b48deef19be6f6c4e53b77504413710100d3bf13171ce3b7e0497a8e6316b688"
   },
   "resin_all_in_one.stl": {
-    "bodies": 17,
+    "bodies": 18,
     "size_mm": [
       164.4,
-      89.2,
+      138.8,
       9.0
     ],
-    "volume_cm3": 12.57,
-    "sha256": "cfaa8a6d98402c5dfe176ed29655447b1a2da5b83dc3a027b22c5f6c434b4499"
+    "volume_cm3": 16.81,
+    "sha256": "0a300dfec847c03cd784eecf1581a138fde9c241a13d57929566e8dce9d77509"
   }
 }

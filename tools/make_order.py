@@ -7,7 +7,7 @@ import hashlib, json, shutil, trimesh
 R = Path(__file__).resolve().parents[1]
 S, A, O = R / "cad/stl", R / "cad/assets", R / "order"
 
-RESIN = [("cam.stl", S / "braille_cam.stl", 1),
+RESIN = [("cam.stl", S / "braille_cam.stl", 2),
          ("comb_light.stl", A / "linkage_comb_light_2026-10-24.stl", 2),
          ("dot_tile.stl", S / "dot_insert.stl", 2)] + \
         [(f"arm_{i}.stl", S / f"arm_{i}.stl", 2) for i in range(1, 7)]
